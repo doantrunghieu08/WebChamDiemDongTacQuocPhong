@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chấm Điểm Động Tác Quốc Phòng – HACTECH</title>
+  <link rel="stylesheet" href="/assets/css/chamdiem.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="btn-back" id="btnBack">← Quay lại</button>
+      <div class="topbar-title" id="topbar-title">Chấm Điểm Động Tác Quốc Phòng</div>
+      <div class="logo">HACTECH</div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb" style="display: none;">
+      <span>🏠</span>
+      <span class="sep">&rsaquo;</span>
+      <span id="breadcrumb-class">Lớp 12A1</span>
+      <span class="sep">&rsaquo;</span>
+      <span id="breadcrumb-student">Học sinh</span>
+      <span class="sep">&rsaquo;</span>
+      <span>Động tác Quốc phòng</span>
+      <span class="sep">&rsaquo;</span>
+      <span class="cur">Chấm điểm</span>
+    </div>
+
+    <!-- Main -->
+    <div class="wrap">
+
+      <!-- Page Header -->
+      <div class="header-row">
+        <div class="page-title">CHẤM ĐIỂM ĐỘNG TÁC QUỐC PHÒNG</div>
+        <button class="btn-add" onclick="openAddErrorModal()">+ THÊM LỖI MỚI</button>
+      </div>
+
+      <div class="grading-deadline-notice" id="gradingDeadlineNotice" style="display:none"></div>
+
+      <!-- Left: Video -->
+      <div class="left-col">
+        <div class="card">
+          <div class="video-header">
+            <div class="vid-info">
+              Đang phát video
+              <span id="vid-index">01</span>/
+              <span id="vid-total">02</span>
+              &nbsp; Thời điểm: <span id="current-time" class="time-accent">00:00</span>
+            </div>
+            <button class="btn-snap" onclick="captureFrame()">&#128247; CHỤP LỖI</button>
+          </div>
+
+          <div class="video-area" id="video-area">
+            <div class="play-icon" id="play-icon">&#9654;</div>
+            <div class="frame-badge" id="frame-badge" style="display:none">Frame t=<span id="frame-time">00:00</span></div>
+            <div class="vid-num-badge">01 / 02</div>
+            <div class="err-tag-r" id="err-tag-r" style="display:none">LỖI: SAI NHỊP TAY</div>
+            <div class="err-tag-a" id="err-tag-a" style="display:none">DÁNG NGƯỜI GÙ</div>
+          </div>
+
+          <div class="video-footer">
+            Đang phát video 01/02 &nbsp;|&nbsp; Thời điểm:
+            <span id="footer-time" class="time-bold">00:00</span>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls">
+            <button class="ctrl" onclick="seek(-10)" title="Lùi 10s">&#9664;&#9664;</button>
+            <button class="ctrl" id="play-btn" onclick="togglePlay()">&#9646;&#9646;</button>
+            <button class="ctrl" onclick="resetVideo()" title="Lại từ đầu">&#8635;</button>
+            <button class="ctrl" onclick="seek(10)" title="Tới 10s">&#9654;&#9654;</button>
+            <div class="prog" id="prog-bar" onclick="seekByClick(event)">
+              <div class="prog-fill" id="prog-fill"></div>
+              <div class="prog-dot" id="prog-dot"></div>
+            </div>
+            <button class="btn-snap" onclick="captureFrame()">CHỤP LỖI</button>
+          </div>
+
+          <!-- Thumbnails -->
+          <div class="thumbs">
+            <div class="thumb" onclick="switchVideo(1)">
+              <div class="thumb-img" id="thumb-1">&#9654; V01</div>
+              <span>Video 01</span>
+            </div>
+            <div class="thumb" onclick="switchVideo(2)">
+              <div class="thumb-img" id="thumb-2">&#9654; V02</div>
+              <span>Video 02</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Panel -->
+      <div class="right-col">
+        <div class="card">
+          <div class="panel-title">Chi tiết lỗi mắc phải</div>
+
+          <div class="frame-img" id="frame-preview">
+            <div class="frame-placeholder">
+              <div class="frame-icon">&#9654;</div>
+              <span>Chưa chụp frame</span>
+            </div>
+            <div class="frame-badge-overlay" id="frame-badge-overlay" style="display:none">
+              Frame t=<span id="overlay-frame-time">00:00</span>
+            </div>
+          </div>
+
+          <div class="tag-section-title">GÁN THẺ LỖI</div>
+          <div class="dropdown-body">
+            <div class="drop-label">Chọn Loại Lỗi</div>
+            <input class="drop-search" id="error-search" type="text" placeholder="Tìm kiếm lỗi..." onkeyup="filterErrors()" />
+            <div class="drop-list" id="error-type-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="errors-assigned">
+            <div class="err-title">Lỗi đã gán cho frame này</div>
+            <div id="assigned-list">
+              <div class="no-error-msg">Chưa có lỗi nào được gán.</div>
+            </div>
+            <div class="total-row">
+              Tổng trừ Frame: <span class="total-val" id="frame-total">0.0</span>
+            </div>
+            <button class="btn-finish" onclick="finishGrading()">KẾT THÚC CHẤM</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Table -->
+      <div class="history-wrap">
+        <div class="section-label">Lịch sử chấm bài thi</div>
+        <div class="table-wrap">
+          <table class="htable" id="history-table">
+            <thead>
+              <tr>
+                <th style="width:44px">STT</th>
+                <th style="width:56px">Ảnh</th>
+                <th style="width:90px">Thời điểm</th>
+                <th>Danh sách lỗi</th>
+                <th style="width:84px">Tổng trừ</th>
+                <th style="width:100px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr>
+                <td colspan="6" style="text-align:center;color:var(--txt3);padding:20px">
+                  Chưa có frame nào được chấm.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding: 16px; text-align: right; font-size: 15px; font-weight: 700; border-top: 2px solid var(--border); margin-top: 10px;">
+          Tổng điểm bài thi: <span id="exam-total-score" style="color: var(--red); font-size: 18px;">0.0</span>
+          <br/>
+          <button class="btn-finish" onclick="submitExamScore()" style="margin-top: 12px; width: auto; background: linear-gradient(135deg, #16a34a, #15803d); padding: 10px 24px; font-size: 15px;">✓ HOÀN THÀNH BÀI THI</button>
+        </div>
+      </div>
+
+    </div><!-- end .wrap -->
+  </div><!-- end .app -->
+
+    <!-- Modal xác nhận quay lại -->
+    <div class="modal-backdrop" id="exit-confirm-modal" style="display:none" onclick="closeExitConfirmModal(event)">
+      <div class="modal exit-confirm-modal">
+        <div class="exit-confirm-icon"><i class="fas fa-arrow-left"></i></div>
+        <h2 class="exit-confirm-title">Thoát khỏi chấm điểm?</h2>
+        <p class="exit-confirm-text">Bạn có chắc chắn muốn quay lại lớp trước đó không? Các thay đổi chưa lưu sẽ không được giữ lại.</p>
+        <div class="modal-footer exit-confirm-actions">
+          <button class="btn-cancel" onclick="closeExitConfirmModal()">Ở lại</button>
+          <button class="btn-confirm" onclick="confirmExitGrading()">Quay lại lớp</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Modal hoàn thành chấm bài -->
+  <div class="modal-backdrop" id="success-modal" style="display:none" onclick="closeSuccessModal(event)">
+    <div class="modal success-modal">
+      <div class="success-icon">&#10003;</div>
+      <h2 class="success-title">Chấm bài thành công!</h2>
+      <div class="success-info">
+        <div class="success-row">
+          <span class="success-label">Sinh viên:</span>
+          <span class="success-value" id="success-student"></span>
+        </div>
+        <div class="success-row">
+          <span class="success-label">Bài thi:</span>
+          <span class="success-value" id="success-exam"></span>
+        </div>
+        <div class="success-row">
+          <span class="success-label">Tổng điểm:</span>
+          <span class="success-value success-score" id="success-score"></span>
+        </div>
+      </div>
+      <button class="btn-confirm success-btn" onclick="closeSuccessModal()">Đóng</button>
+    </div>
+  </div>
+
+  <!-- Modal thêm lỗi mới -->
+  <div class="modal-backdrop" id="modal-backdrop" style="display:none" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Thêm lỗi mới</span>
+        <button class="modal-close" onclick="closeAddErrorModal()">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <label class="modal-label">Tên lỗi</label>
+        <input class="modal-input" id="new-error-name" type="text" placeholder="Ví dụ: Sai nhịp tay" />
+        <label class="modal-label">Mô tả lỗi</label>
+        <textarea class="modal-input modal-textarea" id="new-error-description" placeholder="Mô tả ngắn về lỗi này"></textarea>
+        <div class="modal-grid">
+          <div>
+            <label class="modal-label">Mức độ</label>
+            <select class="modal-input" id="new-error-severity">
+              <option value="trung-binh">Trung bình</option>
+              <option value="cao">Nghiêm trọng</option>
+            </select>
+          </div>
+          <div>
+            <label class="modal-label">Điểm trừ</label>
+            <input class="modal-input" id="new-error-deduction" type="number" min="0.5" step="0.5" placeholder="Ví dụ: 1.0" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeAddErrorModal()">Hủy</button>
+        <button class="btn-confirm" onclick="addNewErrorType()">Lưu lỗi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/api/exams.js"></script>
+  <script src="/assets/js/chamdiem.js"></script>
+</body>
+</html>

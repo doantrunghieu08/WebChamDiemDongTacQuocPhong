@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Bài Thi - HACTECH</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/exam-detail.css">
+</head>
+<body>
+  <div class="ed-app">
+    <!-- Topbar -->
+    <header class="ed-topbar">
+      <div class="ed-topbar-content">
+        <button class="ed-btn-back" onclick="goBack()">
+          <i class="fas fa-arrow-left"></i> Quay lại
+        </button>
+        <div class="ed-topbar-title" id="edTopbarTitle">Chi Tiết Bài Thi</div>
+        <div class="ed-logo">HACTECH</div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="ed-main">
+      <!-- Exam Info Card -->
+      <div class="ed-exam-info-card" id="edExamInfo">
+        <!-- Loaded by JS -->
+      </div>
+
+      <!-- Sample Video Section -->
+      <div class="ed-reference-section">
+        <div class="ed-section-title">
+          <i class="fas fa-photo-film"></i> Video mẫu tham khảo
+        </div>
+        <div class="ed-reference-description" id="edReferenceDescription">
+          Sinh viên có thể xem thông tin video mẫu của bài thi tại đây.
+        </div>
+        <div class="ed-reference-video-grid" id="edReferenceVideoList">
+          <!-- Loaded by JS -->
+        </div>
+      </div>
+
+      <!-- Score Section -->
+      <div class="ed-scores-card" id="edScoresCard">
+        <!-- Loaded by JS -->
+      </div>
+
+      <!-- Grading Detail Section -->
+      <div class="ed-grading-detail-card" id="edGradingDetailCard">
+        <!-- Loaded by JS -->
+      </div>
+
+      <!-- Video Upload Section -->
+      <div class="ed-upload-section">
+        <div class="ed-section-title">
+          <i class="fas fa-video"></i> Video Bài Thi
+        </div>
+
+        <!-- Uploaded Videos List -->
+        <div class="ed-video-list" id="edVideoList">
+          <!-- Loaded by JS -->
+        </div>
+
+        <!-- Upload Area -->
+        <div class="ed-upload-area" id="edUploadArea">
+          <div class="ed-upload-dropzone" id="edDropzone">
+            <div class="ed-upload-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="ed-upload-text">
+              <h3>Tải video bài thi lên</h3>
+              <p>Kéo thả file vào đây hoặc nhấn để chọn file</p>
+              <span class="ed-upload-hint">Hỗ trợ: MP4, AVI, MOV, MKV — Tối đa 500MB</span>
+            </div>
+            <button class="ed-btn-browse" onclick="document.getElementById('edFileInput').click()">
+              <i class="fas fa-folder-open"></i> Chọn file
+            </button>
+          </div>
+          <input type="file" id="edFileInput" accept="video/*" multiple style="display:none">
+        </div>
+
+        <!-- Upload Progress -->
+        <div class="ed-upload-progress-list" id="edProgressList" style="display:none">
+          <!-- Upload progress items added by JS -->
+        </div>
+
+        <!-- Submit Button -->
+        <div class="ed-submit-area" id="edSubmitArea" style="display:none">
+          <button class="ed-btn-submit" onclick="confirmSubmit()">
+            <i class="fas fa-paper-plane"></i> Xác nhận nộp bài
+          </button>
+          <p class="ed-submit-hint">Sau khi nộp, bạn không thể thay đổi video</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Confirm Submit Modal -->
+    <div class="ed-modal" id="edConfirmModal" style="display:none">
+      <div class="ed-modal-content ed-modal-confirm">
+        <div class="ed-modal-header">
+          <h3>Xác nhận nộp bài</h3>
+          <button class="ed-modal-close" onclick="closeConfirmModal()">&times;</button>
+        </div>
+        <div class="ed-confirm-body">
+          <div class="ed-confirm-icon"><i class="fas fa-clipboard-check"></i></div>
+          <p class="ed-confirm-text">Bạn có chắc chắn muốn nộp <strong id="edConfirmCount">0</strong> video cho bài thi <strong id="edConfirmExam"></strong>?</p>
+          <p class="ed-confirm-warning"><i class="fas fa-exclamation-triangle"></i> Sau khi nộp, bạn sẽ không thể thay đổi video.</p>
+          <div class="ed-confirm-actions">
+            <button class="ed-btn-cancel" onclick="closeConfirmModal()">Hủy</button>
+            <button class="ed-btn-confirm" onclick="submitVideos()"><i class="fas fa-check"></i> Xác nhận nộp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Delete Video Modal -->
+    <div class="ed-modal" id="edDeleteModal" style="display:none">
+      <div class="ed-modal-content ed-modal-confirm">
+        <div class="ed-modal-header">
+          <h3>Xác nhận xóa video</h3>
+          <button class="ed-modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="ed-confirm-body">
+          <div class="ed-confirm-icon"><i class="fas fa-trash"></i></div>
+          <p class="ed-confirm-text">Bạn có chắc chắn muốn xóa video <strong id="edDeleteVideoName"></strong>?</p>
+          <p class="ed-confirm-warning"><i class="fas fa-exclamation-triangle"></i> Sau khi xóa, bạn cần tải lại video nếu muốn nộp.</p>
+          <div class="ed-confirm-actions">
+            <button class="ed-btn-cancel" onclick="closeDeleteModal()">Hủy</button>
+            <button class="ed-btn-confirm" onclick="confirmDeleteVideo()"><i class="fas fa-trash"></i> Xóa video</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Preview Modal -->
+    <div class="ed-modal" id="edVideoModal" style="display:none">
+      <div class="ed-modal-content ed-modal-video">
+        <div class="ed-modal-header">
+          <h3 id="edModalVideoTitle">Xem Video</h3>
+          <button class="ed-modal-close" onclick="closeVideoModal()">&times;</button>
+        </div>
+        <div class="ed-modal-body">
+          <video id="edModalPlayer" controls class="ed-video-player">
+            Trình duyệt không hỗ trợ phát video.
+          </video>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="ed-toast" id="edToast" style="display:none">
+      <i class="fas fa-check-circle"></i>
+      <span id="edToastMsg"></span>
+    </div>
+  </div>
+
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/api/exams.js"></script>
+  <script src="/assets/js/exam-detail.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Lớp Học - HACTECH</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/class-detail.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="cd-header">
+    <div class="cd-header-content">
+      <div class="cd-header-left">
+        <button class="btn-back" onclick="goBack()">
+          <i class="fas fa-arrow-left"></i> Quay lại
+        </button>
+        <div class="cd-logo">HACTECH</div>
+      </div>
+      <div class="cd-header-right">
+        <span class="cd-user" id="cdUserName">Giảng viên</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="cd-breadcrumb">
+    <a href="/pages/home.html"><i class="fas fa-home"></i> Trang chủ</a>
+    <span class="sep">›</span>
+    <a href="/pages/home.html" onclick="localStorage.setItem('autoTab','classes')">Lớp Học</a>
+    <span class="sep">›</span>
+    <span class="current" id="breadcrumbClass">Chi tiết lớp</span>
+  </div>
+
+  <!-- Main -->
+  <div class="cd-container">
+    <!-- Class Info Banner -->
+    <div class="cd-class-banner" id="classBanner">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Student List -->
+    <div class="cd-section">
+      <div class="cd-section-header">
+        <h2><i class="fas fa-users"></i> Danh sách sinh viên</h2>
+        <div class="cd-section-actions">
+          <button class="cd-btn-add" id="btnAddExam" onclick="openAddExamModal()" style="display:none"><i class="fas fa-file-alt"></i> Thêm bài thi</button>
+          <div class="cd-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Tìm sinh viên..." id="searchStudent" oninput="filterStudents()">
+          </div>
+        </div>
+      </div>
+
+      <div class="cd-student-list" id="studentList">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Exam Modal -->
+  <div class="cd-modal" id="addExamModal" style="display:none;">
+    <div class="cd-modal-content">
+      <div class="cd-modal-header">
+        <h3>Thêm bài thi cho lớp</h3>
+        <button class="cd-modal-close" onclick="closeAddExamModal()">&times;</button>
+      </div>
+      <div class="cd-modal-body">
+        <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong lớp</p>
+        <div class="cd-assigned-exams-section">
+          <div class="cd-assigned-exams-title">Bài thi đã thêm</div>
+          <div id="assignedExamList" class="cd-assigned-exam-list"></div>
+        </div>
+        <div class="cd-deadline-grid">
+          <div class="cd-form-group">
+            <label>Hạn nộp bài</label>
+            <input type="datetime-local" id="submissionDeadline">
+          </div>
+          <div class="cd-form-group">
+            <label>Hạn chấm bài</label>
+            <input type="datetime-local" id="gradingDeadline">
+          </div>
+        </div>
+        <p class="cd-deadline-note">Thời gian này sẽ áp dụng cho tất cả bài thi được chọn trong lần thêm hiện tại.</p>
+        <div id="examCheckboxList" class="cd-exam-checklist"></div>
+        <div class="cd-form-actions">
+          <button type="button" class="cd-btn-cancel" onclick="closeAddExamModal()">Hủy</button>
+          <button type="button" class="cd-btn-submit" onclick="addExamsToClass()">Thêm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grading Mode Modal -->
+  <div class="cd-modal" id="gradingModal" style="display:none;">
+    <div class="cd-modal-content">
+      <div class="cd-modal-header">
+        <h3 id="gradingModalTitle">Chọn chế độ chấm</h3>
+        <button class="cd-modal-close" onclick="closeGradingModal()">&times;</button>
+      </div>
+      <div class="cd-modal-body">
+        <div class="grading-exam-info" id="gradingExamInfo"></div>
+        <div class="grading-modes">
+          <div class="grading-mode-card" onclick="startGrading('practice')">
+            <div class="gm-icon">📝</div>
+            <div class="gm-info">
+              <h4>Chấm Luyện Tập</h4>
+              <p>Không lưu điểm chính thức. Dùng để tập luyện và kiểm tra.</p>
+            </div>
+          </div>
+          <div class="grading-mode-card" onclick="startGrading('official')">
+            <div class="gm-icon">⭐</div>
+            <div class="gm-info">
+              <h4>Chấm Lấy Điểm</h4>
+              <p>Điểm sẽ được lưu chính thức vào hệ thống.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Exam Confirm Modal -->
+  <div class="cd-delete-modal" id="deleteExamModal" style="display:none">
+    <div class="cd-delete-modal-content">
+      <div class="cd-delete-modal-icon">
+        <i class="fas fa-trash-alt"></i>
+      </div>
+      <h3 class="cd-delete-modal-title">Xóa bài thi</h3>
+      <p class="cd-delete-modal-text" id="deleteExamMessage"></p>
+      <div class="cd-delete-modal-actions">
+        <button class="cd-delete-btn-cancel" onclick="closeDeleteExamModal()">Hủy</button>
+        <button class="cd-delete-btn-confirm" onclick="confirmDeleteExam()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd-toast" id="classDetailToast" style="display:none">
+    <i class="fas fa-check-circle"></i>
+    <span id="classDetailToastMessage">Thao tác thành công</span>
+  </div>
+
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/api/students.js"></script>
+  <script src="/assets/js/api/exams.js"></script>
+  <script src="/assets/js/class-detail.js"></script>
+</body>
+</html>

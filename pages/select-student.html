@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chọn Học Sinh - HACTECH</title>
+  <link rel="stylesheet" href="/assets/css/select-student.css" />
+</head>
+<body>
+  <div class="select-container">
+    <!-- Header -->
+    <header class="select-header">
+      <div class="header-content">
+        <button class="btn-back" id="btnBack">← Quay lại</button>
+        <div class="header-title">Chọn Học Sinh</div>
+        <div class="user-section">
+          <button class="btn-logout" id="btnLogout">Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="select-main">
+      <!-- Class Info -->
+      <div class="class-info-section">
+        <div class="class-info-header">
+          <h1 id="className">Lớp 12A1</h1>
+          <span class="class-subject" id="classSubject">Tin học</span>
+        </div>
+        <div class="class-stats">
+          <div class="stat-item">
+            <span class="stat-label">Tổng học sinh:</span>
+            <span class="stat-value" id="totalStudents">30</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Năm học:</span>
+            <span class="stat-value" id="classYear">2025-2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search/Filter -->
+      <div class="search-section">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Tìm kiếm theo tên hoặc mã học sinh..."
+        >
+      </div>
+
+      <!-- Students List -->
+      <div class="students-section">
+        <div class="students-list" id="studentsList">
+          <!-- Students will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon">😕</div>
+          <h2>Không tìm thấy học sinh</h2>
+          <p>Vui lòng thử tìm kiếm với từ khóa khác</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Grading Mode Modal -->
+    <div class="modal" id="gradingModeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Chọn Chế Độ Chấm</h2>
+          <button class="modal-close" onclick="closeGradingModeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="modalStudentInfo" class="modal-student-info"></p>
+          
+          <div class="mode-options">
+            <button class="mode-option practice-mode" onclick="selectMode('practice')">
+              <div class="mode-icon">📝</div>
+              <div class="mode-name">Chấm Luyện Tập</div>
+              <div class="mode-desc">Không lưu kết quả</div>
+            </button>
+            <button class="mode-option grading-mode" onclick="selectMode('grading')">
+              <div class="mode-icon">⭐</div>
+              <div class="mode-name">Chấm Lấy Điểm</div>
+              <div class="mode-desc">Lưu vào hệ thống</div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="select-footer">
+      <p>&copy; 2025 HACTECH - Hà Nội. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Logout Confirm Modal -->
+  <div class="logout-modal" id="logoutModal" style="display:none">
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h3 class="logout-modal-title">Đăng xuất</h3>
+      <p class="logout-modal-text">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?</p>
+      <div class="logout-modal-actions">
+        <button class="logout-btn-cancel" onclick="closeLogoutModal()">Hủy</button>
+        <button class="logout-btn-confirm" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/api/students.js"></script>
+  <script src="/assets/js/select-student.js"></script>
+</body>
+</html>

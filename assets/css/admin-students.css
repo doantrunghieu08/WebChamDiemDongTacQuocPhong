@@ -1,0 +1,230 @@
+body {
+  min-height: 100vh;
+}
+
+.admin-students-shell {
+  width: min(1520px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-students-breadcrumb {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.admin-students-hero {
+  padding: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.admin-students-eyebrow {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #DC143C;
+  margin-bottom: 10px;
+}
+
+.admin-students-hero h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.admin-students-hero p {
+  color: #6f625c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-students-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 14px;
+  min-width: 360px;
+}
+
+.admin-students-stat {
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff8f4, #fffdfb);
+  border: 1px solid #f6d6c0;
+}
+
+.admin-students-stat-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #9a3412;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.admin-students-stat strong {
+  font-size: 24px;
+  color: #1a1a1a;
+}
+
+.admin-students-grid {
+  display: grid;
+  grid-template-columns: 460px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.admin-students-form-panel,
+.admin-students-list-panel {
+  padding: 24px;
+}
+
+.admin-students-panel-header {
+  margin-bottom: 16px;
+}
+
+.admin-students-panel-header h2 {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.admin-students-form {
+  margin-top: 18px;
+}
+
+.admin-student-lookup {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8a6b5c;
+}
+
+.admin-student-lookup.success {
+  color: #15803d;
+}
+
+.admin-student-lookup.warning {
+  color: #b45309;
+}
+
+#studentClassName[readonly],
+#studentClassBirthday[readonly],
+#studentClassGender[readonly] {
+  background: #f4efe9;
+  color: #5f5753;
+  cursor: not-allowed;
+}
+
+.admin-students-submit-row {
+  justify-content: flex-end;
+}
+
+.admin-students-submit-row .admin-primary-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.admin-students-import-row {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-student-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #f1dfd3;
+  border-radius: 16px;
+  background: #fffaf7;
+}
+
+.admin-student-order {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff2eb, #ffe1d3);
+  color: #DC143C;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.admin-student-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-student-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.admin-student-meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #7a6b64;
+}
+
+.admin-student-empty {
+  padding: 22px;
+  border: 1px dashed #f0c8b1;
+  border-radius: 16px;
+  background: #fffaf7;
+  text-align: center;
+  color: #8a6b5c;
+}
+
+@media (max-width: 1100px) {
+  .admin-students-hero,
+  .admin-students-grid {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .admin-students-hero-stats {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-students-shell {
+    width: min(100% - 32px, 1520px);
+    padding-top: 20px;
+  }
+
+  .admin-students-hero {
+    padding: 22px;
+  }
+
+  .admin-students-hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-student-item,
+  .admin-students-import-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-student-order {
+    width: 100%;
+  }
+}

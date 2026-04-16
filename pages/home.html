@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang Chủ - HACTECH</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/home.css">
+</head>
+<body>
+  <div class="home-container">
+    <!-- Header -->
+    <header class="home-header">
+      <div class="header-content">
+        <div class="logo-section">
+          <div class="logo">HACTECH</div>
+          <div class="school-name">Cao đẳng Nghề Bách Khoa Hà Nội</div>
+        </div>
+        <div class="user-section">
+          <span class="user-name" id="userName">Giảng viên</span>
+          <button class="btn-logout" id="btnLogout">Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Layout with Sidebar -->
+    <div class="home-wrapper">
+      <!-- Sidebar Menu -->
+      <aside class="sidebar-menu">
+        <nav class="nav-menu">
+          <!-- Teacher Menu -->
+          <ul class="menu-list" id="teacherMenu">
+            <li class="menu-item">
+              <button class="menu-link active" data-tab="profile" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i>
+                <span>Hồ Sơ</span>
+              </button>
+            </li>
+            <li class="menu-item">
+              <button class="menu-link" data-tab="classes" onclick="switchTab('classes')">
+                <i class="fas fa-book"></i>
+                <span>Lớp Học</span>
+              </button>
+            </li>
+            <li class="menu-item">
+              <button class="menu-link" data-tab="exams" onclick="switchTab('exams')">
+                <i class="fas fa-file-alt"></i>
+                <span>Bài Thi</span>
+              </button>
+            </li>
+            <li class="menu-item">
+              <button class="menu-link" data-tab="errors" onclick="switchTab('errors')">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Danh Sách Lỗi</span>
+              </button>
+            </li>
+            <li class="menu-item">
+              <button class="menu-link" data-tab="history" onclick="switchTab('history')">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>Lịch Sử Chấm</span>
+              </button>
+            </li>
+            <li class="menu-item">
+              <button class="menu-link" data-tab="report" onclick="switchTab('report')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Báo Cáo</span>
+              </button>
+            </li>
+          </ul>
+
+          <!-- Student Menu -->
+          <ul class="menu-list" id="studentMenu" style="display: none;">
+            <li class="menu-item">
+              <button class="menu-link active" data-tab="st-profile" onclick="switchTab('st-profile')">
+                <i class="fas fa-user"></i>
+                <span>Hồ Sơ</span>
+              </button>
+            </li>
+            <li class="menu-item">
+              <button class="menu-link" data-tab="st-exams" onclick="switchTab('st-exams')">
+                <i class="fas fa-file-alt"></i>
+                <span>Bài Thi</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="home-main">
+        <!-- Profile Tab (Default) -->
+        <section id="profile-tab" class="tab-content active">
+          <div class="section-header">
+            <h1>Hồ Sơ Cá Nhân</h1>
+            <p>Thông tin tài khoản của bạn</p>
+          </div>
+          <div class="profile-section" id="profileContent">
+            <!-- Profile content will be loaded here -->
+          </div>
+        </section>
+
+        <!-- Classes Tab -->
+        <section id="classes-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Lớp Học</h1>
+            <p>Các lớp học được phân công cho bạn</p>
+          </div>
+          <div class="classes-section">
+            <div class="classes-toolbar">
+              <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchClass" class="search-input" placeholder="Tìm kiếm lớp học..." oninput="searchClasses()">
+              </div>
+            </div>
+            <div class="class-grid" id="classGrid">
+              <!-- Classes will be loaded here by JavaScript -->
+            </div>
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+              <div class="empty-icon">📚</div>
+              <h2>Chưa có lớp học nào</h2>
+              <p>Bạn hiện không được gán dạy lớp nào</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Exams Tab -->
+        <section id="exams-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Bài Thi</h1>
+            <p>Quản lý danh mục bài thi dùng chung cho các lớp học</p>
+          </div>
+          <div class="classes-section exams-section">
+            <div class="classes-toolbar">
+              <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchExamCatalog" class="search-input" placeholder="Tìm kiếm bài thi..." oninput="searchExams()">
+              </div>
+              <button class="btn-add-class" id="btnAddExamCatalog">
+                <i class="fas fa-plus"></i>
+                Thêm bài thi
+              </button>
+            </div>
+            <div class="exam-grid" id="examGrid"></div>
+            <div class="empty-state" id="examEmptyState" style="display: none;">
+              <div class="empty-icon">📝</div>
+              <h2>Chưa có bài thi nào</h2>
+              <p>Hãy tạo bài thi để phân công cho các lớp học</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Errors Tab -->
+        <section id="errors-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Danh Sách Lỗi</h1>
+            <p>Danh sách các lỗi trong quá trình chấm điểm</p>
+          </div>
+          <div class="classes-toolbar errors-toolbar">
+            <div class="search-bar search-bar-errors">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="searchError" class="search-input" placeholder="Tìm kiếm lỗi..." oninput="searchErrors()">
+            </div>
+            <button class="btn-add-class" id="btnAddErrorCatalog">
+              <i class="fas fa-plus"></i>
+              Thêm lỗi
+            </button>
+          </div>
+          <div class="errors-section" id="errorsContent">
+            <!-- Errors content will be loaded here -->
+          </div>
+        </section>
+
+        <section id="history-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Lịch Sử Chấm Bài</h1>
+            <p>Theo dõi thời gian chấm, video nộp và các frame lỗi của từng bài thi đã chấm</p>
+          </div>
+          <div class="history-section">
+            <div class="history-toolbar">
+              <div class="search-bar history-search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="historySearch" class="search-input history-search-input" placeholder="Tìm theo mã sinh viên, tên sinh viên hoặc bài thi..." oninput="searchHistory()" />
+              </div>
+            </div>
+            <div id="historyContent"><!-- Grading history loaded by JS --></div>
+          </div>
+        </section>
+
+        <!-- Report Tab -->
+        <section id="report-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Báo Cáo</h1>
+            <p>Thống kê và báo cáo chấm điểm</p>
+          </div>
+          <div class="report-section" id="reportContent">
+            <!-- Report content will be loaded here -->
+          </div>
+        </section>
+
+        <!-- ========== STUDENT TABS ========== -->
+
+        <!-- Student Profile Tab -->
+        <section id="st-profile-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Hồ Sơ Cá Nhân</h1>
+            <p>Thông tin tài khoản sinh viên</p>
+          </div>
+          <div class="profile-section" id="stProfileContent">
+            <!-- Student profile loaded by JS -->
+          </div>
+        </section>
+
+        <!-- Student Exams Tab -->
+        <section id="st-exams-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Bài Thi</h1>
+            <p>Danh sách bài thi và kết quả</p>
+          </div>
+          <div class="st-exams-section" id="stExamsContent">
+            <!-- Student exams loaded by JS -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="home-footer">
+      <p>&copy; 2025 HACTECH - Hà Nội. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Logout Confirm Modal -->
+  <div class="logout-modal" id="logoutModal" style="display:none">
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h3 class="logout-modal-title">Đăng xuất</h3>
+      <p class="logout-modal-text">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?</p>
+      <div class="logout-modal-actions">
+        <button class="logout-btn-cancel" onclick="closeLogoutModal()">Hủy</button>
+        <button class="logout-btn-confirm" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="logout-modal" id="deleteConfirmModal" style="display:none">
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon">
+        <i class="fas fa-trash-alt"></i>
+      </div>
+      <h3 class="logout-modal-title" id="deleteConfirmTitle">Xác nhận xóa</h3>
+      <p class="logout-modal-text" id="deleteConfirmMessage">Bạn có chắc chắn muốn xóa mục này không?</p>
+      <div class="logout-modal-actions">
+        <button class="logout-btn-cancel" onclick="closeDeleteConfirmModal()">Hủy</button>
+        <button class="logout-btn-confirm" onclick="confirmDeleteAction()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="logout-modal" id="saveExamConfirmModal" style="display:none">
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon">
+        <i class="fas fa-save"></i>
+      </div>
+      <h3 class="logout-modal-title" id="saveExamConfirmTitle">Xác nhận lưu</h3>
+      <p class="logout-modal-text" id="saveExamConfirmMessage">Bạn có chắc chắn muốn lưu bài thi này không?</p>
+      <div class="logout-modal-actions">
+        <button class="logout-btn-cancel" onclick="closeSaveExamConfirmModal()">Hủy</button>
+        <button class="logout-btn-confirm" onclick="confirmSaveExamAction()"><i class="fas fa-save"></i> Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="logout-modal" id="examVideoNoticeModal" style="display:none">
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon">
+        <i class="fas fa-circle-exclamation"></i>
+      </div>
+      <h3 class="logout-modal-title">Thiếu video mẫu</h3>
+      <p class="logout-modal-text" id="examVideoNoticeMessage">Vui lòng chọn video mẫu trước khi lưu bài thi.</p>
+      <div class="logout-modal-actions">
+        <button class="logout-btn-cancel" onclick="closeExamVideoNoticeModal()">Đóng</button>
+        <button class="logout-btn-confirm" onclick="focusExamVideoPicker()"><i class="fas fa-video"></i> Chọn video</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-toast" id="homeToast" style="display:none">
+    <i class="fas fa-circle-check"></i>
+    <span id="homeToastMessage">Thao tác thành công</span>
+  </div>
+
+  <div class="class-modal" id="classDetailsModal" style="display: none;">
+    <div class="class-modal-content">
+      <div class="class-modal-header">
+        <h3>Chi tiết lớp học</h3>
+        <button class="class-modal-close" id="btnCloseDetails">&times;</button>
+      </div>
+      <div class="class-modal-body" id="classDetailsContent"></div>
+    </div>
+  </div>
+
+  <div class="class-modal" id="addClassModal" style="display: none;">
+    <div class="class-modal-content">
+      <div class="class-modal-header">
+        <h3>Thêm lớp học mới</h3>
+        <button class="class-modal-close" id="btnCloseAddClass">&times;</button>
+      </div>
+      <form class="class-modal-body" id="addClassForm">
+        <div class="form-row">
+          <label for="newClassName">Tên lớp</label>
+          <input id="newClassName" type="text" required placeholder="Ví dụ: Lớp Quân sự 6">
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="newClassSemester">Học kỳ</label>
+            <select id="newClassSemester" required>
+              <option value="I">I</option>
+              <option value="II">II</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="newClassYear">Năm học</label>
+            <input id="newClassYear" type="text" required placeholder="2025-2026">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="newClassRoom">Phòng học</label>
+            <input id="newClassRoom" type="text" required placeholder="101">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-class-action btn-details" id="btnCancelAddClass">Hủy</button>
+          <button type="submit" class="btn-class-action btn-grade">Lưu lớp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="class-modal" id="examModal" style="display: none;">
+    <div class="class-modal-content">
+      <div class="class-modal-header">
+        <h3 id="examModalTitle">Thêm bài thi mới</h3>
+        <button class="class-modal-close" id="btnCloseExamModal">&times;</button>
+      </div>
+      <form class="class-modal-body" id="examForm">
+        <input id="examEditId" type="hidden">
+        <div class="form-row">
+          <label for="examName">Tên bài thi</label>
+          <input id="examName" type="text" required placeholder="Ví dụ: Điều lệnh đội ngũ">
+        </div>
+        <div class="form-row">
+          <label for="examDescription">Mô tả</label>
+          <textarea id="examDescription" class="form-textarea" required placeholder="Mô tả ngắn về nội dung bài thi"></textarea>
+        </div>
+        <div class="exam-video-section">
+          <div class="exam-video-section-head">
+            <label>Video mẫu</label>
+            <button type="button" class="btn-add-video-row" onclick="addExamVideoField()">
+              <i class="fas fa-plus"></i>
+              Thêm video mẫu
+            </button>
+          </div>
+          <p class="exam-video-note">Mỗi bài thi phải có ít nhất 1 video mẫu. Tên video sẽ tự động lấy theo tên file bạn tải lên.</p>
+          <div id="examVideoList" class="exam-video-list"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-class-action btn-details" id="btnCancelExamModal">Hủy</button>
+          <button type="submit" class="btn-class-action btn-grade">Lưu bài thi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="class-modal" id="errorModal" style="display: none;">
+    <div class="class-modal-content">
+      <div class="class-modal-header">
+        <h3>Thêm lỗi mới</h3>
+        <button class="class-modal-close" id="btnCloseErrorModal">&times;</button>
+      </div>
+      <form class="class-modal-body" id="errorForm">
+        <div class="form-row">
+          <label for="errorName">Tên lỗi</label>
+          <input id="errorName" type="text" required placeholder="Ví dụ: Sai nhịp tay">
+        </div>
+        <div class="form-row">
+          <label for="errorDescription">Mô tả lỗi</label>
+          <textarea id="errorDescription" class="form-textarea" required placeholder="Mô tả ngắn về lỗi này"></textarea>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="errorSeverity">Mức độ</label>
+            <select id="errorSeverity" required>
+              <option value="trung-binh">Trung bình</option>
+              <option value="cao">Nghiêm trọng</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="errorDeduction">Điểm trừ</label>
+            <input id="errorDeduction" type="number" step="0.5" min="0.5" required placeholder="Ví dụ: 1.0">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-class-action btn-details" id="btnCancelErrorModal">Hủy</button>
+          <button type="submit" class="btn-class-action btn-grade">Lưu lỗi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/api/auth.js"></script>
+  <script src="/assets/js/api/classes.js"></script>
+  <script src="/assets/js/api/exams.js"></script>
+  <script src="/assets/js/home.js"></script>
+</body>
+</html>

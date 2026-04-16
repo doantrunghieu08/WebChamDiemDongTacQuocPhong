@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chế độ Chấm - HACTECH</title>
+  <link rel="stylesheet" href="/assets/css/grading-mode.css" />
+</head>
+<body>
+  <div class="mode-container">
+    <!-- Header -->
+    <header class="mode-header">
+      <div class="header-content">
+        <button class="btn-back" id="btnBack">← Quay lại</button>
+        <div class="header-title">Chọn Chế Độ Chấm</div>
+        <div style="width: 60px;"></div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mode-main">
+      <!-- Student Info -->
+      <div class="student-info">
+        <h1 id="studentName">Học sinh</h1>
+        <p id="studentClass">Lớp</p>
+      </div>
+
+      <!-- Mode Selection -->
+      <div class="modes-container">
+        <!-- Practice Mode -->
+        <div class="mode-card practice-mode" onclick="selectMode('practice')">
+          <div class="mode-icon">📝</div>
+          <h2>Chấm Luyện Tập</h2>
+          <p class="mode-description">
+            Phương pháp tập luyện không chính thức. Các điểm số không lưu vào hệ thống.
+          </p>
+          <div class="mode-features">
+            <div class="feature">✓ Thử nghiệm các lỗi</div>
+            <div class="feature">✓ Xem điểm liên tục</div>
+            <div class="feature">✓ Không lưu kết quả</div>
+          </div>
+          <button class="btn-select">Bắt đầu</button>
+        </div>
+
+        <!-- Grading Mode -->
+        <div class="mode-card grading-mode" onclick="selectMode('grading')">
+          <div class="mode-icon">⭐</div>
+          <h2>Chấm Lấy Điểm</h2>
+          <p class="mode-description">
+            Phương pháp chấm chính thức. Các điểm số sẽ được lưu vào hệ thống.
+          </p>
+          <div class="mode-features">
+            <div class="feature">✓ Chấm điểm chính thức</div>
+            <div class="feature">✓ Lưu kết quả vào hệ thống</div>
+            <div class="feature">✓ Có thể xem lại lịch sử</div>
+          </div>
+          <button class="btn-select">Bắt đầu</button>
+        </div>
+      </div>
+
+      <!-- Info Section -->
+      <div class="info-section">
+        <h3>📌 Lưu ý quan trọng:</h3>
+        <ul>
+          <li>Chế độ <strong>Chấm Luyện Tập</strong> giúp bạn quen với hệ thống trước khi chấm chính thức</li>
+          <li>Chế độ <strong>Chấm Lấy Điểm</strong> sẽ ghi nhận kết quả và không thể thay đổi</li>
+          <li>Bạn có thể quay lại và chọn lại chế độ nếu thay đổi ý định</li>
+        </ul>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mode-footer">
+      <p>&copy; 2025 HACTECH - Hà Nội. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Logout Confirm Modal -->
+  <div class="logout-modal" id="logoutModal" style="display:none">
+    <div class="logout-modal-content">
+      <div class="logout-modal-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h3 class="logout-modal-title">Đăng xuất</h3>
+      <p class="logout-modal-text">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?</p>
+      <div class="logout-modal-actions">
+        <button class="logout-btn-cancel" onclick="closeLogoutModal()">Hủy</button>
+        <button class="logout-btn-confirm" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/grading-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý sinh viên lớp - HACTECH</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+  <link rel="stylesheet" href="/assets/css/admin-students.css">
+</head>
+<body>
+  <div class="admin-app">
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div>
+          <div class="admin-logo">HACTECH ADMIN</div>
+          <div class="admin-subtitle">Quản lý danh sách sinh viên theo từng lớp</div>
+        </div>
+        <div class="admin-user-box">
+          <span class="admin-user-name" id="adminStudentsUserName">Quản trị viên</span>
+          <button class="admin-logout-btn" id="btnAdminStudentsLogout">Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-students-shell">
+      <div class="admin-students-breadcrumb">
+        <button class="admin-secondary-btn" onclick="goBackToAdmin()"><i class="fas fa-arrow-left"></i> Quay lại quản lý lớp</button>
+      </div>
+
+      <section class="admin-students-hero admin-panel">
+        <div>
+          <p class="admin-students-eyebrow">Quản lý sinh viên</p>
+          <h1 id="adminStudentsTitle">Danh sách sinh viên lớp</h1>
+          <p id="adminStudentsSubtitle">Admin là nơi duy nhất được quyền thêm, nhập Excel hoặc xóa sinh viên khỏi lớp.</p>
+        </div>
+        <div class="admin-students-hero-stats">
+          <div class="admin-students-stat">
+            <span class="admin-students-stat-label">Mã lớp</span>
+            <strong id="adminStudentsClassCode">-</strong>
+          </div>
+          <div class="admin-students-stat">
+            <span class="admin-students-stat-label">Sĩ số</span>
+            <strong id="adminStudentsCount">0 sinh viên</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-students-grid">
+        <div class="admin-panel admin-students-form-panel">
+          <div class="admin-section-header admin-students-panel-header">
+            <div>
+              <h2>Thêm sinh viên</h2>
+              <p>Nhập thủ công hoặc import Excel để cập nhật lớp.</p>
+            </div>
+          </div>
+
+          <form id="studentManagerForm" class="admin-students-form">
+            <div class="admin-form-grid">
+              <div class="admin-form-row">
+                <label for="studentClassCode">Mã sinh viên</label>
+                <input id="studentClassCode" type="text" placeholder="Ví dụ: SV003" required>
+              </div>
+              <div class="admin-form-row">
+                <label for="studentClassName">Họ và tên</label>
+                <input id="studentClassName" type="text" placeholder="Tự động hiển thị theo mã sinh viên" readonly required>
+              </div>
+            </div>
+            <div class="admin-form-grid">
+              <div class="admin-form-row">
+                <label for="studentClassBirthday">Ngày sinh</label>
+                <input id="studentClassBirthday" type="text" placeholder="Tự động hiển thị theo mã sinh viên" readonly>
+              </div>
+              <div class="admin-form-row">
+                <label for="studentClassGender">Giới tính</label>
+                <input id="studentClassGender" type="text" placeholder="Tự động hiển thị theo mã sinh viên" readonly>
+              </div>
+            </div>
+            <div class="admin-form-grid">
+              <div class="admin-form-row admin-students-submit-row">
+                <label>&nbsp;</label>
+                <button type="submit" class="admin-primary-btn"><i class="fas fa-user-plus"></i> Thêm sinh viên</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="admin-students-import-row">
+            <button type="button" class="admin-secondary-btn" onclick="triggerStudentExcelImport()"><i class="fas fa-file-excel"></i> Nhập từ Excel</button>
+            <input type="file" id="studentExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleStudentExcelFile(event)">
+          </div>
+        </div>
+
+        <div class="admin-panel admin-students-list-panel">
+          <div class="admin-section-header admin-students-panel-header">
+            <div>
+              <h2>Danh sách hiện tại</h2>
+              <p id="adminStudentsListHint">Toàn bộ thay đổi được đồng bộ ngay cho lớp và giảng viên được phân công.</p>
+            </div>
+          </div>
+          <div id="studentManagerList"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="admin-feedback-modal" id="adminStudentsFeedbackModal" style="display:none">
+      <div class="admin-feedback-card">
+        <div class="admin-feedback-icon info" id="adminStudentsFeedbackIcon">
+          <i class="fas fa-circle-info"></i>
+        </div>
+        <h3 id="adminStudentsFeedbackTitle">Thông báo</h3>
+        <p id="adminStudentsFeedbackMessage">Nội dung thông báo</p>
+        <div class="admin-feedback-actions" id="adminStudentsFeedbackActions">
+          <button type="button" class="admin-secondary-btn" id="adminStudentsFeedbackCancel">Hủy</button>
+          <button type="button" class="admin-primary-btn" id="adminStudentsFeedbackConfirm">Đồng ý</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/admin-students.js"></script>
+</body>
+</html>
