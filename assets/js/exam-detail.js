@@ -88,310 +88,6 @@ function saveAllGradingHistoryRecords(records) {
   localStorage.setItem('gradingHistoryRecords', JSON.stringify(records));
 }
 
-function syncCurrentExamScores(nextOfficialScore) {
-  if (!currentExam?.classId || !currentExam?.studentCode || !currentExam?.id) {
-    return;
-  }
-
-  const scores = JSON.parse(localStorage.getItem('examScores') || '{}');
-  const officialKey = `${currentExam.classId}_${currentExam.studentCode}_${currentExam.id}_official`;
-  scores[officialKey] = nextOfficialScore;
-  localStorage.setItem('examScores', JSON.stringify(scores));
-
-  currentExam.officialScore = nextOfficialScore;
-  localStorage.setItem('selectedExamDetail', JSON.stringify(currentExam));
-}
-
-function getExamSpecificSampleTemplate() {
-  const templates = {
-    'di-deu': {
-      gradedAt: '2026-04-14T09:15:00',
-      history: [
-        {
-          id: 'sample-frame-1',
-          frameTs: 18,
-          video: 1,
-          total: -1.0,
-          errors: [
-            {
-              id: 1,
-              name: 'Sai nhịp tay',
-              score: -0.5,
-              note: 'Tay đánh chưa đều, chậm hơn nhịp bước ở đoạn đầu.'
-            },
-            {
-              id: 4,
-              name: 'Mắt không nhìn thẳng',
-              score: -0.5,
-              note: 'Ánh nhìn bị lệch xuống dưới khi thực hiện động tác.'
-            }
-          ]
-        },
-        {
-          id: 'sample-frame-2',
-          frameTs: 42,
-          video: 1,
-          total: -1.0,
-          errors: [
-            {
-              id: 3,
-              name: 'Dáng người gù',
-              score: -1.0,
-              note: 'Lưng chưa giữ thẳng khi chuyển nhịp, làm sai tư thế tổng thể.'
-            }
-          ]
-        }
-      ]
-    },
-    'ban-sung': {
-      gradedAt: '2026-04-14T10:05:00',
-      history: [
-        {
-          id: 'sample-frame-1',
-          frameTs: 12,
-          video: 1,
-          total: -1.5,
-          errors: [
-            {
-              id: 5,
-              name: 'Tay không đúng tư thế',
-              score: -0.5,
-              note: 'Tay giữ súng chưa đúng vị trí chuẩn khi vào tư thế ngắm.'
-            },
-            {
-              id: 4,
-              name: 'Mắt không nhìn thẳng',
-              score: -0.5,
-              note: 'Mắt chưa căn đúng đường ngắm về mục tiêu.'
-            },
-            {
-              id: 2,
-              name: 'Bàn chân không vuông',
-              score: -0.5,
-              note: 'Bước chân mở chưa đúng góc, làm mất thăng bằng tư thế bắn.'
-            }
-          ]
-        },
-        {
-          id: 'sample-frame-2',
-          frameTs: 36,
-          video: 2,
-          total: -1.0,
-          errors: [
-            {
-              id: 3,
-              name: 'Dáng người gù',
-              score: -1.0,
-              note: 'Vai và lưng bị khom khi giữ súng, chưa đúng tư thế ổn định.'
-            }
-          ]
-        }
-      ]
-    },
-    'vo-thuat': {
-      gradedAt: '2026-04-14T11:20:00',
-      history: [
-        {
-          id: 'sample-frame-1',
-          frameTs: 20,
-          video: 1,
-          total: -1.0,
-          errors: [
-            {
-              id: 2,
-              name: 'Bàn chân không vuông',
-              score: -0.5,
-              note: 'Trụ chân chưa chắc, mũi chân xoay sai hướng ở động tác chuyển thế.'
-            },
-            {
-              id: 5,
-              name: 'Tay không đúng tư thế',
-              score: -0.5,
-              note: 'Tay ra đòn chưa đủ biên độ theo yêu cầu của bài quyền.'
-            }
-          ]
-        },
-        {
-          id: 'sample-frame-2',
-          frameTs: 51,
-          video: 1,
-          total: -0.5,
-          errors: [
-            {
-              id: 4,
-              name: 'Mắt không nhìn thẳng',
-              score: -0.5,
-              note: 'Hướng nhìn chưa bám theo mục tiêu ở cuối động tác.'
-            }
-          ]
-        }
-      ]
-    },
-    'the-duc': {
-      gradedAt: '2026-04-14T13:10:00',
-      history: [
-        {
-          id: 'sample-frame-1',
-          frameTs: 15,
-          video: 1,
-          total: -0.5,
-          errors: [
-            {
-              id: 1,
-              name: 'Sai nhịp tay',
-              score: -0.5,
-              note: 'Nhịp nâng tay chưa trùng với nhịp bài thể dục mẫu.'
-            }
-          ]
-        },
-        {
-          id: 'sample-frame-2',
-          frameTs: 34,
-          video: 1,
-          total: -1.0,
-          errors: [
-            {
-              id: 3,
-              name: 'Dáng người gù',
-              score: -0.5,
-              note: 'Thân người chưa giữ thẳng ở động tác cúi và bật lên.'
-            },
-            {
-              id: 5,
-              name: 'Tay không đúng tư thế',
-              score: -0.5,
-              note: 'Biên độ mở tay chưa đạt chuẩn ở nhịp giữa bài.'
-            }
-          ]
-        }
-      ]
-    },
-    'chay-vu-trang': {
-      gradedAt: '2026-04-14T14:00:00',
-      history: [
-        {
-          id: 'sample-frame-1',
-          frameTs: 22,
-          video: 1,
-          total: -1.0,
-          errors: [
-            {
-              id: 2,
-              name: 'Bàn chân không vuông',
-              score: -0.5,
-              note: 'Bước tiếp đất chưa chắc, hướng bàn chân lệch khi chạy mang vũ trang.'
-            },
-            {
-              id: 1,
-              name: 'Sai nhịp tay',
-              score: -0.5,
-              note: 'Nhịp đánh tay chưa đều với tốc độ chạy.'
-            }
-          ]
-        },
-        {
-          id: 'sample-frame-2',
-          frameTs: 48,
-          video: 2,
-          total: -0.5,
-          errors: [
-            {
-              id: 3,
-              name: 'Dáng người gù',
-              score: -0.5,
-              note: 'Tư thế thân trên đổ quá nhiều về trước, chưa đúng kỹ thuật.'
-            }
-          ]
-        }
-      ]
-    }
-  };
-
-  return templates[currentExam?.id] || {
-    gradedAt: '2026-04-14T09:15:00',
-    history: [
-      {
-        id: 'sample-frame-1',
-        frameTs: 18,
-        video: 1,
-        total: -0.5,
-        errors: [
-          {
-            id: 5,
-            name: 'Tay không đúng tư thế',
-            score: -0.5,
-            note: `Tư thế thực hiện của bài ${currentExam?.name || 'này'} chưa đúng ở giai đoạn đầu.`
-          }
-        ]
-      },
-      {
-        id: 'sample-frame-2',
-        frameTs: 40,
-        video: 1,
-        total: -0.5,
-        errors: [
-          {
-            id: 4,
-            name: 'Mắt không nhìn thẳng',
-            score: -0.5,
-            note: 'Hướng nhìn chưa ổn định ở đoạn giữa bài thi.'
-          }
-        ]
-      }
-    ]
-  };
-}
-
-function ensureSampleGradingData() {
-  if (!currentExam?.classId || !currentExam?.studentCode || !currentExam?.id) {
-    return;
-  }
-
-  const existingRecords = getAllGradingHistoryRecords();
-  const currentRecord = existingRecords.find(record => record.classId === currentExam.classId
-    && record.studentCode === currentExam.studentCode
-    && record.examId === currentExam.id);
-
-  if (currentRecord && !currentRecord.isSample) {
-    return;
-  }
-
-  const sampleTemplate = getExamSpecificSampleTemplate();
-  const submittedAt = new Date(sampleTemplate.gradedAt);
-  const sampleHistory = sampleTemplate.history;
-
-  const totalDeductions = sampleHistory.reduce((sum, frame) => sum + (Number(frame.total) || 0), 0);
-  const finalScore = Math.max(0, 10 + totalDeductions);
-  const sampleRecord = {
-    id: `sample-grading-${currentExam.classId}-${currentExam.studentCode}-${currentExam.id}`,
-    isSample: true,
-    teacherId: 'GV001',
-    teacherName: 'Nguyễn Văn A',
-    classId: currentExam.classId,
-    className: currentExam.className || 'Lớp Quân sự 1',
-    studentCode: currentExam.studentCode,
-    studentName: currentExam.studentName || 'Nguyễn Văn An',
-    examId: currentExam.id,
-    examName: currentExam.name || 'Bài thi',
-    gradingMode: 'official',
-    timestamp: submittedAt.toLocaleString('vi-VN'),
-    timestampIso: submittedAt.toISOString(),
-    finalScore,
-    totalDeductions,
-    totalFrames: sampleHistory.length,
-    history: sampleHistory,
-    videoStorageKey: getVideoStorageKey()
-  };
-
-  const filteredRecords = existingRecords.filter(record => !(record.classId === currentExam.classId
-    && record.studentCode === currentExam.studentCode
-    && record.examId === currentExam.id
-    && record.isSample));
-
-  saveAllGradingHistoryRecords([sampleRecord, ...filteredRecords]);
-  syncCurrentExamScores(finalScore);
-}
-
 function formatDeadline(deadline) {
   if (!deadline) return 'Chưa đặt';
   const date = new Date(deadline);
@@ -413,23 +109,57 @@ function isSubmissionClosed() {
 }
 
 // ---- INITIALIZATION ----
+function purgeSampleRecords() {
+  const all = JSON.parse(localStorage.getItem('gradingHistoryRecords') || '[]');
+  const cleaned = all.filter(r => !r.isSample);
+  if (cleaned.length !== all.length) {
+    localStorage.setItem('gradingHistoryRecords', JSON.stringify(cleaned));
+  }
+
+  // Clear exam scores that were written by sample data functions
+  if (currentExam?.classId && currentExam?.studentCode && currentExam?.id) {
+    const scores = JSON.parse(sessionStorage.getItem('examScores') || '{}');
+    const prefix = `${currentExam.classId}_${currentExam.studentCode}_${currentExam.id}_`;
+    const keys = Object.keys(scores).filter(k => k.startsWith(prefix));
+    if (keys.length) {
+      keys.forEach(k => delete scores[k]);
+      sessionStorage.setItem('examScores', JSON.stringify(scores));
+    }
+  }
+}
+
 function initPage() {
-  currentExam = JSON.parse(localStorage.getItem('selectedExamDetail') || 'null');
+  currentExam = JSON.parse(sessionStorage.getItem('selectedExamDetail') || 'null');
   if (!currentExam) {
     window.location.href = '/pages/home.html';
     return;
   }
 
-  ensureSampleGradingData();
+  purgeSampleRecords();
   loadUploadedVideos();
   renderExamInfo();
   renderReferenceVideos().catch(() => {
     showToast('Không thể tải video mẫu để phát trực tiếp.');
   });
   renderScores();
-  renderGradingDetails();
+  renderGradingDetails(); // async — tự xử lý
   renderVideoList();
   setupUploadHandlers();
+
+  // Ưu tiên khôi phục từ sessionStorage nếu còn (cùng tab)
+  const savedStatus = sessionStorage.getItem(getVideoStorageKey() + '_status');
+  const isSubmitted = sessionStorage.getItem(getVideoStorageKey() + '_submitted') === 'true';
+  if (isSubmitted) {
+    renderSubmittedBadge();
+  } else if (savedStatus === 'DRAFT') {
+    renderDraftBadge();
+  }
+
+  // Luôn gọi API để đồng bộ trạng thái thực từ server (xử lý trường hợp sessionStorage bị xóa)
+  fetchAndRestoreSubmissionStatus();
+
+  // Đồng bộ điểm từ server (async, cập nhật lại nếu có)
+  fetchAndUpdateScores();
 }
 
 // ---- EXAM INFO ----
@@ -558,7 +288,8 @@ function getStudentGradingRecords() {
 
   const records = JSON.parse(localStorage.getItem('gradingHistoryRecords') || '[]');
   return records
-    .filter(record => record.classId === currentExam.classId
+    .filter(record => !record.isSample
+      && record.classId === currentExam.classId
       && record.studentCode === currentExam.studentCode
       && record.examId === currentExam.id)
     .sort((left, right) => {
@@ -597,10 +328,264 @@ function getFramePreviewSource(frame) {
   return frame?.image || frame?.thumbnailUrl || frame?.frameImage || '';
 }
 
-function renderGradingDetails() {
+function formatSecondsToTimestamp(seconds) {
+  const s = Math.floor(Number(seconds) || 0);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+async function renderGradingDetails() {
   const container = document.getElementById('edGradingDetailCard');
   if (!container) return;
 
+  // Xác định role
+  const _currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const _role = ((sessionStorage.getItem('currentUserRole') || _currentUser?.role || '')).toLowerCase().replace('role_', '');
+  const isStudent = _role === 'student';
+
+  // ---- STUDENT VIEW: chỉ hiển thị chế độ chấm OFFICIAL ----
+  if (isStudent) {
+    if (!currentExam?.submissionId) {
+      container.innerHTML = `
+        <div class="ed-section-title">
+          <i class="fas fa-list-check"></i> Chi tiết chấm bài chính thức
+        </div>
+        <div class="ed-grading-empty">
+          <i class="fas fa-clipboard-list"></i>
+          <span>Chưa có kết quả chấm chính thức cho bài thi này.</span>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="ed-section-title">
+        <i class="fas fa-list-check"></i> Chi tiết chấm bài chính thức
+      </div>
+      <div class="ed-grading-description">Đang tải kết quả chấm chính thức...</div>
+    `;
+
+    try {
+      // Bước 1: kiểm tra xem currentExam đã có officialSessionId chưa
+      // (có thể được spread từ STUDENT_MY_EXAM response qua openExamDetail)
+      let officialSessionId = currentExam.officialSessionId
+        ?? currentExam.idOfficialGradingSession
+        ?? currentExam.officialGradingSessionId
+        ?? currentExam.idOfficialSession
+        ?? null;
+
+      // Bước 2: nếu chưa có, gọi grade-board (public) để tìm session ID
+      if (!officialSessionId) {
+        const rawGradeBoard = await ExamsService.getGradeBoard(currentExam.submissionId);
+        // Trường hợp A: mảng entries phân chia theo gradingMode (mỗi entry = 1 session)
+        const officialByMode = Array.isArray(rawGradeBoard)
+          ? rawGradeBoard.find(e => (e.gradingMode || '').toUpperCase() === 'OFFICIAL')
+          : null;
+        if (officialByMode) {
+          officialSessionId = officialByMode.id
+            ?? officialByMode.idGradingSession
+            ?? officialByMode.gradingSessionId
+            ?? null;
+        }
+        // Trường hợp B: 1 entry chứa cả 2 chế độ, có field officialSessionId riêng
+        if (!officialSessionId && Array.isArray(rawGradeBoard) && rawGradeBoard.length > 0) {
+          const single = rawGradeBoard[0];
+          officialSessionId = single.officialSessionId
+            ?? single.idOfficialGradingSession
+            ?? single.officialGradingSessionId
+            ?? null;
+        }
+      }
+
+      if (!officialSessionId) {
+        console.warn('[renderGradingDetails] Không tìm được officialSessionId. currentExam:', JSON.stringify(currentExam));
+        container.innerHTML = `
+          <div class="ed-section-title">
+            <i class="fas fa-list-check"></i> Chi tiết chấm bài chính thức
+          </div>
+          <div class="ed-grading-empty">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Chưa có kết quả chấm chính thức cho bài thi này.</span>
+          </div>
+        `;
+        return;
+      }
+      console.log('[renderGradingDetails] officialSessionId =', officialSessionId);
+
+      const errors = await ExamsService.getGradingErrorDetail(String(officialSessionId), 'OFFICIAL');
+      if (!errors || errors.length === 0) {
+        container.innerHTML = `
+          <div class="ed-section-title">
+            <i class="fas fa-list-check"></i> Chi tiết chấm bài chính thức
+          </div>
+          <div class="ed-grading-empty">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Không có lỗi nào được ghi nhận trong phiên chấm chính thức.</span>
+          </div>
+        `;
+        return;
+      }
+
+      const totalDeduction = errors.reduce((sum, e) => sum + (Number(e.deduction) || 0), 0);
+      container.innerHTML = `
+        <div class="ed-section-title">
+          <i class="fas fa-list-check"></i> Chi tiết chấm bài chính thức
+        </div>
+        <div class="ed-grading-description">
+          Tổng cộng <strong>${errors.length}</strong> lỗi được ghi nhận, trừ tổng <strong>${formatDeduction(totalDeduction)} điểm</strong>.
+        </div>
+        <div class="ed-grading-record-list">
+          <div class="ed-grading-record">
+            <div class="ed-grading-frame-list">
+              ${errors.map((err, index) => `
+                <div class="ed-grading-frame-item">
+                  <div class="ed-grading-frame-layout">
+                    <div class="ed-grading-frame-preview ${err.frameImageUrl ? 'has-image' : 'is-placeholder'}">
+                      ${err.frameImageUrl
+                        ? `<img src="${err.frameImageUrl}" alt="Bằng chứng lỗi ${index + 1}">`
+                        : `<div class="ed-grading-frame-placeholder-icon"><i class="fas fa-video"></i></div><div class="ed-grading-frame-placeholder-text">Khung hình ${index + 1}</div>`}
+                      <div class="ed-grading-frame-badge">${formatSecondsToTimestamp(err.frameTimeSeconds)}</div>
+                    </div>
+                    <div class="ed-grading-frame-main">
+                      <div class="ed-grading-frame-top">
+                        <div class="ed-grading-frame-heading">Lỗi ${index + 1}</div>
+                        <div class="ed-grading-frame-meta">
+                          <span><i class="fas fa-clock"></i> ${formatSecondsToTimestamp(err.frameTimeSeconds)}</span>
+                          <span><i class="fas fa-minus-circle"></i> Trừ ${formatDeduction(err.deduction)} điểm</span>
+                        </div>
+                      </div>
+                      <div class="ed-grading-error-list">
+                        <div class="ed-grading-error-item">
+                          <div class="ed-grading-error-main">
+                            <div class="ed-grading-error-name">${err.errorName}</div>
+                            <div class="ed-grading-error-note">${err.errorDescription || 'Không có mô tả.'}</div>
+                          </div>
+                          <div class="ed-grading-error-score">-${formatDeduction(err.deduction)}đ</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      console.error('[renderGradingDetails student]', err);
+      container.innerHTML = `
+        <div class="ed-section-title">
+          <i class="fas fa-list-check"></i> Chi tiết chấm bài chính thức
+        </div>
+        <div class="ed-grading-empty">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Không thể tải chi tiết chấm. Vui lòng thử lại.</span>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  // ---- TEACHER/OTHER VIEW: logic cũ ----
+  const urlParams = new URLSearchParams(window.location.search);
+  const _sessionFromStorage = JSON.parse(sessionStorage.getItem('gradingSession') || 'null');
+  const _records = getStudentGradingRecords();
+  const _recordWithSession = _records.find(r => r.gradingSessionId);
+  let idSession = urlParams.get('idSession')
+    || (_sessionFromStorage?.id ? String(_sessionFromStorage.id) : null)
+    || (_recordWithSession?.gradingSessionId ? String(_recordWithSession.gradingSessionId) : null)
+    || null;
+
+  let _rawMode = urlParams.get('gradingMode')
+    || _sessionFromStorage?.gradingMode
+    || _recordWithSession?.gradingMode
+    || null;
+
+  const gradingMode = (_rawMode || 'PRACTICE').toUpperCase() === 'OFFICIAL' ? 'OFFICIAL' : 'PRACTICE';
+
+  if (idSession) {
+    container.innerHTML = `
+      <div class="ed-section-title">
+        <i class="fas fa-list-check"></i> Chi tiết lỗi chấm bài
+      </div>
+      <div class="ed-grading-description">Đang tải chi tiết lỗi...</div>
+    `;
+    try {
+      const errors = await ExamsService.getGradingErrorDetail(idSession, gradingMode);
+      if (!errors || errors.length === 0) {
+        container.innerHTML = `
+          <div class="ed-section-title">
+            <i class="fas fa-list-check"></i> Chi tiết lỗi chấm bài
+          </div>
+          <div class="ed-grading-empty">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Không có lỗi nào được ghi nhận trong phiên chấm này.</span>
+          </div>
+        `;
+        return;
+      }
+      const totalDeduction = errors.reduce((sum, e) => sum + (Number(e.deduction) || 0), 0);
+      container.innerHTML = `
+        <div class="ed-section-title">
+          <i class="fas fa-list-check"></i> Chi tiết lỗi chấm bài
+        </div>
+        <div class="ed-grading-description">
+          Phiên chấm #${idSession} — Tổng cộng <strong>${errors.length}</strong> lỗi được ghi nhận, trừ tổng <strong>${formatDeduction(totalDeduction)} điểm</strong>.
+        </div>
+        <div class="ed-grading-record-list">
+          <div class="ed-grading-record">
+            <div class="ed-grading-frame-list">
+              ${errors.map((err, index) => `
+                <div class="ed-grading-frame-item">
+                  <div class="ed-grading-frame-layout">
+                    <div class="ed-grading-frame-preview ${err.frameImageUrl ? 'has-image' : 'is-placeholder'}">
+                      ${err.frameImageUrl
+                        ? `<img src="${err.frameImageUrl}" alt="Bằng chứng lỗi ${index + 1}">`
+                        : `<div class="ed-grading-frame-placeholder-icon"><i class="fas fa-video"></i></div><div class="ed-grading-frame-placeholder-text">Khung hình ${index + 1}</div>`}
+                      <div class="ed-grading-frame-badge">${formatSecondsToTimestamp(err.frameTimeSeconds)}</div>
+                    </div>
+                    <div class="ed-grading-frame-main">
+                      <div class="ed-grading-frame-top">
+                        <div class="ed-grading-frame-heading">Lỗi ${index + 1}</div>
+                        <div class="ed-grading-frame-meta">
+                          <span><i class="fas fa-clock"></i> ${formatSecondsToTimestamp(err.frameTimeSeconds)}</span>
+                          <span><i class="fas fa-minus-circle"></i> Trừ ${formatDeduction(err.deduction)} điểm</span>
+                        </div>
+                      </div>
+                      <div class="ed-grading-error-list">
+                        <div class="ed-grading-error-item">
+                          <div class="ed-grading-error-main">
+                            <div class="ed-grading-error-name">${err.errorName}</div>
+                            <div class="ed-grading-error-note">${err.errorDescription || 'Không có mô tả.'}</div>
+                          </div>
+                          <div class="ed-grading-error-score">-${formatDeduction(err.deduction)}đ</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      console.error('[renderGradingDetails] Lỗi khi tải chi tiết lỗi từ API:', err);
+      container.innerHTML = `
+        <div class="ed-section-title">
+          <i class="fas fa-list-check"></i> Chi tiết lỗi chấm bài
+        </div>
+        <div class="ed-grading-empty">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Không thể tải chi tiết lỗi. Vui lòng thử lại.</span>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  // Fallback: dùng dữ liệu local (sessionStorage)
   const gradingRecords = getLatestGradingRecordsByMode();
   if (gradingRecords.length === 0) {
     container.innerHTML = `
@@ -676,18 +661,18 @@ function renderGradingDetails() {
   `;
 }
 
-// ---- VIDEO STORAGE (localStorage) ----
+// ---- VIDEO STORAGE (sessionStorage) ----
 function getVideoStorageKey() {
   return 'examVideos_' + (currentExam.classId || '1') + '_' + currentExam.studentCode + '_' + currentExam.id;
 }
 
 function loadUploadedVideos() {
-  const stored = localStorage.getItem(getVideoStorageKey());
+  const stored = sessionStorage.getItem(getVideoStorageKey());
   uploadedVideos = stored ? JSON.parse(stored) : [];
 }
 
 function saveUploadedVideos() {
-  localStorage.setItem(getVideoStorageKey(), JSON.stringify(uploadedVideos));
+  sessionStorage.setItem(getVideoStorageKey(), JSON.stringify(uploadedVideos));
 }
 
 // ---- RENDER VIDEO LIST ----
@@ -737,7 +722,7 @@ function renderVideoList() {
 function updateUploadAreaVisibility() {
   const uploadArea = document.getElementById('edUploadArea');
   const submitArea = document.getElementById('edSubmitArea');
-  const isSubmitted = localStorage.getItem(getVideoStorageKey() + '_submitted') === 'true';
+  const isSubmitted = sessionStorage.getItem(getVideoStorageKey() + '_submitted') === 'true';
   const submissionClosed = isSubmissionClosed();
 
   renderDeadlineNotice();
@@ -778,7 +763,7 @@ function renderDeadlineNotice() {
     }
   }
 
-  const isSubmitted = localStorage.getItem(getVideoStorageKey() + '_submitted') === 'true';
+  const isSubmitted = sessionStorage.getItem(getVideoStorageKey() + '_submitted') === 'true';
   const submissionClosed = isSubmissionClosed();
   notice.className = `ed-deadline-notice ${submissionClosed ? 'closed' : 'open'}`;
 
@@ -792,6 +777,7 @@ function renderDeadlineNotice() {
 }
 
 function renderSubmittedBadge() {
+  removeDraftBadge();
   const existing = document.getElementById('edSubmittedBadge');
   if (existing) return;
   const section = document.querySelector('.ed-upload-section');
@@ -801,6 +787,25 @@ function renderSubmittedBadge() {
   badge.className = 'ed-submitted-badge';
   badge.innerHTML = `<div class="ed-badge-content"><i class="fas fa-check-circle"></i> Đã nộp bài thành công</div>`;
   section.appendChild(badge);
+}
+
+function renderDraftBadge() {
+  const isSubmitted = sessionStorage.getItem(getVideoStorageKey() + '_submitted') === 'true';
+  if (isSubmitted) return;
+  let badge = document.getElementById('edDraftBadge');
+  if (badge) return;
+  const section = document.querySelector('.ed-upload-section');
+  if (!section) return;
+  badge = document.createElement('div');
+  badge.id = 'edDraftBadge';
+  badge.className = 'ed-draft-badge';
+  badge.innerHTML = `<div class="ed-badge-content"><i class="fas fa-save"></i> Đã lưu nháp (DRAFT)</div>`;
+  section.appendChild(badge);
+}
+
+function removeDraftBadge() {
+  const badge = document.getElementById('edDraftBadge');
+  if (badge) badge.remove();
 }
 
 // ---- UPLOAD HANDLERS ----
@@ -875,12 +880,12 @@ function handleFiles(files) {
       showToast(`File "${file.name}" không phải video`);
       return;
     }
-    simulateUpload(file);
+    uploadFileToServer(file);
     remaining--;
   });
 }
 
-function simulateUpload(file) {
+async function uploadFileToServer(file) {
   const progressList = document.getElementById('edProgressList');
   if (progressList) progressList.style.display = '';
 
@@ -899,38 +904,91 @@ function simulateUpload(file) {
   `;
   progressList.insertAdjacentHTML('beforeend', progressHTML);
 
-  // Simulate progress
+  const getEl = (suffix) => document.getElementById(itemId + suffix);
+
+  // Animate progress to 90% while waiting for server
   let progress = 0;
-  const interval = setInterval(() => {
-    progress += Math.random() * 15 + 5;
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(interval);
-      onUploadComplete(file, itemId);
+  const animInterval = setInterval(() => {
+    if (progress < 90) {
+      progress += Math.random() * 8 + 3;
+      if (progress > 90) progress = 90;
+      const fill = getEl('-fill');
+      const pct = getEl('-percent');
+      if (fill) fill.style.width = progress + '%';
+      if (pct) pct.textContent = Math.round(progress) + '%';
     }
-    const fill = document.getElementById(itemId + '-fill');
-    const percent = document.getElementById(itemId + '-percent');
-    if (fill) fill.style.width = progress + '%';
-    if (percent) percent.textContent = Math.round(progress) + '%';
-  }, 200);
+  }, 300);
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('studentName', currentExam?.studentName || '');
+    formData.append('examTitle', currentExam?.name || '');
+
+    const uploadCsrf = (typeof _getCsrfToken === 'function') ? _getCsrfToken() : null;
+    const uploadHeaders = {};
+    if (uploadCsrf) uploadHeaders['X-XSRF-TOKEN'] = uploadCsrf;
+
+    const response = await fetch('http://localhost:8080/public/upload-student-exam', {
+      method: 'POST',
+      headers: uploadHeaders,
+      credentials: 'include',
+      body: formData
+    });
+
+    clearInterval(animInterval);
+
+    if (!response.ok) {
+      throw new Error('Upload thất bại: ' + response.status);
+    }
+
+    const json = await response.json();
+    if (json.code !== 200) {
+      throw new Error(json.message || 'Upload thất bại');
+    }
+
+    const fill = getEl('-fill');
+    const pct = getEl('-percent');
+    if (fill) fill.style.width = '100%';
+    if (pct) {
+      pct.textContent = '✓';
+      pct.classList.add('ed-progress-done');
+    }
+
+    onUploadComplete(file, itemId, json.data.url);
+  } catch (err) {
+    clearInterval(animInterval);
+    const fill = getEl('-fill');
+    const pct = getEl('-percent');
+    if (fill) fill.style.width = '0%';
+    if (pct) {
+      pct.textContent = '✗';
+      pct.style.color = '#ef4444';
+    }
+    showToast('Tải lên thất bại: ' + (err.message || 'Lỗi không xác định'));
+    setTimeout(() => {
+      const item = document.getElementById(itemId);
+      if (item) item.remove();
+      const list = document.getElementById('edProgressList');
+      if (list && list.children.length === 0) list.style.display = 'none';
+    }, 2000);
+  }
 }
 
-function onUploadComplete(file, itemId) {
+function onUploadComplete(file, itemId, serverUrl) {
   const percentEl = document.getElementById(itemId + '-percent');
   if (percentEl) {
     percentEl.textContent = '✓';
     percentEl.classList.add('ed-progress-done');
   }
 
-  // Create blob URL for preview
-  const blobUrl = URL.createObjectURL(file);
-
   const videoRecord = {
     name: file.name,
     size: file.size,
     type: file.type,
-    blobUrl: blobUrl,
-    thumbnailUrl: blobUrl,
+    serverUrl: serverUrl,
+    blobUrl: serverUrl,
+    thumbnailUrl: serverUrl,
     uploadTime: new Date().toLocaleString('vi-VN'),
   };
 
@@ -938,6 +996,14 @@ function onUploadComplete(file, itemId) {
   saveUploadedVideos();
   renderVideoList();
   showToast('Tải video "' + file.name + '" thành công!');
+
+  // Lưu tạm (DRAFT) lên server sau mỗi lần upload video
+  callSubmissionApi('DRAFT').then(result => {
+    if (result) {
+      sessionStorage.setItem(getVideoStorageKey() + '_status', 'DRAFT');
+      renderDraftBadge();
+    }
+  }).catch(err => console.warn('DRAFT submission error', err));
 
   // Remove progress item after delay
   setTimeout(() => {
@@ -1047,11 +1113,6 @@ function confirmDeleteVideo() {
   closeDeleteModal();
   if (!video) return;
 
-  // Revoke blob URL
-  if (video.blobUrl) {
-    URL.revokeObjectURL(video.blobUrl);
-  }
-
   uploadedVideos.splice(idx, 1);
   saveUploadedVideos();
   renderVideoList();
@@ -1060,7 +1121,12 @@ function confirmDeleteVideo() {
 
 // ---- NAVIGATION ----
 function goBack() {
-  window.location.href = '/pages/home.html';
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const role = ((sessionStorage.getItem('currentUserRole') || currentUser?.role || '')).toLowerCase().replace('role_', '');
+  if (role === 'student') {
+    sessionStorage.setItem('homeActiveTab', 'st-exams');
+  }
+  window.history.length > 1 ? window.history.back() : (window.location.href = '/pages/home.html');
 }
 
 // ---- TOAST ----
@@ -1082,6 +1148,201 @@ function formatFileSize(bytes) {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+}
+
+// ---- FETCH SUBMISSION STATUS FROM SERVER ----
+async function fetchAndUpdateScores() {
+  if (!currentExam) return;
+
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const studentId = currentExam?.studentCode
+    || currentUser?.studentId
+    || currentUser?.id
+    || currentUser?.username
+    || '';
+  if (!studentId) return;
+
+  try {
+    // Lấy submissionId từ bài nộp
+    const subUrl = API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT(studentId);
+    const subResponse = await fetch(subUrl, { credentials: 'include' });
+    if (!subResponse.ok) return;
+    const subJson = await subResponse.json().catch(() => null);
+    const subList = Array.isArray(subJson?.data) ? subJson.data : [];
+    const classExamId = currentExam?.classExamId ?? currentExam?.id;
+    const submission = subList.find(item => String(item.idClassExam) === String(classExamId));
+    if (!submission) return;
+
+    const submissionId = submission.id ?? submission.submissionId;
+    if (submissionId == null) return;
+
+    // Lấy điểm theo submissionId
+    const scoreUrl = API_CONFIG.ENDPOINTS.STUDENT_MY_EXAM(studentId);
+    const scoreResponse = await fetch(scoreUrl, { credentials: 'include' });
+    if (!scoreResponse.ok) return;
+    const scoreJson = await scoreResponse.json().catch(() => null);
+    const scoreList = Array.isArray(scoreJson?.data) ? scoreJson.data : [];
+    const scoreEntry = scoreList.find(e => String(e.submissionId) === String(submissionId));
+    if (!scoreEntry) return;
+
+    // Cập nhật currentExam và re-render nếu điểm thay đổi
+    const newPractice = scoreEntry.practiceScore ?? null;
+    const newOfficial = scoreEntry.officialScore ?? null;
+    if (newPractice !== currentExam.practiceScore || newOfficial !== currentExam.officialScore) {
+      currentExam.practiceScore = newPractice;
+      currentExam.practiceStatus = scoreEntry.practiceStatus ?? null;
+      currentExam.officialScore = newOfficial;
+      currentExam.officialStatus = scoreEntry.officialStatus ?? null;
+      currentExam.submissionId = submissionId;
+      sessionStorage.setItem('selectedExamDetail', JSON.stringify(currentExam));
+      renderScores();
+    }
+  } catch (err) {
+    console.warn('fetchAndUpdateScores error', err);
+  }
+}
+
+async function fetchAndRestoreSubmissionStatus() {
+  if (!currentExam) return;
+
+  const classExamId = currentExam?.classExamId ?? currentExam?.id;
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const studentId = currentExam?.studentCode
+    || currentUser?.studentId
+    || currentUser?.id
+    || currentUser?.username
+    || '';
+
+  if (!classExamId || !studentId) return;
+
+  const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT)
+    ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT(studentId)
+    : `http://localhost:8080/student/submission/${encodeURIComponent(studentId)}`;
+
+  try {
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) return;
+
+    const json = await response.json().catch(() => null);
+    const list = Array.isArray(json?.data) ? json.data : [];
+
+    // Tìm bài nộp khớp với classExamId hiện tại
+    const submission = list.find(item => String(item.idClassExam) === String(classExamId));
+    if (!submission) return;
+
+    const status = submission.status;
+    const storageKey = getVideoStorageKey();
+
+    // Khôi phục danh sách video từ server nếu sessionStorage không có
+    const storedVideos = sessionStorage.getItem(storageKey);
+    if (!storedVideos || JSON.parse(storedVideos).length === 0) {
+      const restoredVideos = [];
+      if (submission.videoUrl1) {
+        restoredVideos.push({
+          name: 'Video 1',
+          size: submission.fileSizeBytes1 || 0,
+          type: 'video/mp4',
+          serverUrl: submission.videoUrl1,
+          blobUrl: submission.videoUrl1,
+          thumbnailUrl: submission.videoUrl1,
+          uploadTime: '',
+        });
+      }
+      if (submission.videoUrl2) {
+        restoredVideos.push({
+          name: 'Video 2',
+          size: submission.fileSizeBytes2 || 0,
+          type: 'video/mp4',
+          serverUrl: submission.videoUrl2,
+          blobUrl: submission.videoUrl2,
+          thumbnailUrl: submission.videoUrl2,
+          uploadTime: '',
+        });
+      }
+      if (restoredVideos.length > 0) {
+        uploadedVideos = restoredVideos;
+        saveUploadedVideos();
+        renderVideoList();
+      }
+    }
+
+    if (status === 'SUBMITTED') {
+      sessionStorage.setItem(storageKey + '_submitted', 'true');
+      sessionStorage.setItem(storageKey + '_status', 'SUBMITTED');
+      renderSubmittedBadge();
+      updateUploadAreaVisibility();
+    } else if (status === 'DRAFT') {
+      sessionStorage.setItem(storageKey + '_status', 'DRAFT');
+      renderDraftBadge();
+      updateUploadAreaVisibility();
+    }
+  } catch (err) {
+    console.warn('fetchAndRestoreSubmissionStatus error', err);
+  }
+}
+
+// ---- SUBMISSION API ----
+function buildSubmissionPayload(status) {
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  // idStudent: ưu tiên studentCode lưu trong currentExam (set bởi openExamDetail),
+  // fallback về currentUser.studentId / id / username
+  const idStudent = currentExam?.studentCode
+    || currentUser?.studentId
+    || currentUser?.id
+    || currentUser?.username
+    || '';
+  // classExamId là ID của bản ghi class_exam (item.id), khác với examType id (currentExam.id)
+  const idClassExam = currentExam?.classExamId ?? currentExam?.id;
+
+  const video1 = uploadedVideos[0] || null;
+  const video2 = uploadedVideos[1] || null;
+
+  return {
+    idClassExam: idClassExam,
+    idStudent: String(idStudent),
+    videoUrl1: video1?.serverUrl || null,
+    fileSizeBytes1: video1?.size || null,
+    videoUrl2: video2?.serverUrl || null,
+    fileSizeBytes2: video2?.size || null,
+    status: status
+  };
+}
+
+async function callSubmissionApi(status) {
+  const payload = buildSubmissionPayload(status);
+  const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSION)
+    ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSION
+    : 'http://localhost:8080/student/submission';
+
+  try {
+    const csrfToken = (typeof _getCsrfToken === 'function') ? _getCsrfToken() : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+
+    const json = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      console.error('callSubmissionApi error', response.status, json);
+      return null;
+    }
+
+    // Lưu submission id để tham chiếu sau này
+    if (json?.data?.id) {
+      sessionStorage.setItem(getVideoStorageKey() + '_submissionId', String(json.data.id));
+    }
+
+    return json;
+  } catch (err) {
+    console.error('callSubmissionApi fetch error', err);
+    return null;
+  }
 }
 
 // ---- SUBMIT ----
@@ -1108,7 +1369,7 @@ function closeConfirmModal() {
   if (modal) modal.style.display = 'none';
 }
 
-function submitVideos() {
+async function submitVideos() {
   if (isSubmissionClosed()) {
     closeConfirmModal();
     showToast('Đã hết thời gian nộp bài, không thể nộp bài.');
@@ -1116,7 +1377,21 @@ function submitVideos() {
   }
 
   closeConfirmModal();
-  localStorage.setItem(getVideoStorageKey() + '_submitted', 'true');
+
+  // Disable button to prevent double-submit
+  const btnConfirm = document.querySelector('#edConfirmModal .ed-btn-confirm');
+  if (btnConfirm) btnConfirm.disabled = true;
+
+  const result = await callSubmissionApi('SUBMITTED');
+
+  if (btnConfirm) btnConfirm.disabled = false;
+
+  if (!result) {
+    showToast('Nộp bài thất bại, vui lòng thử lại.');
+    return;
+  }
+
+  sessionStorage.setItem(getVideoStorageKey() + '_submitted', 'true');
   updateUploadAreaVisibility();
   showToast('Nộp bài thành công!');
 }

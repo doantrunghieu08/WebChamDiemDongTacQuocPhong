@@ -5,19 +5,63 @@ let pendingDeleteAction = null;
 let pendingSaveExamAction = null;
 let homeToastTimer = null;
 let selectedGradingHistoryId = null;
+
+// ---- Class pagination state ----
+let classPage      = 0;
+let classPageSize  = 9;
+let classTotalPages = 1;
+let classTotalElements = 0;
+let classTeacherId = '';
+
+// ---- Exam pagination state ----
+let examPage         = 0;
+let examPageSize     = 9;
+let examTotalPages   = 1;
+let examTotalElements = 0;
+let examTeacherId    = '';
+
+// ---- History pagination state ----
+let historyPage         = 0;
+let historyPageSize     = 10;
+let historyTotalPages   = 1;
+let historyTotalElements = 0;
+
+// ---- My-Exam pagination state (student) ----
+let myExamPage         = 0;
+let myExamPageSize     = 9;
+let myExamTotalPages   = 1;
+let myExamTotalElements = 0;
+let myExamStudentId    = '';
 const MIN_SAMPLE_VIDEOS_PER_EXAM = 1;
 const SAMPLE_VIDEO_DB_NAME = 'hactech-sample-video-db';
 const SAMPLE_VIDEO_STORE = 'examSampleVideos';
 const SAMPLE_VIDEO_DB_VERSION = 1;
 let sampleVideoDbPromise = null;
 
+function normalizeRole(role) {
+  const raw = (role || '').toString().toUpperCase().replace('ROLE_', '');
+  if (raw === 'ADMIN') return 'admin';
+  if (raw === 'TEACHER') return 'teacher';
+  if (raw === 'STUDENT') return 'student';
+  return raw ? raw.toLowerCase() : '';
+}
+
+function getCurrentRoleFromStorage(user) {
+  return normalizeRole(sessionStorage.getItem('currentUserRole') || user?.role);
+}
+
+function getCurrentUserDisplayName(user) {
+  return user?.studentId || user?.fullName || user?.name || user?.username || 'Người dùng';
+}
+
 function checkLoginStatus() {
-  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const user = JSON.parse(sessionStorage.getItem('currentUser'));
   if (!user) {
     window.location.href = '/index.html';
     return null;
   }
-  if (user.role === 'admin') {
+  const role = getCurrentRoleFromStorage(user);
+  if (role === 'admin') {
     window.location.href = '/pages/admin.html';
     return null;
   }
@@ -25,53 +69,36 @@ function checkLoginStatus() {
 }
 
 function getSampleStudents(classId) {
-  const allStudents = {
-    '1': [
-      { code: 'SV001', name: 'Nguyễn Văn An', gender: 'Nam' },
-      { code: 'SV002', name: 'Trần Thị Bình', gender: 'Nữ' },
-      { code: 'SV003', name: 'Lê Hoàng Cường', gender: 'Nam' },
-      { code: 'SV004', name: 'Phạm Minh Đức', gender: 'Nam' },
-      { code: 'SV005', name: 'Vũ Thị Hoa', gender: 'Nữ' },
-    ],
-    '2': [
-      { code: 'SV006', name: 'Đỗ Quang Huy', gender: 'Nam' },
-      { code: 'SV007', name: 'Hoàng Thị Lan', gender: 'Nữ' },
-      { code: 'SV008', name: 'Bùi Văn Mạnh', gender: 'Nam' },
-      { code: 'SV009', name: 'Ngô Thị Ngọc', gender: 'Nữ' },
-    ],
-    '3': [
-      { code: 'SV010', name: 'Đinh Văn Phúc', gender: 'Nam' },
-      { code: 'SV011', name: 'Lý Thị Quỳnh', gender: 'Nữ' },
-      { code: 'SV012', name: 'Trương Văn Sơn', gender: 'Nam' },
-    ]
-  };
-  return allStudents[classId] || [];
+  // Sample students removed — the app should load students from the server
+  return [];
+}
+
+function formatGender(value) {
+  if (value === undefined || value === null) return '';
+  const s = String(value).trim().toLowerCase();
+  if (!s) return '';
+  if (s === 'male' || s === 'm' || s === 'nam') return 'Nam';
+  if (s === 'female' || s === 'f' || s === 'nu' || s === 'nữ') return 'Nữ';
+  if (s === 'other' || s === 'khác' || s === 'khac') return 'Khác';
+  return value;
 }
 
 function getSampleClasses() {
-  return [
-    { classId: '1', className: 'Lớp Quân sự 1', subject: 'Động tác Quốc phòng', semester: 'I', year: '2025-2026', studentCount: 30, roomNumber: '101' },
-    { classId: '2', className: 'Lớp Quân sự 2', subject: 'Động tác Quốc phòng', semester: 'I', year: '2025-2026', studentCount: 28, roomNumber: '102' },
-    { classId: '3', className: 'Lớp Quân sự 3', subject: 'Động tác Quốc phòng', semester: 'II', year: '2025-2026', studentCount: 32, roomNumber: '203' }
-  ];
+  // No local sample classes — rely on server data
+  return [];
 }
 
 function getClassStorageKey() {
-  return `classes_${currentUser.studentId || currentUser.name || 'teacher'}`;
+  return `classes_${currentUser.studentId || currentUser.fullName || currentUser.name || currentUser.username || 'teacher'}`;
 }
 
 function getTeacherClasses() {
-  const stored = localStorage.getItem(getClassStorageKey());
-  if (stored) {
-    return JSON.parse(stored);
-  }
-  const seed = getSampleClasses();
-  localStorage.setItem(getClassStorageKey(), JSON.stringify(seed));
-  return seed;
+  const stored = sessionStorage.getItem(getClassStorageKey());
+  return stored ? JSON.parse(stored) : [];
 }
 
 function saveTeacherClasses(classes) {
-  localStorage.setItem(getClassStorageKey(), JSON.stringify(classes));
+  sessionStorage.setItem(getClassStorageKey(), JSON.stringify(classes));
 }
 
 function getDefaultExamCatalog() {
@@ -134,12 +161,13 @@ function getDefaultExamCatalog() {
 
 function normalizeExamItem(exam, index) {
   return {
-    id: exam.id || `exam-${Date.now()}-${index}`,
+    id: String(exam.id || `exam-${Date.now()}-${index}`),
     name: exam.name || 'Bài thi mới',
     icon: '📝',
     iconClass: 'custom-exam',
     description: exam.description || 'Mô tả đang được cập nhật',
-    videos: Array.isArray(exam.videos) ? exam.videos : []
+    videos: Array.isArray(exam.videos) ? exam.videos : [],
+    deleted: exam.deleted === true
   };
 }
 
@@ -147,6 +175,7 @@ function normalizeClassExamAssignment(assignment, index) {
   if (typeof assignment === 'string') {
     return {
       id: assignment,
+      classExamId: null,
       submissionDeadline: '',
       gradingDeadline: ''
     };
@@ -154,13 +183,14 @@ function normalizeClassExamAssignment(assignment, index) {
 
   return {
     id: assignment?.id || `exam-${Date.now()}-${index}`,
+    classExamId: assignment?.classExamId ?? null,
     submissionDeadline: assignment?.submissionDeadline || '',
     gradingDeadline: assignment?.gradingDeadline || ''
   };
 }
 
 function getNormalizedClassExamMap() {
-  const all = JSON.parse(localStorage.getItem('classExams') || '{}');
+  const all = JSON.parse(sessionStorage.getItem('classExams') || '{}');
   let changed = false;
 
   Object.keys(all).forEach(classId => {
@@ -173,7 +203,7 @@ function getNormalizedClassExamMap() {
   });
 
   if (changed) {
-    localStorage.setItem('classExams', JSON.stringify(all));
+    sessionStorage.setItem('classExams', JSON.stringify(all));
   }
 
   return all;
@@ -213,17 +243,17 @@ function syncClassExamAssignments(validExamIds) {
   });
 
   if (changed) {
-    localStorage.setItem('classExams', JSON.stringify(allClassExams));
+    sessionStorage.setItem('classExams', JSON.stringify(allClassExams));
   }
 }
 
 function getExamCatalog() {
-  const stored = JSON.parse(localStorage.getItem('examCatalog') || 'null');
+  const stored = JSON.parse(sessionStorage.getItem('examCatalog') || 'null');
   const base = Array.isArray(stored) ? stored : getDefaultExamCatalog();
   const normalized = base.map(normalizeExamItem);
 
   if (!stored || JSON.stringify(stored) !== JSON.stringify(normalized)) {
-    localStorage.setItem('examCatalog', JSON.stringify(normalized));
+    sessionStorage.setItem('examCatalog', JSON.stringify(normalized));
   }
 
   syncClassExamAssignments(normalized.map(exam => exam.id));
@@ -232,7 +262,7 @@ function getExamCatalog() {
 
 function saveExamCatalog(exams) {
   const normalized = exams.map(normalizeExamItem);
-  localStorage.setItem('examCatalog', JSON.stringify(normalized));
+  sessionStorage.setItem('examCatalog', JSON.stringify(normalized));
   syncClassExamAssignments(normalized.map(exam => exam.id));
   return normalized;
 }
@@ -243,7 +273,7 @@ function getExamUsageCount(examId) {
 }
 
 function cleanupExamScores(examId) {
-  const scores = JSON.parse(localStorage.getItem('examScores') || '{}');
+  const scores = JSON.parse(sessionStorage.getItem('examScores') || '{}');
   let changed = false;
 
   Object.keys(scores).forEach(key => {
@@ -254,7 +284,7 @@ function cleanupExamScores(examId) {
   });
 
   if (changed) {
-    localStorage.setItem('examScores', JSON.stringify(scores));
+    sessionStorage.setItem('examScores', JSON.stringify(scores));
   }
 }
 
@@ -360,17 +390,17 @@ function getDefaultErrorData() {
 }
 
 function getStoredErrors() {
-  const stored = JSON.parse(localStorage.getItem('teacherErrorCatalog') || 'null');
+  const stored = JSON.parse(sessionStorage.getItem('teacherErrorCatalog') || 'null');
   if (Array.isArray(stored)) {
     return stored;
   }
   const seed = getDefaultErrorData();
-  localStorage.setItem('teacherErrorCatalog', JSON.stringify(seed));
+  sessionStorage.setItem('teacherErrorCatalog', JSON.stringify(seed));
   return seed;
 }
 
 function saveStoredErrors(errors) {
-  localStorage.setItem('teacherErrorCatalog', JSON.stringify(errors));
+  sessionStorage.setItem('teacherErrorCatalog', JSON.stringify(errors));
 }
 
 function switchTab(tabName) {
@@ -422,13 +452,28 @@ function loadProfileContent() {
     return;
   }
 
-  const teacherId = currentUser.studentId || 'GV001';
-  const teacherName = currentUser.name || 'Nguyễn Văn A';
+  const teacherId = currentUser.studentId || currentUser.id || 'GV001';
+  const teacherName = currentUser.fullName || currentUser.name || currentUser.username || 'Nguyễn Văn A';
+  const teacherAvatar = currentUser.avatarImage
+    ? `<img src="${currentUser.avatarImage}" alt="avatar" style="width:110px;height:110px;border-radius:50%;object-fit:cover;display:block">`
+    : `<i class="fas fa-user-tie"></i>`;
+
+  const teacherEmail = currentUser.email || `${teacherId.toLowerCase()}@hactech.edu.vn`;
+  const teacherBirthday = currentUser.birthday
+    ? new Date(currentUser.birthday).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : 'Chưa cập nhật';
+  const teacherGender = formatGender(currentUser.gender) || 'Chưa cập nhật';
 
   container.innerHTML = `
     <div class="profile-card">
       <div class="profile-header">
-        <div class="profile-avatar"><i class="fas fa-user-tie"></i></div>
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profileAvatarDisplay" style="${currentUser.avatarImage ? 'background:transparent;padding:0' : ''}">${teacherAvatar}</div>
+          <button class="profile-avatar-edit-btn" onclick="document.getElementById('profileAvatarInput').click()" title="Đổi ảnh đại diện">
+            <i class="fas fa-camera"></i>
+          </button>
+          <input type="file" id="profileAvatarInput" accept="image/*" style="display:none" onchange="handleProfileAvatarChange(event)">
+        </div>
         <div class="profile-name">${teacherName}</div>
         <div class="profile-role">Giảng viên</div>
         <div class="profile-status"><span class="status-dot"></span> Đang hoạt động</div>
@@ -446,16 +491,16 @@ function loadProfileContent() {
         <span class="field-value">${teacherName}</span>
       </div>
       <div class="profile-field">
-        <span class="field-label"><i class="fas fa-envelope"></i> Email</span>
-        <span class="field-value">${teacherId.toLowerCase()}@hactech.edu.vn</span>
+        <span class="field-label"><i class="fas fa-venus-mars"></i> Giới tính</span>
+        <span class="field-value">${teacherGender}</span>
       </div>
       <div class="profile-field">
-        <span class="field-label"><i class="fas fa-phone"></i> Số điện thoại</span>
-        <span class="field-value">0987 654 321</span>
+        <span class="field-label"><i class="fas fa-envelope"></i> Email</span>
+        <span class="field-value">${teacherEmail}</span>
       </div>
       <div class="profile-field">
         <span class="field-label"><i class="fas fa-birthday-cake"></i> Ngày sinh</span>
-        <span class="field-value">15/06/1985</span>
+        <span class="field-value">${teacherBirthday}</span>
       </div>
     </div>
   `;
@@ -464,14 +509,13 @@ function loadProfileContent() {
 function renderClasses(classes) {
   const classGrid = document.getElementById('classGrid');
   const emptyState = document.getElementById('emptyState');
-  if (!classGrid || !emptyState) {
-    return;
-  }
+  if (!classGrid || !emptyState) return;
 
   if (!classes || classes.length === 0) {
     classGrid.style.display = 'none';
     classGrid.innerHTML = '';
     emptyState.style.display = 'block';
+    _renderClassPagination();
     return;
   }
 
@@ -494,7 +538,6 @@ function renderClasses(classes) {
           <span class="info-value">${cls.roomNumber}</span>
         </div>
       </div>
-      <div class="class-students"><strong>${cls.studentCount}</strong> học sinh</div>
       <div class="class-action">
         <button class="btn-class-action btn-details" onclick="viewClassDetails('${cls.classId}'); event.stopPropagation();">Vào lớp</button>
       </div>
@@ -503,6 +546,147 @@ function renderClasses(classes) {
 
   classGrid.style.display = 'grid';
   emptyState.style.display = 'none';
+  _renderClassPagination();
+}
+
+function _renderClassPagination() {
+  const container = document.getElementById('classPagination');
+  if (!container) return;
+
+  const total = classTotalElements;
+  const isLastPage = classPage + 1 >= classTotalPages;
+
+  if (classTotalPages <= 1 && total <= classPageSize) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const start = classPage * classPageSize + 1;
+  const end   = Math.min(start + currentClasses.length - 1, total || (start + currentClasses.length - 1));
+
+  let btns = '';
+  btns += `<button class="home-page-btn" onclick="loadClassPage(${classPage - 1})" ${classPage === 0 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+  const winSize = 2;
+  for (let i = 0; i < classTotalPages; i++) {
+    const show = i === 0 || i === classTotalPages - 1 || (i >= classPage - winSize && i <= classPage + winSize);
+    const ellipsis = i === classPage - winSize - 1 || i === classPage + winSize + 1;
+    if (show) {
+      btns += `<button class="home-page-btn${i === classPage ? ' active' : ''}" onclick="loadClassPage(${i})">${i + 1}</button>`;
+    } else if (ellipsis) {
+      btns += `<span class="home-page-ellipsis">…</span>`;
+    }
+  }
+
+  btns += `<button class="home-page-btn" onclick="loadClassPage(${classPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+  const infoText = total > 0
+    ? `Hiển thị ${start}–${end} trong tổng số ${total} lớp`
+    : `Trang ${classPage + 1} / ${classTotalPages}`;
+
+  container.innerHTML = `
+    <div class="home-pagination">
+      <span class="home-page-info">${infoText}</span>
+      <div class="home-page-controls">${btns}</div>
+    </div>`;
+}
+
+async function loadClassPage(page) {
+  if (!classTeacherId) return;
+  if (page < 0 || page >= classTotalPages) return;
+  try {
+    const result = await ClassesService.getClassesByTeacher(classTeacherId, page, classPageSize);
+    if (!result) return;
+
+    // Nếu trang rỗng và không phải trang 0 → quay lại
+    if (result.classes.length === 0 && page > 0) {
+      classTotalPages = page;
+      await loadClassPage(page - 1);
+      return;
+    }
+
+    classPage          = page;
+    classTotalPages    = result.totalPages;
+    classTotalElements = result.totalElements;
+
+    const normalized = result.classes.map(cls => ({
+      classId:     cls.id || cls.classId,
+      className:   cls.className,
+      semester:    cls.semester ? `Học kỳ ${cls.semester}` : '',
+      year:        cls.academicYear || cls.year || '',
+      roomNumber:  cls.roomNumber || '',
+      teacherName: cls.teacherName || '',
+      studentCount: cls.totalStudent ?? cls.studentCount ?? cls.numberOfStudents ?? 0,
+    }));
+
+    currentClasses = normalized;
+    saveTeacherClasses(normalized);
+    renderClasses(currentClasses);
+  } catch (err) {
+    console.error('Lỗi tải trang lớp:', err);
+  }
+}
+
+async function loadExamPageFromAPI(page) {
+  if (!examTeacherId) return;
+  try {
+    const result = await ExamsService.getTeacherExams(examTeacherId, page, examPageSize);
+    if (!result || !Array.isArray(result.exams)) return;
+
+    if (result.exams.length === 0 && page > 0) {
+      examPage = page - 1;
+      loadExamsContent();
+      return;
+    }
+
+    const normalized = result.exams.map((exam, index) => {
+      let videos = [];
+      if (Array.isArray(exam.videos) && exam.videos.length > 0) {
+        videos = exam.videos.map(v => ({
+          name: v.name || v.title || '',
+          file: v.file || v.fileName || '',
+          url: v.url || v.videoUrl || '',
+          storageKey: v.storageKey || ''
+        }));
+      } else if (exam.sampleVideoUrl) {
+        videos = [{
+          name: exam.name || `Video mẫu ${index + 1}`,
+          file: exam.sampleVideoUrl.split('/').pop(),
+          url: exam.sampleVideoUrl,
+          storageKey: ''
+        }];
+      }
+      return {
+        id: String(exam.id || exam.examId || `exam-api-${index}`),
+        name: exam.name || exam.examName || exam.title || 'Bài thi',
+        icon: '📝',
+        iconClass: 'custom-exam',
+        description: exam.description || exam.content || '',
+        deleted: exam.isDeleted === true,
+        videos
+      };
+    });
+
+    // Khi tải trang 0 → ghi đè toàn bộ sessionStorage
+    if (page === 0) {
+      saveExamCatalog(normalized);
+    } else {
+      // Trang sau → merge vào sessionStorage để giữ các trang trước
+      const existing = getExamCatalog();
+      const ids = new Set(normalized.map(e => e.id));
+      const merged = [...existing.filter(e => !ids.has(e.id)), ...normalized];
+      saveExamCatalog(merged);
+    }
+
+    examPage          = page;
+    examTotalPages    = result.totalPages;
+    examTotalElements = result.totalElements;
+
+    loadExamsContent();
+  } catch (err) {
+    console.error('Lỗi tải trang bài thi:', err);
+    loadExamsContent(); // vẫn render từ sessionStorage
+  }
 }
 
 function goToClass(classId) {
@@ -510,8 +694,8 @@ function goToClass(classId) {
   if (!selected) {
     return;
   }
-  localStorage.setItem('selectedClassId', classId);
-  localStorage.setItem('selectedClass', JSON.stringify(selected));
+  sessionStorage.setItem('selectedClassId', classId);
+  sessionStorage.setItem('selectedClass', JSON.stringify(selected));
   window.location.href = '/pages/class-detail.html';
 }
 
@@ -520,8 +704,8 @@ function viewClassDetails(classId) {
   if (!selected) {
     return;
   }
-  localStorage.setItem('selectedClassId', classId);
-  localStorage.setItem('selectedClass', JSON.stringify(selected));
+  sessionStorage.setItem('selectedClassId', classId);
+  sessionStorage.setItem('selectedClass', JSON.stringify(selected));
   window.location.href = '/pages/class-detail.html';
 }
 
@@ -608,48 +792,108 @@ function addClass(event) {
 function loadExamsContent() {
   const examGrid = document.getElementById('examGrid');
   const emptyState = document.getElementById('examEmptyState');
-  if (!examGrid || !emptyState) {
-    return;
-  }
+  if (!examGrid || !emptyState) return;
 
   const keyword = (document.getElementById('searchExamCatalog')?.value || '').toLowerCase().trim();
-  const exams = getExamCatalog().filter(exam => {
+  const showDeleted = examFilterStatus === 'deleted';
+  const allExams = getExamCatalog().filter(exam => {
+    if (showDeleted ? !exam.deleted : exam.deleted) return false;
     const text = `${exam.name} ${exam.description}`.toLowerCase();
     return text.includes(keyword);
   });
 
-  if (exams.length === 0) {
+  if (allExams.length === 0) {
     examGrid.innerHTML = '';
     examGrid.style.display = 'none';
     emptyState.style.display = 'block';
+    _renderExamPagination(0, 0, 0);
     return;
   }
 
-  examGrid.innerHTML = exams.map(exam => `
-    <div class="exam-card">
+  // Phân trang local (dùng khi lọc/search)
+  const totalLocal = allExams.length;
+  const totalPagesLocal = Math.ceil(totalLocal / examPageSize);
+  if (examPage >= totalPagesLocal) examPage = 0;
+  const start = examPage * examPageSize;
+  const pageExams = allExams.slice(start, start + examPageSize);
+
+  examGrid.innerHTML = pageExams.map(exam => `
+    <div class="exam-card${exam.deleted ? ' exam-card-deleted' : ''}">
       <div class="exam-card-header">
         <div>
           <h3 class="exam-card-title">${exam.name}</h3>
           <p class="exam-card-desc">${exam.description}</p>
         </div>
-        <span class="exam-card-badge">${getExamUsageCount(exam.id)} lớp</span>
       </div>
       <div class="exam-card-meta">
         <span class="exam-meta-chip"><i class="fas fa-film"></i> ${exam.videos.length} video mẫu</span>
         <span class="exam-meta-chip"><i class="fas fa-id-badge"></i> ${exam.id}</span>
       </div>
       <div class="exam-card-actions">
-        <button class="btn-exam-action btn-exam-edit" onclick="openExamModal('${exam.id}')">Cập nhật</button>
-        <button class="btn-exam-action btn-exam-delete" onclick="deleteExam('${exam.id}')">Xóa</button>
+        ${exam.deleted
+          ? `<button class="btn-exam-action btn-exam-restore" onclick="restoreExam('${exam.id}')">Khôi phục</button>`
+          : `<button class="btn-exam-action btn-exam-edit" onclick="openExamModal('${exam.id}')">Cập nhật</button>
+             <button class="btn-exam-action btn-exam-delete" onclick="deleteExam('${exam.id}')">Xóa</button>`
+        }
       </div>
     </div>
   `).join('');
 
   examGrid.style.display = 'grid';
   emptyState.style.display = 'none';
+  _renderExamPagination(examPage, totalPagesLocal, totalLocal);
+}
+
+function _renderExamPagination(page, totalPages, totalElements) {
+  const container = document.getElementById('examPagination');
+  if (!container) return;
+
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const isFirst = page === 0;
+  const isLast  = page + 1 >= totalPages;
+  const start   = page * examPageSize + 1;
+  const end     = Math.min(start + examPageSize - 1, totalElements);
+
+  let btns = '';
+  btns += `<button class="home-page-btn" onclick="goToExamPage(${page - 1})" ${isFirst ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+  const winSize = 2;
+  for (let i = 0; i < totalPages; i++) {
+    const show = i === 0 || i === totalPages - 1 || (i >= page - winSize && i <= page + winSize);
+    const ellipsis = i === page - winSize - 1 || i === page + winSize + 1;
+    if (show) {
+      btns += `<button class="home-page-btn${i === page ? ' active' : ''}" onclick="goToExamPage(${i})">${i + 1}</button>`;
+    } else if (ellipsis) {
+      btns += `<span class="home-page-ellipsis">…</span>`;
+    }
+  }
+
+  btns += `<button class="home-page-btn" onclick="goToExamPage(${page + 1})" ${isLast ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+  container.innerHTML = `
+    <div class="home-pagination">
+      <span class="home-page-info">Hiển thị ${start}–${end} trong tổng số ${totalElements} bài thi</span>
+      <div class="home-page-controls">${btns}</div>
+    </div>`;
+}
+
+function goToExamPage(page) {
+  const allExams = getExamCatalog().filter(exam => {
+    const showDeleted = examFilterStatus === 'deleted';
+    return showDeleted ? exam.deleted : !exam.deleted;
+  });
+  const totalPages = Math.ceil(allExams.length / examPageSize);
+  if (page < 0 || page >= totalPages) return;
+  examPage = page;
+  loadExamsContent();
 }
 
 function searchExams() {
+  examPage = 0;
   loadExamsContent();
 }
 
@@ -788,6 +1032,16 @@ async function buildExamVideoPayloads(videoDrafts, examId) {
       const savedKey = await saveSampleVideoBlob(selectedFile, storageKey);
       if (savedKey) {
         videoPayload.storageKey = savedKey;
+      }
+
+      // Upload lên server (Cloudinary) — nếu thất bại vẫn dùng IndexedDB
+      try {
+        const cloudUrl = await ExamsService.uploadSampleVideo(selectedFile, videoPayload.name);
+        if (cloudUrl) {
+          videoPayload.url = cloudUrl;
+        }
+      } catch (uploadErr) {
+        console.warn('Không thể upload video mẫu lên server, dùng bản local:', uploadErr);
       }
     } else if (draft.existingStorageKey) {
       videoPayload.storageKey = draft.existingStorageKey;
@@ -1155,6 +1409,10 @@ function saveExam(event) {
     : `Đã thêm bài thi ${name} thành công.`;
 
   openSaveExamConfirmModal(confirmMessage, async () => {
+    const newFilesCount = videoDrafts.filter(d => d.selectedFile).length;
+    if (newFilesCount > 0) {
+      showHomeToast(`Đang tải lên ${newFilesCount} video mẫu...`);
+    }
     const videos = await buildExamVideoPayloads(videoDrafts, targetExamId);
 
     let updatedExams;
@@ -1174,9 +1432,24 @@ function saveExam(event) {
         videos
       } : exam);
     } else {
+      // Tạo bài thi mới — gọi API server trước, dùng ID trả về
+      let serverExamId = targetExamId;
+      const sampleVideoUrl = videos.find(v => v.url)?.url || '';
+      const teacherId = currentUser?.studentId || currentUser?.id || '';
+      if (teacherId && typeof ExamsService !== 'undefined') {
+        try {
+          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId);
+          if (created?.id) {
+            serverExamId = String(created.id);
+          }
+        } catch (err) {
+          console.warn('Tạo bài thi trên server thất bại, lưu local:', err);
+        }
+      }
+
       updatedExams = [
         {
-          id: targetExamId,
+          id: serverExamId,
           name,
           description,
           icon: '📝',
@@ -1195,72 +1468,190 @@ function saveExam(event) {
 }
 
 function deleteExam(examId) {
-  const exam = getExamCatalog().find(item => item.id === examId);
+  const exam = getExamCatalog().find(item => item.id === examId && !item.deleted);
   if (!exam) {
     return;
   }
 
   openDeleteConfirmModal(`Bạn có chắc chắn muốn xóa bài thi ${exam.name} không?`, async () => {
-    const storageKeys = (exam.videos || []).map(video => video.storageKey).filter(Boolean);
-    await Promise.all(storageKeys.map(removeSampleVideoBlobByKey));
+    try {
+      const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.DELETE_TEACHER_EXAM)
+        ? API_CONFIG.ENDPOINTS.DELETE_TEACHER_EXAM(examId)
+        : `http://localhost:8080/api/teacher/exam/${encodeURIComponent(examId)}`;
 
-    const updated = getExamCatalog().filter(item => item.id !== examId);
-    saveExamCatalog(updated);
+      const response = await fetch(url, { method: 'DELETE', credentials: 'include' });
+      if (!response.ok) {
+        const msg = await response.text().catch(() => '');
+        showHomeToast('Xóa bài thi thất bại: ' + (msg || `HTTP ${response.status}`));
+        return;
+      }
+    } catch (err) {
+      showHomeToast('Không thể kết nối đến máy chủ để xóa bài thi.');
+      return;
+    }
+
+    const allExams = getExamCatalog();
+    const target = allExams.find(item => item.id === examId);
+    if (target) target.deleted = true;
+    saveExamCatalog(allExams);
     cleanupExamScores(examId);
+
     loadExamsContent();
+    showHomeToast(`Đã xóa bài thi "${exam.name}" thành công.`);
   });
 }
 
-let currentErrorData = [];
+async function restoreExam(examId) {
+  const exam = getExamCatalog().find(item => item.id === examId && item.deleted);
+  if (!exam) return;
 
-function loadErrorsContent() {
-  const container = document.getElementById('errorsContent');
-  if (!container) {
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.RESTORE_TEACHER_EXAM)
+      ? API_CONFIG.ENDPOINTS.RESTORE_TEACHER_EXAM(examId)
+      : `http://localhost:8080/api/teacher/exam/${encodeURIComponent(examId)}`;
+
+    const response = await fetch(url, { method: 'PUT', credentials: 'include' });
+    if (!response.ok) {
+      const msg = await response.text().catch(() => '');
+      showHomeToast('Khôi phục bài thi thất bại: ' + (msg || `HTTP ${response.status}`));
+      return;
+    }
+  } catch (err) {
+    showHomeToast('Không thể kết nối đến máy chủ để khôi phục bài thi.');
     return;
   }
 
-  if (currentErrorData.length === 0) {
-    currentErrorData = getStoredErrors();
-  }
+  const allExams = getExamCatalog();
+  const target = allExams.find(item => item.id === examId);
+  if (target) target.deleted = false;
+  saveExamCatalog(allExams);
+  loadExamsContent();
+  showHomeToast(`Đã khôi phục bài thi "${exam.name}" thành công.`);
+}
 
+let currentErrorData = [];
+let errorFilterStatus = 'active';
+let examFilterStatus = 'active';
+
+// ---- Error pagination state ----
+let errorPage         = 0;
+let errorPageSize     = 10;
+let errorTotalPages   = 1;
+let errorTotalElements = 0;
+let errorTeacherId    = '';
+
+function changeExamFilter() {
+  const sel = document.getElementById('examFilterStatus');
+  if (sel) examFilterStatus = sel.value;
+  examPage = 0;
+  loadExamsContent();
+}
+
+async function loadErrorsContent() {
+  const container = document.getElementById('errorsContent');
+  if (!container) return;
+
+  // Render ngay từ cache trước
   renderErrors();
+
+  const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
+  if (!teacherId) return;
+
+  errorTeacherId = teacherId;
+  await loadErrorPageFromAPI(0);
+}
+
+async function loadErrorPageFromAPI(page) {
+  if (!errorTeacherId) return;
+
+  try {
+    const url = API_CONFIG.ENDPOINTS.TEACHER_ERRORS(errorTeacherId, page, errorPageSize);
+    const response = await ApiClient.fetchWithAuth(url);
+    const json = await response.json().catch(() => null);
+
+    if (!response.ok) return;
+
+    // Hỗ trợ Spring Page<> { data: { content, totalPages, totalElements } }
+    const pageData = json?.data;
+    let rawList, totalPages, totalElements;
+
+    if (pageData && Array.isArray(pageData.content)) {
+      rawList       = pageData.content;
+      totalPages    = pageData.totalPages    ?? 1;
+      totalElements = pageData.totalElements ?? rawList.length;
+    } else if (Array.isArray(json?.data)) {
+      rawList       = json.data;
+      totalPages    = 1;
+      totalElements = rawList.length;
+    } else {
+      return;
+    }
+
+    const serverErrors = rawList.map(e => ({
+      id: e.id,
+      name: e.name,
+      description: e.description || '',
+      severity: e.severityType === 'HIGH' ? 'cao' : e.severityType === 'LOW' ? 'thap' : 'trung-binh',
+      deduction: e.deduction,
+      icon: 'fas fa-exclamation-circle',
+      students: [],
+      deleted: !e.isActive
+    }));
+
+    if (page === 0) {
+      currentErrorData = serverErrors;
+    } else {
+      // Merge: thay thế các item cùng id, thêm mới nếu chưa có
+      const idSet = new Set(serverErrors.map(e => e.id));
+      currentErrorData = [...currentErrorData.filter(e => !idSet.has(e.id)), ...serverErrors];
+    }
+
+    saveStoredErrors(currentErrorData);
+    errorPage          = page;
+    errorTotalPages    = totalPages;
+    errorTotalElements = totalElements;
+
+    renderErrors();
+  } catch (err) {
+    console.warn('Không thể tải danh sách lỗi từ API:', err);
+  }
 }
 
 function renderErrors() {
   const container = document.getElementById('errorsContent');
   if (!container) return;
 
-  const totalStudents = currentErrorData.reduce((sum, e) => sum + e.students.length, 0);
-  const highCount = currentErrorData.filter(e => e.severity === 'cao').length;
-  const medCount = currentErrorData.filter(e => e.severity === 'trung-binh').length;
+  const activeData = currentErrorData.filter(e => !e.deleted);
+  const keyword = (document.getElementById('searchError')?.value || '').toLowerCase().trim();
+  const filteredAll = (errorFilterStatus === 'deleted'
+    ? currentErrorData.filter(e => e.deleted)
+    : activeData
+  ).filter(e => !keyword || `${e.name} ${e.description}`.toLowerCase().includes(keyword));
 
-  const severityText = (s) => s === 'cao' ? 'Nghiêm trọng' : 'Trung bình';
+  // Phân trang local
+  const totalLocal   = filteredAll.length;
+  const totalPagesLocal = Math.max(1, Math.ceil(totalLocal / errorPageSize));
+  if (errorPage >= totalPagesLocal) errorPage = 0;
+  const startIdx   = errorPage * errorPageSize;
+  const filteredData = filteredAll.slice(startIdx, startIdx + errorPageSize);
+
+  const totalStudents = activeData.reduce((sum, e) => sum + e.students.length, 0);
+  const highCount = activeData.filter(e => e.severity === 'cao').length;
+  const medCount = activeData.filter(e => e.severity === 'trung-binh').length;
+  const lowCount = activeData.filter(e => e.severity === 'thap').length;
+
+  const severityText = (s) => s === 'cao' ? 'Nghiêm trọng' : s === 'thap' ? 'Thấp' : 'Trung bình';
+
+  const emptyMessage = errorFilterStatus === 'deleted'
+    ? 'Không có lỗi nào đã xóa.'
+    : 'Chưa có lỗi nào.';
 
   container.innerHTML = `
-    <div class="error-summary">
-      <div class="summary-item">
-        <span class="summary-label"><i class="fas fa-exclamation-triangle"></i> Tổng lỗi</span>
-        <span class="summary-value">${currentErrorData.length}</span>
-      </div>
-      <div class="summary-item summary-high">
-        <span class="summary-label"><i class="fas fa-times-circle"></i> Nghiêm trọng</span>
-        <span class="summary-value">${highCount}</span>
-      </div>
-      <div class="summary-item summary-medium">
-        <span class="summary-label"><i class="fas fa-info-circle"></i> Trung bình</span>
-        <span class="summary-value">${medCount}</span>
-      </div>
-      <div class="summary-item">
-        <span class="summary-label"><i class="fas fa-users"></i> SV mắc lỗi</span>
-        <span class="summary-value">${totalStudents}</span>
-      </div>
-    </div>
-
     <div class="error-type-list">
-      ${currentErrorData.map(error => `
-        <div class="error-type-card" id="error-card-${error.id}">
+      ${filteredData.length === 0 ? `<div class="error-empty-state">${emptyMessage}</div>` : filteredData.map(error => `
+        <div class="error-type-card${error.deleted ? ' error-deleted' : ''}" id="error-card-${error.id}">
           <div class="error-type-header">
-            <div class="error-type-info" onclick="toggleError(${error.id})">
+            <div class="error-type-info">
               <div class="error-type-name">
                 ${error.name}
                 <span class="error-type-count">${error.students.length} sinh viên</span>
@@ -1269,46 +1660,164 @@ function renderErrors() {
             </div>
             <div class="error-deduction-badge">-${error.deduction} điểm</div>
             <div class="error-type-severity ${error.severity}">${severityText(error.severity)}</div>
-            <button class="btn-delete-error" onclick="deleteError(${error.id})" title="Xóa lỗi"><i class="fas fa-trash-alt"></i></button>
-            <i class="fas fa-chevron-down expand-icon" id="expand-icon-${error.id}" onclick="toggleError(${error.id})"></i>
-          </div>
-          <div class="error-type-details" id="error-details-${error.id}" style="display:none;">
-            <div class="error-student-list">
-              ${error.students.length === 0 ? `
-                <div class="error-student-empty">Chưa có sinh viên nào được ghi nhận mắc lỗi này.</div>
-              ` : error.students.map((sv, idx) => `
-                <div class="error-student-item" onclick="toggleErrorStudent(${error.id}, ${idx})">
-                  <div class="error-student-header">
-                    <div class="error-student-rank">${idx + 1}</div>
-                    <div class="error-student-info">
-                      <div class="error-student-name">${sv.name}</div>
-                      <div class="error-student-meta">${sv.code} · ${sv.class}</div>
-                    </div>
-                    <i class="fas fa-image error-img-icon" id="img-icon-${error.id}-${idx}"></i>
-                  </div>
-                  <div class="error-student-image" id="error-img-${error.id}-${idx}" style="display:none;">
-                    <img src="${sv.image}" alt="Lỗi ${error.name} - ${sv.name}" loading="lazy">
-                    <div class="error-img-caption">Hình ảnh lỗi: <strong>${error.name}</strong> — ${sv.name} (${sv.code})</div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
+            ${error.deleted
+              ? `<button class="btn-restore-error" onclick="restoreError(${error.id})" title="Khôi phục lỗi"><i class="fas fa-undo"></i> Khôi phục</button>`
+              : `<button class="btn-delete-error" onclick="deleteError(${error.id})" title="Xóa lỗi"><i class="fas fa-trash-alt"></i></button>`
+            }
           </div>
         </div>
       `).join('')}
     </div>
   `;
+
+  // Render summary vào div cố định (không bị xóa khi scroll danh sách)
+  const summaryEl = document.getElementById('errorSummaryFixed');
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <div class="error-summary">
+        <div class="summary-item">
+          <span class="summary-label"><i class="fas fa-exclamation-triangle"></i> Tổng lỗi</span>
+          <span class="summary-value">${activeData.length}</span>
+        </div>
+        <div class="summary-item summary-high">
+          <span class="summary-label"><i class="fas fa-times-circle"></i> Nghiêm trọng</span>
+          <span class="summary-value">${highCount}</span>
+        </div>
+        <div class="summary-item summary-medium">
+          <span class="summary-label"><i class="fas fa-info-circle"></i> Trung bình</span>
+          <span class="summary-value">${medCount}</span>
+        </div>
+        <div class="summary-item summary-low">
+          <span class="summary-label"><i class="fas fa-check-circle"></i> Thấp</span>
+          <span class="summary-value">${lowCount}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label"><i class="fas fa-users"></i> SV mắc lỗi</span>
+          <span class="summary-value">${totalStudents}</span>
+        </div>
+      </div>`;
+  }
+
+  _renderErrorPagination(errorPage, totalPagesLocal, totalLocal);
+}
+
+function _renderErrorPagination(page, totalPages, totalElements) {
+  const container = document.getElementById('errorPagination');
+  if (!container) return;
+
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const isFirst = page === 0;
+  const isLast  = page + 1 >= totalPages;
+  const start   = page * errorPageSize + 1;
+  const end     = Math.min(start + errorPageSize - 1, totalElements);
+
+  let btns = '';
+  btns += `<button class="home-page-btn" onclick="goToErrorPage(${page - 1})" ${isFirst ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+  const winSize = 2;
+  for (let i = 0; i < totalPages; i++) {
+    const show = i === 0 || i === totalPages - 1 || (i >= page - winSize && i <= page + winSize);
+    const ellipsis = i === page - winSize - 1 || i === page + winSize + 1;
+    if (show) {
+      btns += `<button class="home-page-btn${i === page ? ' active' : ''}" onclick="goToErrorPage(${i})">${i + 1}</button>`;
+    } else if (ellipsis) {
+      btns += `<span class="home-page-ellipsis">…</span>`;
+    }
+  }
+
+  btns += `<button class="home-page-btn" onclick="goToErrorPage(${page + 1})" ${isLast ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+  container.innerHTML = `
+    <div class="home-pagination">
+      <span class="home-page-info">Hiển thị ${start}–${end} trong tổng số ${totalElements} lỗi</span>
+      <div class="home-page-controls">${btns}</div>
+    </div>`;
+}
+
+function goToErrorPage(page) {
+  const filteredAll = errorFilterStatus === 'deleted'
+    ? currentErrorData.filter(e => e.deleted)
+    : currentErrorData.filter(e => !e.deleted);
+  const totalPages = Math.max(1, Math.ceil(filteredAll.length / errorPageSize));
+  if (page < 0 || page >= totalPages) return;
+  errorPage = page;
+  renderErrors();
+}
+
+function changeErrorFilter() {
+  const select = document.getElementById('errorFilterStatus');
+  if (select) errorFilterStatus = select.value;
+  errorPage = 0;
+  renderErrors();
 }
 
 function deleteError(errorId) {
-  const error = currentErrorData.find(e => e.id === errorId);
+  const error = currentErrorData.find(e => e.id === errorId && !e.deleted);
   if (!error) return;
 
-  openDeleteConfirmModal('Bạn có chắc muốn xóa lỗi "' + error.name + '" không?', () => {
-    currentErrorData = currentErrorData.filter(e => e.id !== errorId);
+  openDeleteConfirmModal('Bạn có chắc muốn xóa lỗi "' + error.name + '" không?', async () => {
+    try {
+      const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.DELETE_TEACHER_ERROR)
+        ? API_CONFIG.ENDPOINTS.DELETE_TEACHER_ERROR(errorId)
+        : `http://localhost:8080/api/teacher/error/${encodeURIComponent(errorId)}`;
+
+      const response = await fetch(url, { method: 'DELETE', credentials: 'include' });
+      if (!response.ok) {
+        const msg = await response.text().catch(() => '');
+        showHomeToast('Xóa lỗi thất bại: ' + (msg || `HTTP ${response.status}`));
+        return;
+      }
+    } catch (err) {
+      showHomeToast('Không thể kết nối đến máy chủ để xóa lỗi.');
+      return;
+    }
+
+    error.deleted = true;
     saveStoredErrors(currentErrorData);
     renderErrors();
+    showHomeToast('Đã xóa lỗi "' + error.name + '" thành công.');
   });
+}
+
+async function restoreError(errorId) {
+  const error = currentErrorData.find(e => e.id === errorId && e.deleted);
+  if (!error) return;
+
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.RESTORE_TEACHER_ERROR)
+      ? API_CONFIG.ENDPOINTS.RESTORE_TEACHER_ERROR(errorId)
+      : `http://localhost:8080/api/teacher/error/${encodeURIComponent(errorId)}`;
+
+    const csrfCookie = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
+    const csrfToken = csrfCookie ? decodeURIComponent(csrfCookie.split('=')[1]) : '';
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {})
+      }
+    });
+
+    if (!response.ok) {
+      const json = await response.json().catch(() => null);
+      showHomeToast('Khôi phục lỗi thất bại: ' + (json?.message || `HTTP ${response.status}`));
+      return;
+    }
+  } catch (err) {
+    showHomeToast('Không thể kết nối đến máy chủ để khôi phục lỗi.');
+    return;
+  }
+
+  error.deleted = false;
+  saveStoredErrors(currentErrorData);
+  renderErrors();
+  showHomeToast(`Đã khôi phục lỗi "${error.name}".`);
 }
 
 function openErrorModal() {
@@ -1333,7 +1842,7 @@ function closeErrorModal() {
   }
 }
 
-function addErrorCatalog(event) {
+async function addErrorCatalog(event) {
   event.preventDefault();
 
   const name = document.getElementById('errorName').value.trim();
@@ -1346,14 +1855,44 @@ function addErrorCatalog(event) {
     return;
   }
 
-  const duplicate = currentErrorData.find(error => error.name.toLowerCase() === name.toLowerCase());
+  const duplicate = currentErrorData.find(error => !error.deleted && error.name.toLowerCase() === name.toLowerCase());
   if (duplicate) {
     alert('Tên lỗi đã tồn tại. Vui lòng nhập tên khác.');
     return;
   }
 
+  const severityApiMap = { 'cao': 'HIGH', 'trung-binh': 'MEDIUM', 'thap': 'LOW' };
+  const severityType = severityApiMap[severity] || 'MEDIUM';
+  const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
+
+  let newErrorId = Date.now();
+
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR)
+      ? API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR
+      : 'http://localhost:8080/api/teacher/error';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idTeacher, name, description, severityType, deduction })
+    });
+
+    const json = await response.json().catch(() => null);
+
+    if ((response.ok || response.status === 201) && json?.data?.id) {
+      newErrorId = json.data.id;
+    } else {
+      const msg = json?.message || `HTTP ${response.status}`;
+      console.warn('Thêm lỗi API thất bại:', msg);
+    }
+  } catch (err) {
+    console.warn('Không thể kết nối API thêm lỗi, lưu local:', err);
+  }
+
   const newError = {
-    id: Date.now(),
+    id: newErrorId,
     name,
     description,
     severity,
@@ -1398,14 +1937,8 @@ function confirmDeleteAction() {
 }
 
 function searchErrors() {
-  const keyword = document.getElementById('searchError').value.toLowerCase().trim();
-  const cards = document.querySelectorAll('.error-type-card');
-  cards.forEach(card => {
-    const name = card.querySelector('.error-type-name');
-    const desc = card.querySelector('.error-type-description');
-    const text = (name ? name.textContent : '') + ' ' + (desc ? desc.textContent : '');
-    card.style.display = text.toLowerCase().includes(keyword) ? '' : 'none';
-  });
+  errorPage = 0;
+  renderErrors();
 }
 
 function searchClasses() {
@@ -1433,8 +1966,90 @@ function getStoredGradingHistory() {
   return Array.isArray(stored) ? stored : [];
 }
 
+// Cache lịch sử từ API (null = chưa load, [] = đã load nhưng rỗng)
+let _apiHistoryCache = null;
+
+// Map record từ API response sang format frontend dùng
+function _mapApiHistoryRecord(item) {
+  return {
+    id: item.id,
+    teacherId: item.teacherId,
+    teacherName: item.teacherName,
+    classId: item.classId,
+    className: item.className,
+    studentCode: item.studentCode,
+    studentName: item.studentName,
+    examId: item.examId,
+    examName: item.examName,
+    gradingMode: (item.gradingMode || '').toLowerCase(),  // OFFICIAL → official
+    gradingSessionId: item.gradingSessionId,
+    submissionId: item.submissionId,
+    timestamp: item.gradedAt
+      ? new Date(item.gradedAt).toLocaleString('vi-VN')
+      : '—',
+    timestampIso: item.gradedAt || null,
+    finalScore: item.finalScore ?? 10,
+    totalDeductions: item.totalDeductions ?? 0,
+    totalFrames: Array.isArray(item.frames) ? item.frames.length : 0,
+    // Map frames sang format history
+    history: Array.isArray(item.frames) ? item.frames.map((f, idx) => ({
+      id: idx + 1,
+      frameTs: f.frameTimeSeconds ?? 0,
+      video: 1,
+      total: -(f.deductionApplied ?? 0),
+      errors: [{
+        id: f.errorId,
+        name: f.errorTypeName,
+        score: -(f.deductionApplied ?? 0),
+        note: f.notes || ''
+      }]
+    })) : [],
+    _fromApi: true
+  };
+}
+
+async function loadApiGradingHistory(page = 0) {
+  if (!currentUser) return;
+  const teacherId = currentUser.id || currentUser.studentId || currentUser.username;
+  if (!teacherId) return;
+
+  try {
+    const url = API_CONFIG.ENDPOINTS.GRADING_HISTORY(teacherId, page, historyPageSize);
+    const res = await ApiClient.fetchWithAuth(url);
+    if (!res.ok) return;
+    const json = await res.json().catch(() => null);
+
+    // Spring Page<> format: { data: { content, totalPages, totalElements, number } }
+    if (json?.data?.content != null && json?.data?.totalPages != null) {
+      _apiHistoryCache = json.data.content.map(_mapApiHistoryRecord);
+      historyPage         = json.data.number ?? page;
+      historyTotalPages   = json.data.totalPages;
+      historyTotalElements = json.data.totalElements;
+    } else if (Array.isArray(json?.data)) {
+      // Fallback: flat array (no pagination from server)
+      _apiHistoryCache = json.data.map(_mapApiHistoryRecord);
+      historyPage         = 0;
+      historyTotalPages   = 1;
+      historyTotalElements = _apiHistoryCache.length;
+    } else {
+      return;
+    }
+
+    // Re-render nếu đang ở tab lịch sử
+    const container = document.getElementById('historyContent');
+    if (container) loadGradingHistoryContent();
+  } catch (e) {
+    console.warn('[loadApiGradingHistory] Không thể tải lịch sử từ API:', e);
+  }
+}
+
 function getTeacherGradingHistory() {
-  const teacherId = currentUser?.studentId || currentUser?.name || 'teacher';
+  // Ưu tiên dữ liệu từ API nếu đã có
+  if (_apiHistoryCache !== null) {
+    return _apiHistoryCache;
+  }
+  // Fallback về localStorage
+  const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || currentUser?.name || 'teacher';
   return getStoredGradingHistory()
     .filter(record => record.teacherId === teacherId)
     .sort((left, right) => new Date(right.timestampIso || 0).getTime() - new Date(left.timestampIso || 0).getTime());
@@ -1445,7 +2060,7 @@ function getHistoryVideos(record) {
     return [];
   }
 
-  const stored = JSON.parse(localStorage.getItem(record.videoStorageKey) || '[]');
+  const stored = JSON.parse(sessionStorage.getItem(record.videoStorageKey) || '[]');
   return Array.isArray(stored) ? stored : [];
 }
 
@@ -1466,7 +2081,19 @@ function loadGradingHistoryContent() {
     return;
   }
 
-  // If a search query is present, filter teacher records by student code, name or exam name
+  // Lần đầu vào tab → gọi API (async, sẽ re-render khi xong)
+  if (_apiHistoryCache === null) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-spinner fa-spin" style="font-size:48px;color:#DC143C"></i></div>
+        <h2>Đang tải lịch sử chấm...</h2>
+      </div>
+    `;
+    loadApiGradingHistory();
+    return;
+  }
+
+  // If a search query is present, filter records by student code, name or exam name
   const qEl = document.getElementById('historySearch');
   const q = qEl ? (qEl.value || '').toLowerCase().trim() : '';
   let records = getTeacherGradingHistory();
@@ -1496,6 +2123,8 @@ function loadGradingHistoryContent() {
         </div>
       `;
     }
+    const paginationEl = document.getElementById('historyPagination');
+    if (paginationEl) paginationEl.innerHTML = '';
     return;
   }
 
@@ -1505,26 +2134,36 @@ function loadGradingHistoryContent() {
 
   const selectedRecord = records.find(record => record.id === selectedGradingHistoryId) || records[0];
   const totalFrames = records.reduce((sum, record) => sum + (record.totalFrames || 0), 0);
-  const officialCount = records.filter(record => record.gradingMode === 'official').length;
+  const officialCount = records.filter(record =>
+    (record.gradingMode || '').toLowerCase() === 'official'
+  ).length;
 
+  // Render summary cards vào vùng cố định (không scroll)
+  const summaryEl = document.getElementById('historySummary');
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <div class="history-summary-grid">
+        <div class="history-summary-card">
+          <div class="history-summary-icon"><i class="fas fa-clock-rotate-left"></i></div>
+          <div class="history-summary-value">${records.length}</div>
+          <div class="history-summary-label">Lần chấm</div>
+        </div>
+        <div class="history-summary-card">
+          <div class="history-summary-icon"><i class="fas fa-clapperboard"></i></div>
+          <div class="history-summary-value">${totalFrames}</div>
+          <div class="history-summary-label">Frame lỗi</div>
+        </div>
+        <div class="history-summary-card">
+          <div class="history-summary-icon"><i class="fas fa-star"></i></div>
+          <div class="history-summary-value">${officialCount}</div>
+          <div class="history-summary-label">Lấy điểm</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Render chỉ danh sách + detail vào #historyContent (có scroll riêng)
   container.innerHTML = `
-    <div class="history-summary-grid">
-      <div class="history-summary-card">
-        <div class="history-summary-icon"><i class="fas fa-clock-rotate-left"></i></div>
-        <div class="history-summary-value">${records.length}</div>
-        <div class="history-summary-label">Lần chấm</div>
-      </div>
-      <div class="history-summary-card">
-        <div class="history-summary-icon"><i class="fas fa-clapperboard"></i></div>
-        <div class="history-summary-value">${totalFrames}</div>
-        <div class="history-summary-label">Frame lỗi</div>
-      </div>
-      <div class="history-summary-card">
-        <div class="history-summary-icon"><i class="fas fa-star"></i></div>
-        <div class="history-summary-value">${officialCount}</div>
-        <div class="history-summary-label">Lấy điểm</div>
-      </div>
-    </div>
     <div class="grading-history-layout">
       <div class="grading-history-list">
         ${records.map(record => `
@@ -1547,12 +2186,26 @@ function loadGradingHistoryContent() {
       </div>
     </div>
   `;
+
+  // Tải dữ liệu API cho bản ghi đang chọn (async, cập nhật sau khi load xong)
+  _fetchHistoryDetailApi(selectedRecord);
+
+  // Render pagination controls
+  _renderHistoryPagination();
 }
 
 function renderGradingHistoryDetail(record) {
   if (!record) {
     return '<div class="history-detail-empty">Chọn một bài thi đã chấm để xem chi tiết.</div>';
   }
+
+  // Lấy dữ liệu từ API cache (nếu đã fetch)
+  const cached = _historyDetailCache[record.id] || {};
+  const apiFrames = cached.apiFrames ?? null;
+  const gradeBoardEntry = cached.gradeBoardEntry ?? null;
+
+  // Ưu tiên frame từ API, fallback về sessionStorage
+  const frames = apiFrames ?? (Array.isArray(record.history) ? record.history : []);
 
   const videos = getHistoryVideos(record);
   const videoMarkup = videos.length === 0
@@ -1568,9 +2221,9 @@ function renderGradingHistoryDetail(record) {
         </div>
       `).join('')}</div>`;
 
-  const frameMarkup = !Array.isArray(record.history) || record.history.length === 0
+  const frameMarkup = frames.length === 0
     ? '<div class="history-empty-box">Bài thi này không có frame lỗi nào được lưu.</div>'
-    : `<div class="history-frame-grid">${record.history.map((frame, index) => `
+    : `<div class="history-frame-grid">${frames.map((frame, index) => `
         <div class="history-frame-card">
           <div class="history-frame-top">
             <div>
@@ -1579,29 +2232,40 @@ function renderGradingHistoryDetail(record) {
             </div>
             <div class="history-frame-score">${Number(frame.total || 0).toFixed(1)}</div>
           </div>
+          ${frame.imageUrl ? `<img src="${frame.imageUrl}" class="history-frame-img" alt="Frame ${index + 1}" loading="lazy">` : ''}
           <div class="history-tag-list">
             ${(frame.errors || []).map(error => `<span class="history-tag">${error.name}${error.note ? ` · ${error.note}` : ''}</span>`).join('')}
           </div>
         </div>
       `).join('')}</div>`;
 
+  // Điểm từ grade board API
+  const practiceScore = gradeBoardEntry?.practiceScore ?? null;
+  const officialScore = gradeBoardEntry?.officialScore ?? null;
+  const scoreBadgeHTML = (practiceScore != null || officialScore != null) ? `
+    <div class="history-score-badges">
+      ${practiceScore != null ? `<span class="history-score-badge practice">📝 Luyện tập: ${Number(practiceScore).toFixed(1)}/10</span>` : ''}
+      ${officialScore != null ? `<span class="history-score-badge official">🏅 Chính thức: ${Number(officialScore).toFixed(1)}/10</span>` : ''}
+    </div>` : '';
+
+  const totalFrames = apiFrames ? apiFrames.length : (record.totalFrames || 0);
+  const totalDeductions = apiFrames
+    ? Math.abs(apiFrames.reduce((s, f) => s + (f.total || 0), 0))
+    : Number(record.totalDeductions || 0);
+
   return `
     <div class="history-detail-header">
       <div>
         <h3>${record.examName}</h3>
         <p>${record.studentName} (${record.studentCode}) · ${record.className || 'Chưa rõ lớp'}</p>
+        ${scoreBadgeHTML}
       </div>
       <div class="history-detail-score">${Number(record.finalScore || 0).toFixed(1)}/10</div>
     </div>
     <div class="history-detail-meta-grid">
-      <div class="history-detail-meta"><span>Thời gian chấm</span><strong>${record.timestamp}</strong></div>
       <div class="history-detail-meta"><span>Chế độ</span><strong>${formatHistoryMode(record.gradingMode)}</strong></div>
-      <div class="history-detail-meta"><span>Tổng frame lỗi</span><strong>${record.totalFrames || 0}</strong></div>
-      <div class="history-detail-meta"><span>Tổng điểm trừ</span><strong>${Number(record.totalDeductions || 0).toFixed(1)}</strong></div>
-    </div>
-    <div class="history-detail-block">
-      <div class="history-block-title"><i class="fas fa-video"></i> Video bài thi</div>
-      ${videoMarkup}
+      <div class="history-detail-meta"><span>Tổng frame lỗi</span><strong>${totalFrames}</strong></div>
+      <div class="history-detail-meta"><span>Tổng điểm trừ</span><strong>${totalDeductions.toFixed(1)}</strong></div>
     </div>
     <div class="history-detail-block">
       <div class="history-block-title"><i class="fas fa-camera"></i> Các frame bị lỗi và tag lỗi</div>
@@ -1610,9 +2274,122 @@ function renderGradingHistoryDetail(record) {
   `;
 }
 
+// Cache API detail data cho bản ghi đang chọn
+let _historyDetailCache = {}; // { recordId: { apiFrames, gradeBoardEntry } }
+
+async function _fetchHistoryDetailApi(record) {
+  if (!record) return;
+  const recordId = record.id;
+  // Bỏ qua nếu đã có cache
+  if (_historyDetailCache.hasOwnProperty(recordId)) return;
+
+  const idSession = record.gradingSessionId;
+  const submissionId = record.submissionId ?? null;
+
+  const [framesResult, gradeBoardResult] = await Promise.allSettled([
+    idSession
+      ? fetch(
+          API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL
+            ? API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL(idSession, record.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE')
+            : `http://localhost:8080/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${record.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE'}`,
+          { credentials: 'include' }
+        ).then(r => r.json()).catch(() => null)
+      : Promise.resolve(null),
+    submissionId
+      ? fetch(
+          API_CONFIG.ENDPOINTS.GRADE_BOARD
+            ? API_CONFIG.ENDPOINTS.GRADE_BOARD(submissionId)
+            : `http://localhost:8080/public/grade-board/${encodeURIComponent(submissionId)}`,
+          { credentials: 'include' }
+        ).then(r => r.json()).catch(() => null)
+      : Promise.resolve(null)
+  ]);
+
+  // Parse frames từ GRADING_ERROR_DETAIL
+  let apiFrames = null;
+  const framesJson = framesResult.status === 'fulfilled' ? framesResult.value : null;
+  if (Array.isArray(framesJson?.data) && framesJson.data.length > 0) {
+    const frameMap = new Map();
+    framesJson.data.forEach(err => {
+      const key = String(err.frameTimeSeconds ?? 0);
+      if (!frameMap.has(key)) {
+        frameMap.set(key, { frameTs: Number(err.frameTimeSeconds) || 0, imageUrl: err.frameImageUrl || null, errors: [], total: 0 });
+      }
+      const frame = frameMap.get(key);
+      frame.errors.push({ id: err.id, name: err.errorName, score: -Math.abs(Number(err.deduction) || 0), note: err.errorDescription || '' });
+      frame.total -= Math.abs(Number(err.deduction) || 0);
+    });
+    apiFrames = Array.from(frameMap.values());
+  }
+
+  // Parse grade board entry
+  let gradeBoardEntry = null;
+  const gbJson = gradeBoardResult.status === 'fulfilled' ? gradeBoardResult.value : null;
+  if (Array.isArray(gbJson?.data) && gbJson.data.length > 0) {
+    gradeBoardEntry = gbJson.data[0];
+  }
+
+  _historyDetailCache[recordId] = { apiFrames, gradeBoardEntry };
+
+  // Re-render detail panel nếu bản ghi này vẫn đang được chọn
+  if (selectedGradingHistoryId === recordId) {
+    const detailEl = document.querySelector('.grading-history-detail');
+    if (detailEl) detailEl.innerHTML = renderGradingHistoryDetail(record);
+  }
+}
+
 function selectGradingHistory(recordId) {
   selectedGradingHistoryId = recordId;
   loadGradingHistoryContent();
+}
+
+function _renderHistoryPagination() {
+  const container = document.getElementById('historyPagination');
+  if (!container) return;
+
+  if (historyTotalPages <= 1 && historyTotalElements <= historyPageSize) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const isFirstPage = historyPage === 0;
+  const isLastPage  = historyPage + 1 >= historyTotalPages;
+
+  const start = historyPage * historyPageSize + 1;
+  const end   = Math.min(start + (_apiHistoryCache?.length ?? 0) - 1, historyTotalElements);
+
+  let btns = '';
+  btns += `<button class="home-page-btn" onclick="loadHistoryPage(${historyPage - 1})" ${isFirstPage ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+  const winSize = 2;
+  for (let i = 0; i < historyTotalPages; i++) {
+    const show = i === 0 || i === historyTotalPages - 1 || (i >= historyPage - winSize && i <= historyPage + winSize);
+    const ellipsis = i === historyPage - winSize - 1 || i === historyPage + winSize + 1;
+    if (show) {
+      btns += `<button class="home-page-btn${i === historyPage ? ' active' : ''}" onclick="loadHistoryPage(${i})">${i + 1}</button>`;
+    } else if (ellipsis) {
+      btns += `<span class="home-page-ellipsis">…</span>`;
+    }
+  }
+
+  btns += `<button class="home-page-btn" onclick="loadHistoryPage(${historyPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+  const infoText = historyTotalElements > 0
+    ? `Hiển thị ${start}–${end} trong tổng số ${historyTotalElements} lần chấm`
+    : `Trang ${historyPage + 1} / ${historyTotalPages}`;
+
+  container.innerHTML = `
+    <div class="home-pagination">
+      <span class="home-page-info">${infoText}</span>
+      <div class="home-page-controls">${btns}</div>
+    </div>`;
+}
+
+async function loadHistoryPage(page) {
+  if (page < 0 || page >= historyTotalPages) return;
+  _apiHistoryCache = null;
+  selectedGradingHistoryId = null;
+  await loadApiGradingHistory(page);
 }
 
 function toggleError(errorId) {
@@ -1646,14 +2423,33 @@ function loadReportContent() {
     return;
   }
 
-  const teacherId = currentUser.studentId || 'GV001';
-  const classesKey = 'classes_' + teacherId;
-  const classes = JSON.parse(localStorage.getItem(classesKey) || '[]');
-  const totalStudents = classes.reduce((sum, c) => sum + (c.students || 0), 0);
-  const totalErrors = currentErrorData.length;
-  const highErrors = currentErrorData.filter(e => e.severity === 'cao').length;
-  const medErrors = currentErrorData.filter(e => e.severity === 'trung-binh').length;
-  const totalSVErrors = currentErrorData.reduce((sum, e) => sum + e.students.length, 0);
+  // Sử dụng dữ liệu JS đã tải sẵn, không cần gọi API
+  const classes = currentClasses;
+
+  // Tính tổng sinh viên từ classStudents sessionStorage (được cập nhật khi mở trang lớp)
+  const allClassStudents = JSON.parse(sessionStorage.getItem('classStudents') || '{}');
+  let totalStudents = 0;
+  classes.forEach(c => {
+    const arr = allClassStudents[c.classId];
+    if (Array.isArray(arr)) {
+      totalStudents += arr.length;
+    } else {
+      totalStudents += (c.studentCount || 0);
+    }
+  });
+
+  const activeErrors = currentErrorData.filter(e => !e.deleted);
+  const totalErrors = activeErrors.length;
+
+  // Tính lượt mắc lỗi từ lịch sử chấm điểm
+  const historyRecords = getTeacherGradingHistory();
+  let totalSVErrors = 0;
+  historyRecords.forEach(record => {
+    if (!Array.isArray(record.history)) return;
+    record.history.forEach(frame => {
+      totalSVErrors += Array.isArray(frame.errors) ? frame.errors.length : 0;
+    });
+  });
 
   container.innerHTML = `
     <div class="report-grid">
@@ -1700,7 +2496,7 @@ function loadReportContent() {
     <div class="chart-row">
       <div class="chart-container">
         <div class="chart-title"><i class="fas fa-chart-bar"></i> Phân bố lỗi theo lớp</div>
-        <canvas id="chartErrorByClass"></canvas>
+        <canvas id="chartErrorByClass" style="max-height:260px"></canvas>
       </div>
       <div class="chart-container">
         <div class="chart-title"><i class="fas fa-chart-doughnut"></i> Top 5 lỗi phổ biến</div>
@@ -1713,25 +2509,55 @@ function loadReportContent() {
 }
 
 function renderCharts() {
-  const errorData = currentErrorData;
+  const errorData = currentErrorData.filter(e => !e.deleted);
   const errorNames = errorData.map(e => e.name.length > 20 ? e.name.substring(0, 20) + '...' : e.name);
-  const errorStudentCounts = errorData.map(e => e.students.length);
   const errorDeductions = errorData.map(e => e.deduction);
   const highCount = errorData.filter(e => e.severity === 'cao').length;
   const medCount = errorData.filter(e => e.severity === 'trung-binh').length;
+  const lowCount = errorData.filter(e => e.severity === 'thap').length;
+
+  // Tính dữ liệu từ lịch sử chấm điểm
+  // Bỏ filter teacherId để tránh mismatch khi sessionStorage được load khác nhau
+  const historyRecords = getStoredGradingHistory();
+  const errorStudentMap = {}; // { errorName: Set<studentCode> }
+  const classErrorMap = {};
+  const errorOccurrenceMap = {}; // { errorName: count }
+
+  historyRecords.forEach(record => {
+    const studentCode = record.studentCode || '';
+    const className = record.className || 'Chưa rõ';
+    if (!Array.isArray(record.history)) return;
+    record.history.forEach(frame => {
+      if (!Array.isArray(frame.errors)) return;
+      frame.errors.forEach(err => {
+        const name = err.name || '';
+        if (!name) return;
+        if (!errorStudentMap[name]) errorStudentMap[name] = new Set();
+        if (studentCode) errorStudentMap[name].add(studentCode);
+        classErrorMap[className] = (classErrorMap[className] || 0) + 1;
+        errorOccurrenceMap[name] = (errorOccurrenceMap[name] || 0) + 1;
+      });
+    });
+  });
+
+  const hasHistory = historyRecords.length > 0;
+  // Số sinh viên mắc lỗi theo loại (từ lịch sử); nếu không có history fallback sang điểm trừ
+  const errorStudentCounts = errorData.map(e =>
+    hasHistory ? (errorStudentMap[e.name] ? errorStudentMap[e.name].size : 0) : e.deduction
+  );
 
   const chartColors = ['#DC143C', '#FF6B35', '#FFB64D', '#2ecc71', '#3498db', '#9b59b6', '#e67e22'];
-  const chartBgColors = chartColors.map(c => c + '33');
 
   // Chart 1: Bar - Students per error type
   const ctx1 = document.getElementById('chartErrorByType');
   if (ctx1) {
+    const chart1Label = hasHistory ? 'Số sinh viên' : 'Điểm trừ (chưa có lịch sử)';
     new Chart(ctx1, {
       type: 'bar',
       data: {
         labels: errorNames,
         datasets: [{
-          label: 'Số sinh viên',
+          label: chart1Label,
           data: errorStudentCounts,
           backgroundColor: chartColors.slice(0, errorData.length),
           borderColor: chartColors.slice(0, errorData.length),
@@ -1753,13 +2579,19 @@ function renderCharts() {
   // Chart 2: Doughnut - Severity ratio
   const ctx2 = document.getElementById('chartSeverity');
   if (ctx2) {
+    const severityLabels = [];
+    const severityData = [];
+    const severityColors = [];
+    if (highCount > 0) { severityLabels.push('Nghiêm trọng'); severityData.push(highCount); severityColors.push('#c62828'); }
+    if (medCount > 0)  { severityLabels.push('Trung bình');    severityData.push(medCount);  severityColors.push('#e65100'); }
+    if (lowCount > 0)  { severityLabels.push('Thấp');          severityData.push(lowCount);  severityColors.push('#f9a825'); }
     new Chart(ctx2, {
       type: 'doughnut',
       data: {
-        labels: ['Nghiêm trọng', 'Trung bình'],
+        labels: severityLabels,
         datasets: [{
-          data: [highCount, medCount],
-          backgroundColor: ['#c62828', '#e65100'],
+          data: severityData,
+          backgroundColor: severityColors,
           borderWidth: 2,
           borderColor: '#fff'
         }]
@@ -1773,24 +2605,26 @@ function renderCharts() {
     });
   }
 
-  // Chart 3: Line - Deduction points
+  // Chart 3: Bar - Deduction points per error type
   const ctx3 = document.getElementById('chartDeduction');
   if (ctx3) {
     new Chart(ctx3, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: errorNames,
         datasets: [{
           label: 'Điểm trừ',
           data: errorDeductions,
-          borderColor: '#DC143C',
-          backgroundColor: 'rgba(220, 20, 60, 0.1)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#DC143C',
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          borderWidth: 3
+          backgroundColor: errorData.map(e =>
+            e.severity === 'cao' ? 'rgba(198,40,40,0.75)' :
+            e.severity === 'trung-binh' ? 'rgba(230,81,0,0.75)' : 'rgba(249,168,37,0.75)'
+          ),
+          borderColor: errorData.map(e =>
+            e.severity === 'cao' ? '#c62828' :
+            e.severity === 'trung-binh' ? '#e65100' : '#f9a825'
+          ),
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
       options: {
@@ -1804,49 +2638,77 @@ function renderCharts() {
     });
   }
 
-  // Chart 4: Bar - Errors by class
-  const classErrorMap = {};
-  errorData.forEach(err => {
-    err.students.forEach(sv => {
-      classErrorMap[sv.class] = (classErrorMap[sv.class] || 0) + 1;
-    });
-  });
-  const classNames = Object.keys(classErrorMap).sort();
-  const classCounts = classNames.map(c => classErrorMap[c]);
+  // Chart 4: Bar - Errors by class (từ lịch sử; fallback: số lượng loại lỗi × số lớp)
+  let chart4Labels, chart4Data, chart4DatasetLabel;
+  if (Object.keys(classErrorMap).length > 0) {
+    chart4Labels = Object.keys(classErrorMap).sort();
+    chart4Data = chart4Labels.map(c => classErrorMap[c]);
+    chart4DatasetLabel = 'Số lượt lỗi';
+  } else {
+    // Fallback: hiển thị số loại lỗi đang có theo từng lớp đang quản lý
+    chart4Labels = currentClasses.map(c => c.className || c.classId || '').filter(Boolean);
+    chart4Data = chart4Labels.map(() => errorData.length);
+    chart4DatasetLabel = 'Số loại lỗi (chưa có lịch sử)';
+  }
 
   const ctx4 = document.getElementById('chartErrorByClass');
   if (ctx4) {
+    // Rút gọn nhãn dài để hiển thị đẹp trên trục
+    const shortLabels = (chart4Labels.length ? chart4Labels : ['Chưa có dữ liệu']).map(label => {
+      const parts = label.split(/[\-–]/);
+      return parts[0].trim().length > 0 ? parts[0].trim() : label;
+    });
     new Chart(ctx4, {
       type: 'bar',
+      indexAxis: 'y',
       data: {
-        labels: classNames,
+        labels: shortLabels,
         datasets: [{
-          label: 'Số lượt lỗi',
-          data: classCounts,
-          backgroundColor: ['#3498db', '#2ecc71', '#e67e22', '#9b59b6', '#DC143C'],
-          borderRadius: 6
+          label: chart4DatasetLabel,
+          data: chart4Data.length ? chart4Data : [0],
+          backgroundColor: ['#DC143C', '#FF6B35', '#3498db', '#9b59b6', '#2ecc71', '#1abc9c', '#e67e22'],
+          borderRadius: 6,
+          barThickness: 28,
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => chart4Labels[items[0].dataIndex] || items[0].label
+            }
+          }
+        },
         scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.06)' } },
+          y: { ticks: { font: { size: 12 }, color: '#333' }, grid: { display: false } }
         }
       }
     });
   }
 
-  // Chart 5: Polar Area - Top 5 errors
-  const sorted = [...errorData].sort((a, b) => b.students.length - a.students.length).slice(0, 5);
+  // Chart 5: Polar Area - Top 5 errors by student count (từ lịch sử)
+  // errorOccurrenceMap đã được tính ở trên
+  // Fallback: nếu chưa có lịch sử, dùng deduction để xếp hạng
+  const sortedErrors = errorData.length > 0
+    ? [...errorData].sort((a, b) => {
+        const ca = errorOccurrenceMap[a.name] || 0;
+        const cb = errorOccurrenceMap[b.name] || 0;
+        return cb !== ca ? cb - ca : b.deduction - a.deduction;
+      }).slice(0, 5)
+    : [];
+
   const ctx5 = document.getElementById('chartTopErrors');
   if (ctx5) {
     new Chart(ctx5, {
       type: 'polarArea',
       data: {
-        labels: sorted.map(e => e.name.length > 18 ? e.name.substring(0, 18) + '...' : e.name),
+        labels: sortedErrors.map(e => e.name.length > 18 ? e.name.substring(0, 18) + '...' : e.name),
         datasets: [{
-          data: sorted.map(e => e.students.length),
+          data: sortedErrors.map(e => errorOccurrenceMap[e.name] || e.deduction || 0),
           backgroundColor: ['rgba(220,20,60,0.6)', 'rgba(255,107,53,0.6)', 'rgba(255,182,77,0.6)', 'rgba(46,204,113,0.6)', 'rgba(52,152,219,0.6)'],
           borderWidth: 2,
           borderColor: '#fff'
@@ -1871,9 +2733,11 @@ function closeLogoutModal() {
 }
 
 function confirmLogout() {
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem('selectedClassId');
-  window.location.href = '/index.html';
+  _apiHistoryCache = null;
+  historyPage = 0;
+  historyTotalPages = 1;
+  historyTotalElements = 0;
+  AuthService.logout();
 }
 
 // ============================================
@@ -1881,17 +2745,19 @@ function confirmLogout() {
 // ============================================
 
 function getStudentSampleData() {
-  // Dữ liệu mẫu cho sinh viên
-  const studentId = currentUser.studentId;
+  const studentId = (currentUser.studentId || currentUser.username || currentUser.id || 'SV001').toString();
+  const fullName = currentUser.fullName || currentUser.name || currentUser.username || 'Sinh viên';
+  const birthday = currentUser.birthday
+    ? new Date(currentUser.birthday).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : 'Chưa cập nhật';
   return {
-    name: 'Nguyễn Văn An',
+    name: fullName,
     code: studentId,
-    gender: 'Nam',
-    className: 'Lớp Quân sự 1',
-    classId: '1',
-    email: studentId.toLowerCase() + '@student.hactech.edu.vn',
-    phone: '0912 345 678',
-    birthday: '20/03/2004',
+    gender: currentUser.gender || '',
+    idClass: currentUser.idClass || null,
+    email: currentUser.email || studentId.toLowerCase() + '@student.hactech.edu.vn',
+    phone: 'Chưa cập nhật',
+    birthday: birthday,
     department: 'Công nghệ thông tin',
     course: 'K26',
   };
@@ -1902,13 +2768,13 @@ function getStudentExamData() {
   const student = getStudentSampleData();
   const allExamTypes = getExamCatalog();
 
-  // Đọc exams của lớp từ localStorage
+  // Đọc exams của lớp từ sessionStorage
   const storedExams = getNormalizedClassExamMap();
-  const classId = student.classId || '1';
+  const classId = student.idClass || student.classId || currentUser.idClass || currentUser.classId || '1';
   const assignments = storedExams[classId] || [];
 
-  // Đọc điểm từ localStorage
-  const scores = JSON.parse(localStorage.getItem('examScores') || '{}');
+  // Đọc điểm từ sessionStorage
+  const scores = JSON.parse(sessionStorage.getItem('examScores') || '{}');
 
   return assignments.map(assignment => {
     const examId = assignment.id;
@@ -1916,13 +2782,16 @@ function getStudentExamData() {
     const practiceKey = classId + '_' + studentId + '_' + examId + '_practice';
     const officialKey = classId + '_' + studentId + '_' + examId + '_official';
     const submittedKey = `examVideos_${classId}_${student.code}_${examId}_submitted`;
+    const statusKey = `examVideos_${classId}_${student.code}_${examId}_status`;
     return {
       ...examType,
+      classExamId: assignment.classExamId ?? examType.classExamId ?? null,
       submissionDeadline: assignment.submissionDeadline || '',
       gradingDeadline: assignment.gradingDeadline || '',
       practiceScore: scores[practiceKey] !== undefined ? scores[practiceKey] : null,
       officialScore: scores[officialKey] !== undefined ? scores[officialKey] : null,
-      isSubmitted: localStorage.getItem(submittedKey) === 'true',
+      isSubmitted: sessionStorage.getItem(submittedKey) === 'true',
+      isDraft: !sessionStorage.getItem(submittedKey) && sessionStorage.getItem(statusKey) === 'DRAFT',
       isSubmissionClosed: isDeadlinePassed(assignment.submissionDeadline),
       isGradingClosed: isDeadlinePassed(assignment.gradingDeadline)
     };
@@ -1950,16 +2819,89 @@ function getStudentErrorData() {
   return myErrors;
 }
 
+async function handleProfileAvatarChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Ảnh quá lớn. Vui lòng chọn ảnh dưới 2MB.');
+    event.target.value = '';
+    return;
+  }
+
+  // Preview ngay lập tức
+  const reader = new FileReader();
+  reader.onload = e => {
+    const display = document.getElementById('profileAvatarDisplay');
+    if (display) {
+      display.style.background = 'transparent';
+      display.style.padding = '0';
+      display.innerHTML = `<img src="${e.target.result}" alt="avatar" style="width:110px;height:110px;border-radius:50%;object-fit:cover;display:block">`;
+    }
+  };
+  reader.readAsDataURL(file);
+
+  // Upload lên server
+  try {
+    const userId = currentUser.studentId || currentUser.id;
+    const formData = new FormData();
+    formData.append('id', userId);
+    formData.append('file', file);
+
+    const res = await fetch('http://localhost:8080/public/upload-avatar', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Lỗi ${res.status}`);
+    const json = await res.json();
+    const imageUrl = json?.data?.imageUrl;
+    if (imageUrl) {
+      // Gán avatar vào user
+      const saveRes = await fetch(`http://localhost:8080/public/upload/avatar/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: imageUrl,
+        credentials: 'include'
+      });
+      if (!saveRes.ok) throw new Error(`Lỗi lưu avatar (${saveRes.status})`);
+
+      currentUser.avatarImage = imageUrl;
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+      // Cập nhật ảnh trên header nếu có
+      const headerAvatar = document.getElementById('headerAvatar');
+      if (headerAvatar) {
+        headerAvatar.src = imageUrl;
+        headerAvatar.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    console.warn('Upload avatar thất bại:', err);
+    alert('Không thể tải ảnh lên. Vui lòng thử lại.');
+  }
+  event.target.value = '';
+}
+
 function loadStudentProfile() {
   const container = document.getElementById('stProfileContent');
   if (!container) return;
 
   const student = getStudentSampleData();
+  const avatarImage = currentUser.avatarImage || '';
+  const avatarHtml = avatarImage
+    ? `<img src="${avatarImage}" alt="avatar" style="width:110px;height:110px;border-radius:50%;object-fit:cover;display:block">`
+    : `<i class="fas fa-user-graduate"></i>`;
+  const avatarStyle = avatarImage ? 'background:transparent;padding:0' : '';
 
   container.innerHTML = `
     <div class="profile-card">
       <div class="profile-header">
-        <div class="profile-avatar"><i class="fas fa-user-graduate"></i></div>
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profileAvatarDisplay" style="${avatarStyle}">${avatarHtml}</div>
+          <button class="profile-avatar-edit-btn" onclick="document.getElementById('profileAvatarInput').click()" title="Đổi ảnh đại diện">
+            <i class="fas fa-camera"></i>
+          </button>
+          <input type="file" id="profileAvatarInput" accept="image/*" style="display:none" onchange="handleProfileAvatarChange(event)">
+        </div>
         <div class="profile-name">${student.name}</div>
         <div class="profile-role">Sinh viên</div>
         <div class="profile-status"><span class="status-dot"></span> Đang hoạt động</div>
@@ -1978,31 +2920,168 @@ function loadStudentProfile() {
       </div>
       <div class="profile-field">
         <span class="field-label"><i class="fas fa-venus-mars"></i> Giới tính</span>
-        <span class="field-value">${student.gender}</span>
+        <span class="field-value">${formatGender(student.gender)}</span>
       </div>
       <div class="profile-field">
         <span class="field-label"><i class="fas fa-envelope"></i> Email</span>
         <span class="field-value">${student.email}</span>
       </div>
       <div class="profile-field">
-        <span class="field-label"><i class="fas fa-phone"></i> Số điện thoại</span>
-        <span class="field-value">${student.phone}</span>
-      </div>
-      <div class="profile-field">
         <span class="field-label"><i class="fas fa-birthday-cake"></i> Ngày sinh</span>
         <span class="field-value">${student.birthday}</span>
       </div>
+      ${student.idClass ? `
+      <div class="profile-field">
+        <span class="field-label"><i class="fas fa-chalkboard"></i> Mã lớp</span>
+        <span class="field-value">${student.idClass}</span>
+      </div>` : ''}
     </div>
   `;
 }
 
-function loadStudentExams() {
+async function fetchStudentSubmissions(studentId) {
+  if (!studentId) return {};
+  const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT)
+    ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT(studentId)
+    : `http://localhost:8080/student/submission/${encodeURIComponent(studentId)}`;
+  try {
+    const response = await ApiClient.fetchWithAuth(url);
+    if (!response.ok) return {};
+    const json = await response.json().catch(() => null);
+    const list = Array.isArray(json?.data) ? json.data : [];
+    // Map theo idClassExam để tra nhanh
+    const map = {};
+    list.forEach(item => { map[String(item.idClassExam)] = item; });
+    return map;
+  } catch (err) {
+    console.warn('fetchStudentSubmissions error', err);
+    return {};
+  }
+}
+
+// Lấy điểm bài thi của sinh viên: GET /student/my-exam/{studentCode}
+// Trả về Map: submissionId (string) → entry { practiceScore, officialScore, ... }
+async function fetchStudentMyExam(studentCode) {
+  if (!studentCode) return {};
+  try {
+    const url = API_CONFIG.ENDPOINTS.STUDENT_MY_EXAM(studentCode, 0, 500);
+    const response = await ApiClient.fetchWithAuth(url);
+    if (!response.ok) return {};
+    const json = await response.json().catch(() => null);
+    const data = json?.data ?? {};
+    // Handle both Page<SubmissionGradeDTO> (data.content) and plain array (data)
+    const list = Array.isArray(data) ? data : (Array.isArray(data.content) ? data.content : []);
+    const map = {};
+    list.forEach(entry => { map[String(entry.submissionId)] = entry; });
+    return map;
+  } catch (err) {
+    console.warn('fetchStudentMyExam error', err);
+    return {};
+  }
+}
+
+// Lấy điểm thi có phân trang: GET /student/my-exam/{studentCode}?page=X&size=Y
+// Trả về { list, totalPages, totalElements }
+async function fetchStudentMyExamPaged(studentCode, page = 0, size = 10) {
+  if (!studentCode) return { list: [], totalPages: 0, totalElements: 0 };
+  try {
+    const url = API_CONFIG.ENDPOINTS.STUDENT_MY_EXAM(studentCode, page, size);
+    const response = await ApiClient.fetchWithAuth(url);
+    if (!response.ok) return { list: [], totalPages: 0, totalElements: 0 };
+    const json = await response.json().catch(() => null);
+    const data = json?.data ?? {};
+    if (Array.isArray(data)) {
+      return { list: data, totalPages: 1, totalElements: data.length };
+    }
+    return {
+      list: Array.isArray(data.content) ? data.content : [],
+      totalPages: data.totalPages ?? 1,
+      totalElements: data.totalElements ?? 0
+    };
+  } catch (err) {
+    console.warn('fetchStudentMyExamPaged error', err);
+    return { list: [], totalPages: 0, totalElements: 0 };
+  }
+}
+
+async function loadStudentExams() {
+  myExamPage = 0;
+  await _doLoadStudentExams();
+}
+
+async function _doLoadStudentExams() {
   const container = document.getElementById('stExamsContent');
   if (!container) return;
 
-  const exams = getStudentExamData();
+  const student = getStudentSampleData();
+  const studentId = currentUser.studentId || currentUser.id || currentUser.username || '';
+  const classId = student.idClass || student.classId || currentUser.idClass || currentUser.classId || null;
 
-  if (exams.length === 0) {
+  myExamStudentId = studentId;
+
+  // Fetch song song:
+  // 1. Danh sách bài thi của lớp (có phân trang) — nguồn chính
+  // 2. Bài nộp của sinh viên
+  // 3. Toàn bộ điểm của sinh viên (size lớn để lấy hết, dùng làm map tra cứu)
+  const [serverExamsResult, submissionsMap, myExamScoresMap] = await Promise.all([
+    classId ? ExamsService.getExamsByClass(classId, myExamPage, myExamPageSize).catch(err => {
+      console.warn('Failed to fetch class exams from server, falling back to local data', err);
+      return null;
+    }) : Promise.resolve(null),
+    fetchStudentSubmissions(studentId),
+    fetchStudentMyExam(studentId)   // trả về map submissionId → scoreEntry (size=500)
+  ]);
+
+  // Cập nhật trạng thái phân trang theo class exam API
+  myExamTotalPages    = serverExamsResult?.totalPages    ?? 1;
+  myExamTotalElements = serverExamsResult?.totalElements ?? 0;
+
+  const serverExams = serverExamsResult?.exams ?? serverExamsResult;
+
+  // Luôn lấy dữ liệu local để fallback khi API không có
+  const localExams = getStudentExamData();
+  const localExamMap = {};
+  localExams.forEach(e => { localExamMap[String(e.id)] = e; });
+
+  let exams = [];
+
+  if (classId && Array.isArray(serverExams) && serverExams.length > 0) {
+    // Luôn dùng danh sách bài thi lớp làm nguồn chính (bao gồm cả bài chưa nộp)
+    exams = serverExams.map(examType => {
+      const examId      = String(examType.id || examType.name || '');
+      const classExamId = String(examType.classExamId ?? '');
+      const submission  = submissionsMap[classExamId] || null;
+      const submissionId = submission?.id ?? submission?.submissionId ?? null;
+      const localExam   = localExamMap[examId] || null;
+
+      // Tra điểm từ map my-exam (chỉ có nếu sinh viên đã nộp và đã chấm)
+      const scoreEntry  = submissionId != null ? (myExamScoresMap[String(submissionId)] || null) : null;
+
+      const isSubmitted = submission?.status === 'SUBMITTED' || localExam?.isSubmitted || false;
+      const isDraft     = !isSubmitted && (submission?.status === 'DRAFT' || localExam?.isDraft || false);
+
+      return {
+        ...examType,
+        id: examId,
+        classExamId: examType.classExamId ?? null,
+        submissionId: submissionId,
+        practiceScore:  scoreEntry?.practiceScore  ?? localExam?.practiceScore  ?? null,
+        practiceStatus: scoreEntry?.practiceStatus ?? null,
+        officialScore:  scoreEntry?.officialScore  ?? localExam?.officialScore  ?? null,
+        officialStatus: scoreEntry?.officialStatus ?? null,
+        isSubmitted,
+        isDraft,
+        isSubmissionClosed: isDeadlinePassed(examType.submissionDeadline),
+        isGradingClosed:    isDeadlinePassed(examType.gradingDeadline)
+      };
+    });
+  } else {
+    exams = localExams;
+    myExamTotalPages    = 1;
+    myExamTotalElements = localExams.length;
+  }
+
+  if (!exams || exams.length === 0) {
     container.innerHTML = `
       <div class="st-exam-empty">
         <div class="st-empty-icon">📋</div>
@@ -2010,32 +3089,86 @@ function loadStudentExams() {
         <p>Bạn chưa được gán bài thi nào. Vui lòng liên hệ giảng viên.</p>
       </div>
     `;
+    _renderMyExamPagination();
     return;
   }
 
-  const totalExams = exams.length;
-  const gradedExams = exams.filter(e => e.practiceScore !== null || e.officialScore !== null).length;
+  // Chia thành 3 nhóm
+  const doneExams    = exams.filter(e => e.practiceScore !== null || e.officialScore !== null || e.isSubmitted);
+  const expiredExams = exams.filter(e => e.practiceScore === null && e.officialScore === null && !e.isSubmitted && e.isSubmissionClosed);
+  const pendingExams = exams.filter(e => e.practiceScore === null && e.officialScore === null && !e.isSubmitted && !e.isSubmissionClosed);
+
   const officialExams = exams.filter(e => e.officialScore !== null);
   const avgScore = officialExams.length > 0
     ? (officialExams.reduce((sum, e) => sum + e.officialScore, 0) / officialExams.length).toFixed(1)
     : '—';
+  const totalDisplay = myExamTotalElements > 0 ? myExamTotalElements : exams.length;
+
+  function buildExamCard(exam) {
+    const hasAnyScore = exam.practiceScore !== null || exam.officialScore !== null;
+    const deadlineBadge = exam.isSubmitted
+      ? ''
+      : (exam.isSubmissionClosed
+          ? '<span class="st-exam-deadline-badge closed">Hết hạn nộp</span>'
+          : (exam.submissionDeadline
+              ? '<span class="st-exam-deadline-badge open">Còn hạn nộp</span>'
+              : '<span class="st-exam-deadline-badge none">Chưa đặt hạn</span>'));
+    return `
+      <div class="st-exam-card" onclick="openExamDetail('${exam.id}')" style="cursor:pointer">
+        <div class="st-exam-icon ${exam.officialScore !== null ? 'official' : (exam.practiceScore !== null ? 'practice' : 'no-score')}">
+          ${exam.icon || '📄'}
+        </div>
+        <div class="st-exam-info">
+          <div class="st-exam-name-row">
+            <div class="st-exam-name">${exam.name || exam.id}</div>
+            ${exam.isSubmitted ? '<span class="st-exam-submitted-badge">Đã nộp bài</span>' : ''}
+            ${exam.isDraft ? '<span class="st-exam-draft-badge">Đang soạn thảo</span>' : ''}
+            ${deadlineBadge}
+          </div>
+          <div class="st-exam-meta">${exam.description || ''}</div>
+          <div class="st-exam-deadlines">
+            <span><i class="fas fa-hourglass-end"></i> Hạn nộp: ${formatDeadline(exam.submissionDeadline)}</span>
+          </div>
+        </div>
+        <div class="st-exam-scores">
+          ${exam.practiceScore !== null ? `
+            <div class="st-score-badge practice">
+              <span class="st-score-type">Luyện tập</span>
+              <span class="st-score-value">${exam.practiceScore}</span>
+            </div>
+          ` : ''}
+          ${exam.officialScore !== null ? `
+            <div class="st-score-badge official">
+              <span class="st-score-type">Chính thức</span>
+              <span class="st-score-value">${exam.officialScore}</span>
+            </div>
+          ` : ''}
+          ${!hasAnyScore ? '<span class="st-score-none">Chưa có điểm</span>' : ''}
+        </div>
+      </div>`;
+  }
 
   container.innerHTML = `
     <div class="st-exam-summary">
       <div class="st-summary-card">
         <div class="st-summary-icon">📝</div>
-        <div class="st-summary-value">${totalExams}</div>
+        <div class="st-summary-value">${totalDisplay}</div>
         <div class="st-summary-label">Tổng bài thi</div>
       </div>
       <div class="st-summary-card">
         <div class="st-summary-icon">✅</div>
-        <div class="st-summary-value">${gradedExams}</div>
-        <div class="st-summary-label">Đã có điểm</div>
+        <div class="st-summary-value">${doneExams.length}</div>
+        <div class="st-summary-label">Đã có kết quả</div>
       </div>
       <div class="st-summary-card">
         <div class="st-summary-icon">⏳</div>
-        <div class="st-summary-value">${totalExams - gradedExams}</div>
-        <div class="st-summary-label">Chưa thi</div>
+        <div class="st-summary-value">${pendingExams.length}</div>
+        <div class="st-summary-label">Chưa nộp</div>
+      </div>
+      <div class="st-summary-card">
+        <div class="st-summary-icon">🚫</div>
+        <div class="st-summary-value">${expiredExams.length}</div>
+        <div class="st-summary-label">Đã hết hạn</div>
       </div>
       <div class="st-summary-card">
         <div class="st-summary-icon">🏅</div>
@@ -2044,69 +3177,168 @@ function loadStudentExams() {
       </div>
     </div>
 
-    <div class="st-exam-list">
-      ${exams.map(exam => {
-        const hasAnyScore = exam.practiceScore !== null || exam.officialScore !== null;
-        const deadlineBadge = exam.isSubmissionClosed
-          ? '<span class="st-exam-deadline-badge closed">Hết hạn nộp</span>'
-          : (exam.submissionDeadline
-              ? '<span class="st-exam-deadline-badge open">Còn hạn nộp</span>'
-              : '<span class="st-exam-deadline-badge none">Chưa đặt hạn</span>');
-        return `
-          <div class="st-exam-card" onclick="openExamDetail('${exam.id}')" style="cursor:pointer">
-            <div class="st-exam-icon ${exam.officialScore !== null ? 'official' : (exam.practiceScore !== null ? 'practice' : 'no-score')}">
-              ${exam.icon}
-            </div>
-            <div class="st-exam-info">
-              <div class="st-exam-name-row">
-                <div class="st-exam-name">${exam.name}</div>
-                ${exam.isSubmitted ? '<span class="st-exam-submitted-badge">Đã nộp bài</span>' : ''}
-                ${deadlineBadge}
-              </div>
-              <div class="st-exam-meta">${exam.description}</div>
-              <div class="st-exam-deadlines">
-                <span><i class="fas fa-hourglass-end"></i> Hạn nộp: ${formatDeadline(exam.submissionDeadline)}</span>
-                <span><i class="fas fa-user-clock"></i> Hạn chấm: ${formatDeadline(exam.gradingDeadline)}</span>
-              </div>
-            </div>
-            <div class="st-exam-scores">
-              ${exam.practiceScore !== null ? `
-                <div class="st-score-badge practice">
-                  <span class="st-score-type">Luyện tập</span>
-                  <span class="st-score-value">${exam.practiceScore}</span>
-                </div>
-              ` : ''}
-              ${exam.officialScore !== null ? `
-                <div class="st-score-badge official">
-                  <span class="st-score-type">Chính thức</span>
-                  <span class="st-score-value">${exam.officialScore}</span>
-                </div>
-              ` : ''}
-              ${!hasAnyScore ? '<span class="st-score-none">Chưa có điểm</span>' : ''}
-            </div>
-          </div>
-        `;
-      }).join('')}
+    <div class="st-exam-tabs">
+      <button class="st-exam-tab-btn active" id="stTabPending" onclick="switchStExamTab('pending')">
+        <i class="fas fa-hourglass-half"></i>
+        Chưa nộp / Chưa có kết quả
+        <span class="st-tab-count">${pendingExams.length}</span>
+      </button>
+      <button class="st-exam-tab-btn" id="stTabDone" onclick="switchStExamTab('done')">
+        <i class="fas fa-check-circle"></i>
+        Đã có kết quả
+        <span class="st-tab-count">${doneExams.length}</span>
+      </button>
+      <button class="st-exam-tab-btn" id="stTabExpired" onclick="switchStExamTab('expired')">
+        <i class="fas fa-ban"></i>
+        Đã hết hạn nộp
+        <span class="st-tab-count">${expiredExams.length}</span>
+      </button>
+    </div>
+
+    <div class="st-exam-tab-panel" id="stPanelPending">
+      ${pendingExams.length === 0
+        ? `<div class="st-exam-empty"><div class="st-empty-icon">🎉</div><h3>Không có bài thi nào chưa nộp</h3><p>Bạn đã nộp tất cả bài thi trong trang này.</p></div>`
+        : `<div class="st-exam-list">${pendingExams.map(buildExamCard).join('')}</div>`}
+    </div>
+
+    <div class="st-exam-tab-panel" id="stPanelDone" style="display:none">
+      ${doneExams.length === 0
+        ? `<div class="st-exam-empty"><div class="st-empty-icon">📋</div><h3>Chưa có bài thi nào có kết quả</h3><p>Các bài thi sau khi nộp và chấm điểm sẽ xuất hiện ở đây.</p></div>`
+        : `<div class="st-exam-list">${doneExams.map(buildExamCard).join('')}</div>`}
+    </div>
+
+    <div class="st-exam-tab-panel" id="stPanelExpired" style="display:none">
+      ${expiredExams.length === 0
+        ? `<div class="st-exam-empty"><div class="st-empty-icon">✅</div><h3>Không có bài thi nào hết hạn</h3><p>Tất cả bài thi đều trong hạn hoặc đã được nộp.</p></div>`
+        : `<div class="st-exam-list">${expiredExams.map(buildExamCard).join('')}</div>`}
     </div>
   `;
+
+  _renderMyExamPagination();
 }
 
-function openExamDetail(examId) {
-  const exams = getStudentExamData();
-  const exam = exams.find(e => e.id === examId);
-  if (!exam) return;
+function switchStExamTab(tab) {
+  const pendingBtn   = document.getElementById('stTabPending');
+  const doneBtn      = document.getElementById('stTabDone');
+  const expiredBtn   = document.getElementById('stTabExpired');
+  const pendingPanel = document.getElementById('stPanelPending');
+  const donePanel    = document.getElementById('stPanelDone');
+  const expiredPanel = document.getElementById('stPanelExpired');
+  if (!pendingBtn || !doneBtn || !pendingPanel || !donePanel) return;
 
+  [pendingBtn, doneBtn, expiredBtn].forEach(b => b && b.classList.remove('active'));
+  [pendingPanel, donePanel, expiredPanel].forEach(p => p && (p.style.display = 'none'));
+
+  if (tab === 'pending') {
+    pendingBtn.classList.add('active');
+    pendingPanel.style.display = '';
+  } else if (tab === 'done') {
+    doneBtn.classList.add('active');
+    donePanel.style.display = '';
+  } else if (tab === 'expired' && expiredBtn && expiredPanel) {
+    expiredBtn.classList.add('active');
+    expiredPanel.style.display = '';
+  }
+}
+
+function _renderMyExamPagination() {
+  const container = document.getElementById('stExamPagination');
+  if (!container) return;
+
+  if (myExamTotalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const isFirstPage = myExamPage === 0;
+  const isLastPage  = myExamPage + 1 >= myExamTotalPages;
+  const start = myExamPage * myExamPageSize + 1;
+  const end   = Math.min(start + myExamPageSize - 1, myExamTotalElements);
+
+  let btns = '';
+  btns += `<button class="home-page-btn" onclick="loadMyExamPage(${myExamPage - 1})" ${isFirstPage ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+  const winSize = 2;
+  for (let i = 0; i < myExamTotalPages; i++) {
+    const show     = i === 0 || i === myExamTotalPages - 1 || (i >= myExamPage - winSize && i <= myExamPage + winSize);
+    const ellipsis = i === myExamPage - winSize - 1 || i === myExamPage + winSize + 1;
+    if (show) {
+      btns += `<button class="home-page-btn${i === myExamPage ? ' active' : ''}" onclick="loadMyExamPage(${i})">${i + 1}</button>`;
+    } else if (ellipsis) {
+      btns += `<span class="home-page-ellipsis">…</span>`;
+    }
+  }
+
+  btns += `<button class="home-page-btn" onclick="loadMyExamPage(${myExamPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+  const infoText = myExamTotalElements > 0
+    ? `Hiển thị ${start}–${end} trong tổng số ${myExamTotalElements} bài thi`
+    : `Trang ${myExamPage + 1} / ${myExamTotalPages}`;
+
+  container.innerHTML = `
+    <div class="home-pagination">
+      <span class="home-page-info">${infoText}</span>
+      <div class="home-page-controls">${btns}</div>
+    </div>`;
+}
+
+async function loadMyExamPage(page) {
+  if (page < 0 || page >= myExamTotalPages) return;
+  myExamPage = page;
+  await _doLoadStudentExams();
+  document.getElementById('st-exams-tab')?.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function openExamDetail(examId) {
+  const exams = getStudentExamData();
+  let exam = exams.find(e => String(e.id) === String(examId));
   const student = getStudentSampleData();
+  const studentId = currentUser.studentId || currentUser.id || currentUser.username || '';
+  const classId = student.idClass || student.classId || currentUser.idClass || currentUser.classId || null;
+
+  // Fetch song song: classExamId và điểm sinh viên
+  const [serverExams, submissionsMap, myExamScores] = await Promise.all([
+    (classId && (!exam || exam.classExamId == null))
+      ? ExamsService.getExamsByClass(classId).catch(() => null)
+      : Promise.resolve(null),
+    fetchStudentSubmissions(studentId),
+    fetchStudentMyExam(studentId)
+  ]);
+
+  const serverExamsList = serverExams?.exams ?? serverExams;
+  if (serverExamsList && Array.isArray(serverExamsList)) {
+    const serverExam = serverExamsList.find(e => String(e.id) === String(examId));
+    if (serverExam) {
+      exam = exam ? { ...exam, classExamId: serverExam.classExamId } : serverExam;
+    }
+  }
+
+  if (!exam) {
+    console.warn('openExamDetail: exam not found', examId);
+    return;
+  }
+
+  // Gắn điểm từ API /student/my-exam nếu có
+  const classExamId = String(exam.classExamId ?? '');
+  const submission = submissionsMap[classExamId] || null;
+  const submissionId = submission?.id ?? submission?.submissionId ?? exam.submissionId ?? null;
+  const scoreEntry = submissionId != null ? (myExamScores[String(submissionId)] || null) : null;
 
   const detailData = {
+    ...(scoreEntry || {}),   // spread toàn bộ fields từ STUDENT_MY_EXAM (bao gồm cả session IDs nếu có)
     ...exam,
+    submissionId: submissionId,
+    practiceScore: scoreEntry?.practiceScore ?? exam.practiceScore ?? null,
+    practiceStatus: scoreEntry?.practiceStatus ?? null,
+    officialScore: scoreEntry?.officialScore ?? exam.officialScore ?? null,
+    officialStatus: scoreEntry?.officialStatus ?? null,
     studentCode: student.code,
     studentName: student.name,
-    className: student.className,
-    classId: student.classId,
+    className: student.className || '',
+    classId: classId,
   };
 
-  localStorage.setItem('selectedExamDetail', JSON.stringify(detailData));
+  sessionStorage.setItem('selectedExamDetail', JSON.stringify(detailData));
   window.location.href = '/pages/exam-detail.html';
 }
 
@@ -2255,9 +3487,9 @@ function initializePage() {
     return;
   }
 
-  isStudentView = currentUser.role === 'student';
+  isStudentView = getCurrentRoleFromStorage(currentUser) === 'student';
 
-  const userName = currentUser.studentId || currentUser.name || 'Người dùng';
+  const userName = getCurrentUserDisplayName(currentUser);
   const userNameNode = document.getElementById('userName');
   if (userNameNode) {
     userNameNode.textContent = userName;
@@ -2276,6 +3508,13 @@ function initializePage() {
     if (stProfileTab) stProfileTab.classList.add('active');
 
     loadStudentProfile();
+
+    // Chuyển tab tự động nếu quay lại từ trang khác (ví dụ: exam-detail → st-exams)
+    const pendingTab = sessionStorage.getItem('homeActiveTab');
+    if (pendingTab) {
+      sessionStorage.removeItem('homeActiveTab');
+      setTimeout(() => switchTab(pendingTab), 0);
+    }
   } else {
     // Teacher view (default)
     currentClasses = getTeacherClasses();
@@ -2286,6 +3525,26 @@ function initializePage() {
     loadErrorsContent();
     loadGradingHistoryContent();
     loadReportContent();
+
+    // Chuyển tab tự động nếu có yêu cầu từ breadcrumb/link khác
+    const autoTab = localStorage.getItem('autoTab');
+    if (autoTab) {
+      localStorage.removeItem('autoTab');
+      switchTab(autoTab);
+    }
+
+    // Tải danh sách bài thi từ API theo mã giáo viên (có phân trang)
+    const teacherIdForApi = currentUser.studentId || currentUser.id || currentUser.username;
+    if (teacherIdForApi && typeof ExamsService !== 'undefined') {
+      examTeacherId = teacherIdForApi;
+      loadExamPageFromAPI(0);
+    }
+
+    // Tải danh sách lớp từ API theo mã giáo viên (có phân trang)
+    if (teacherIdForApi && typeof ClassesService !== 'undefined') {
+      classTeacherId = teacherIdForApi;
+      loadClassPage(0);
+    }
   }
 
   attachEvents();

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
 /* Thanh tìm kiếm lớp */
 .admin-search-row {
   margin-bottom: 18px;
@@ -23,7 +25,7 @@
   background: linear-gradient(135deg, #21a366 60%, #b6e2c6 100%);
   color: #fff;
   border: 1.5px solid #21a366;
-  font-weight: 800;
+  font-weight: 700;
   box-shadow: 0 6px 18px rgba(33, 163, 102, 0.13);
 }
 #importClassExcelBtn:hover {
@@ -47,8 +49,10 @@
 body {
   min-height: 100vh;
   background: linear-gradient(135deg, #FFF5E1 0%, #FFE4B5 100%);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .admin-header {
@@ -244,7 +248,7 @@ body {
   background: linear-gradient(135deg, #21a366 60%, #b6e2c6 100%);
   color: #fff;
   border: 1.5px solid #21a366;
-  font-weight: 800;
+  font-weight: 700;
   box-shadow: 0 6px 18px rgba(33, 163, 102, 0.13);
 }
 #importExcelBtn:hover {
@@ -269,12 +273,42 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 18px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .admin-summary-card {
-  padding: 22px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
+.admin-summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.11);
+}
+
+/* Card 1 — Tổng: đỏ */
+.admin-summary-card:nth-child(1) { background: linear-gradient(135deg,#fff5f5,#ffe4e4); border-left: 4px solid #DC143C; }
+.admin-summary-card:nth-child(1) .admin-summary-icon { background: #ffe4e4; color: #DC143C; }
+.admin-summary-card:nth-child(1) .admin-summary-value { color: #DC143C; }
+
+/* Card 2 — Giảng viên: xanh lá */
+.admin-summary-card:nth-child(2) { background: linear-gradient(135deg,#f0fdf4,#dcfce7); border-left: 4px solid #16a34a; }
+.admin-summary-card:nth-child(2) .admin-summary-icon { background: #dcfce7; color: #16a34a; }
+.admin-summary-card:nth-child(2) .admin-summary-value { color: #16a34a; }
+
+/* Card 3 — Sinh viên: xanh dương */
+.admin-summary-card:nth-child(3) { background: linear-gradient(135deg,#eff6ff,#dbeafe); border-left: 4px solid #2563eb; }
+.admin-summary-card:nth-child(3) .admin-summary-icon { background: #dbeafe; color: #2563eb; }
+.admin-summary-card:nth-child(3) .admin-summary-value { color: #2563eb; }
+
+/* Card 4 — Khóa: vàng cam */
+.admin-summary-card:nth-child(4) { background: linear-gradient(135deg,#fffbeb,#fef3c7); border-left: 4px solid #d97706; }
+.admin-summary-card:nth-child(4) .admin-summary-icon { background: #fef3c7; color: #d97706; }
+.admin-summary-card:nth-child(4) .admin-summary-value { color: #d97706; }
 
 .admin-summary-icon {
   width: 46px;
@@ -283,27 +317,27 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff2eb, #ffe1d3);
-  color: #DC143C;
-  font-size: 18px;
-  margin-bottom: 14px;
+  font-size: 20px;
+  margin-bottom: 16px;
 }
 
 .admin-summary-value {
-  font-size: 30px;
-  color: #DC143C;
+  font-size: 34px;
   font-weight: 800;
   margin-bottom: 4px;
+  line-height: 1;
 }
 
 .admin-summary-label {
   font-size: 13px;
   color: #6f625c;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .admin-table-wrap {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 62vh;
 }
 
 .admin-table {
@@ -313,18 +347,30 @@ body {
 
 .admin-table th,
 .admin-table td {
-  padding: 16px 18px;
-  border-bottom: 1px solid #f4ece7;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0e8e3;
   text-align: left;
   font-size: 14px;
 }
 
 .admin-table th {
-  background: #fff7f3;
-  color: #7a5144;
-  font-size: 12px;
+  background: linear-gradient(180deg,#fff2ec,#ffeee7);
+  color: #7a3c28;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid #f5d5c5;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.admin-table tbody tr {
+  transition: background 0.15s;
+}
+.admin-table tbody tr:hover:not(.locked) {
+  background: #fff8f5;
 }
 
 .admin-role-badge,
@@ -332,20 +378,64 @@ body {
 .admin-assigned-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 10px;
+  gap: 5px;
+  padding: 5px 11px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+/* Member cell: avatar + name + email */
+.admin-member-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admin-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+.admin-member-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+.admin-member-email {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
 }
 
 .admin-role-badge.teacher { background: #e8f5e9; color: #1b5e20; }
 .admin-role-badge.student { background: #e3f2fd; color: #0d47a1; }
-.admin-role-badge.admin { background: #fff3e0; color: #e65100; }
-.admin-status-badge.active { background: #ecfdf3; color: #027a48; }
-.admin-status-badge.locked { background: #fff2f0; color: #b42318; }
+.admin-role-badge.admin   { background: #fff3e0; color: #e65100; }
+.admin-status-badge.active { background: #ecfdf3; color: #027a48; border: 1px solid #a7f0c4; }
+.admin-status-badge.locked { background: #fff2f0; color: #b42318; border: 1px solid #fcc8c3; }
 .admin-assigned-badge { background: #fff8e1; color: #8d5a00; }
+
+/* Locked account row appearance */
+.admin-table tr.locked {
+  background: #fafafa;
+}
+.admin-table tr.locked td {
+  color: #aaa;
+}
+.admin-table tr.locked td strong {
+  color: #bbb;
+}
 
 .admin-delete-btn {
   padding: 9px 12px;
@@ -368,20 +458,62 @@ body {
 }
 
 .admin-update-btn {
-  padding: 9px 12px;
+  padding: 7px 14px;
   font-size: 12px;
   font-weight: 700;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #f2a27f;
-  background: #fff7f3;
-  color: #b45a00;
+  background: linear-gradient(135deg,#fff7f3,#fff2ec);
+  color: #c05621;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .admin-update-btn:hover {
-  background: #ffe1d3;
-  color: #dc143c;
-  border-color: #ffb184;
+  background: linear-gradient(135deg,#DC143C,#FF6B35);
+  color: #fff;
+  border-color: #DC143C;
+  box-shadow: 0 4px 12px rgba(220,20,60,0.22);
+  transform: translateY(-1px);
+}
+
+.admin-lock-btn {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.admin-lock-btn.lock {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+.admin-lock-btn.lock:hover {
+  background: #fbbf24;
+  color: #fff;
+  border-color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(251,191,36,0.3);
+  transform: translateY(-1px);
+}
+.admin-lock-btn.unlock {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #86efac;
+}
+.admin-lock-btn.unlock:hover {
+  background: #22c55e;
+  color: #fff;
+  border-color: #22c55e;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+  transform: translateY(-1px);
 }
 
 .admin-lock-btn {
@@ -405,6 +537,89 @@ body {
   border-color: #abefc6;
 }
 
+.admin-loading-more {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  padding: 4px 0;
+}
+.admin-loading-more i {
+  color: #DC143C;
+}
+
+/* ---- Pagination ---- */
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 4px 4px;
+}
+
+.admin-page-info {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.admin-page-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.admin-page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+.admin-page-btn.active {
+  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+.admin-page-btn:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+}
+.admin-page-ellipsis {
+  padding: 0 6px;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 34px;
+}
+
+.admin-page-size-select {
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+.admin-page-size-select:focus {
+  border-color: #DC143C;
+  box-shadow: 0 0 0 3px rgba(220,20,60,.1);
+}
+
 .admin-class-grid,
 .admin-assignment-grid {
   display: grid;
@@ -415,6 +630,58 @@ body {
 .admin-class-card,
 .admin-assignment-card {
   padding: 20px;
+}
+
+/* Typography and layout improvements for better readability */
+.admin-class-card {
+  font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #2f2f2f;
+}
+
+.admin-class-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.admin-class-subtitle {
+  font-size: 13px;
+  color: #6b6b6b;
+  margin-top: 4px;
+}
+
+.admin-class-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+  font-size: 14px;
+  color: #4b4b4b;
+  margin-top: 10px;
+}
+
+.admin-class-meta span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Disabled delete button appearance */
+.admin-class-actions .admin-delete-btn.disabled,
+.admin-class-actions .admin-delete-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  background: linear-gradient(90deg,#fffaf9,#fff8f7);
+  color: #b45a00;
+  border: 1px solid rgba(180,90,0,0.06);
+}
+
+/* Make action buttons compact on small screens */
+@media (max-width: 640px) {
+  .admin-class-meta { grid-template-columns: 1fr; }
+  .admin-class-top { gap: 8px; }
 }
 
 .admin-class-top,
@@ -429,7 +696,7 @@ body {
 .admin-class-title,
 .admin-assignment-title {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 4px;
 }
@@ -469,6 +736,65 @@ body {
   margin: 0;
 }
 
+/* Refined styles for the class-card action buttons: softer, more modern look */
+.admin-class-actions {
+  gap: 12px;
+}
+.admin-class-actions .admin-update-btn {
+  background: linear-gradient(90deg,#fff6f2,#fffaf9);
+  color: #b45a00;
+  border: 1px solid rgba(220,80,40,0.12);
+  padding: 12px 14px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(220,20,60,0.06);
+  transition: transform .16s ease, box-shadow .16s ease, background .12s ease;
+}
+.admin-class-actions .admin-update-btn i { color: #d97736; }
+.admin-class-actions .admin-update-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(220,20,60,0.08);
+}
+
+.admin-class-actions .admin-secondary-btn {
+  background: #fff;
+  border: 1px solid #efe9e6;
+  color: #5f5753;
+  padding: 12px 14px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  transition: transform .12s ease, background .12s ease;
+}
+.admin-class-actions .admin-secondary-btn i { color: #6b5a53; font-size: 16px; }
+.admin-class-actions .admin-secondary-btn:hover {
+  transform: translateY(-2px);
+  background: #fff8f6;
+}
+
+.admin-class-actions .admin-delete-btn {
+  background: linear-gradient(90deg,#fff0f0,#ffecec);
+  color: #b91c1c;
+  border: 1px solid rgba(185,28,28,0.08);
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.02), 0 8px 30px rgba(185,28,28,0.04);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.admin-class-actions .admin-delete-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(185,28,28,0.06);
+  background: linear-gradient(90deg,#ffd6d6,#fff0f0);
+}
+
 .admin-assignment-select {
   width: 100%;
   margin-top: 16px;
@@ -499,6 +825,12 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+/* If an admin-form-grid contains a single .admin-form-row, make it span both columns
+   so single fields are centered and the form looks balanced. */
+.admin-form-grid > .admin-form-row:only-child {
+  grid-column: 1 / -1;
 }
 
 .admin-form-row {
@@ -584,6 +916,288 @@ body {
 .admin-modal-body {
   padding: 22px;
 }
+
+/* --- Avatar upload styles --- */
+.account-avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.account-avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px dashed #c8a97e;
+  background: #fdf6ee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  color: #c8a97e;
+  font-size: 28px;
+}
+
+.account-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.account-avatar-upload-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-avatar-hint {
+  font-size: 12px;
+  color: #999;
+}
+
+/* --- Account modal specific styles --- */
+#accountModal .admin-modal-content {
+  max-width: 680px;
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  position: relative;
+}
+
+#accountModal .admin-modal-header {
+  padding: 20px 28px;
+  background: linear-gradient(180deg, #fff9f6, #fff);
+  border-bottom: 1px solid #f0e6df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#accountModal .admin-modal-header h3 {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1f2937;
+  letter-spacing: 0.2px;
+}
+
+#accountModal .admin-modal-close {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  background: #fff;
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a6b64;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+
+#accountModal .admin-modal-close:hover {
+  background: #fff0ec;
+  box-shadow: 0 6px 18px rgba(220,20,60,0.10);
+  color: #DC143C;
+}
+
+#accountModal .admin-modal-body {
+  padding: 20px 28px 28px;
+  max-height: 72vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e8d5cc transparent;
+}
+
+#accountModal .admin-form-row input,
+#accountModal .admin-form-row select {
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: 1px solid #efe6e2;
+  background: #fbf7f6;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  font-size: 14px;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+
+#accountModal .admin-form-row input:focus,
+#accountModal .admin-form-row select:focus {
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 5px rgba(255,107,53,0.07);
+  background: #fff;
+}
+
+#accountModal .admin-form-row input[readonly] {
+  background: #f3eeeb;
+  color: #888;
+  cursor: not-allowed;
+}
+
+#accountModal .admin-form-row label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a4040;
+  letter-spacing: 0.1px;
+}
+
+#accountModal .account-avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px dashed #c8a97e;
+  background: linear-gradient(135deg, #fdf4ee, #fff8f3);
+  font-size: 30px;
+  color: #c8a97e;
+  box-shadow: 0 2px 10px rgba(200,169,126,0.12);
+}
+
+#accountModal .admin-form-actions {
+  gap: 14px;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+#accountModal .admin-secondary-btn {
+  background: #fff8f7;
+  color: #6b5a53;
+  border: 1px solid #f0e0db;
+  padding: 11px 22px;
+  border-radius: 18px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.16s;
+}
+
+#accountModal .admin-secondary-btn:hover {
+  background: #fdeee9;
+}
+
+#accountModal .admin-primary-btn {
+  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  padding: 11px 28px;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(220,20,60,0.18);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  border: none;
+  transition: box-shadow 0.18s, opacity 0.18s;
+}
+
+#accountModal .admin-primary-btn:hover {
+  box-shadow: 0 14px 36px rgba(220,20,60,0.26);
+  opacity: 0.93;
+}
+
+/* --- Class modal specific styles (Cập nhật giao diện modal lớp) --- */
+#classModal .admin-modal-content {
+  max-width: 760px;
+  border-radius: 20px;
+  overflow: visible;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+  position: relative;
+}
+
+#classModal .admin-modal-header {
+  padding: 18px 28px;
+  background: linear-gradient(180deg, #fff9f6, #fff);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#classModal .admin-modal-header h3 {
+  font-size: 22px;
+  color: #1f2937;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+}
+
+#classModal .admin-modal-close {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  font-size: 18px;
+  background: #fff;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7a6b64;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+#classModal .admin-modal-body {
+  padding: 18px 28px 26px;
+}
+
+#classModal .admin-form-row input,
+#classModal .admin-form-row select {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #efe6e2;
+  background: #fbf7f6;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  font-size: 15px;
+}
+
+#classModal .admin-form-row input:focus,
+#classModal .admin-form-row select:focus {
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 6px rgba(255,107,53,0.06);
+  background: #fff;
+}
+
+#classModal .admin-form-actions {
+  gap: 14px;
+  padding-top: 8px;
+}
+
+#classModal .admin-secondary-btn {
+  background: #fff8f7;
+  color: #6b5a53;
+  border: 1px solid #f3e6e2;
+  padding: 12px 18px;
+  border-radius: 18px;
+}
+
+#classModal .admin-primary-btn {
+  background: linear-gradient(135deg,#DC143C,#FF6B35);
+  padding: 12px 26px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(220,20,60,0.16);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: none;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+/* Invalid / error state (viền đỏ như mockup) */
+#classModal .admin-form-row input.invalid,
+#classModal .admin-form-row select.invalid {
+  border: 2px solid #ff3b58;
+  box-shadow: 0 0 0 8px rgba(255,59,88,0.06);
+  background: #fff;
+}
+
 
 .admin-feedback-modal {
   position: fixed;

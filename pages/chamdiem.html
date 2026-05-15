@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chấm Điểm Động Tác Quốc Phòng – HACTECH</title>
-  <base href="/WebChamDiemDongTacQuocPhong/">
-  <link rel="stylesheet" href="/assets/css/chamdiem.css" />
+  <link rel="stylesheet" href="../assets/css/chamdiem.css" />
 </head>
 <body>
   <div class="app">
@@ -70,7 +69,7 @@
           <!-- Controls -->
           <div class="controls">
             <button class="ctrl" onclick="seek(-10)" title="Lùi 10s">&#9664;&#9664;</button>
-            <button class="ctrl" id="play-btn" onclick="togglePlay()">&#9646;&#9646;</button>
+            <button class="ctrl" id="play-btn" onclick="togglePlay()">&#9654;</button>
             <button class="ctrl" onclick="resetVideo()" title="Lại từ đầu">&#8635;</button>
             <button class="ctrl" onclick="seek(10)" title="Tới 10s">&#9654;&#9654;</button>
             <div class="prog" id="prog-bar" onclick="seekByClick(event)">
@@ -196,6 +195,18 @@
           <span class="success-label">Tổng điểm:</span>
           <span class="success-value success-score" id="success-score"></span>
         </div>
+        <div class="success-row" id="success-practice-row" style="display:none">
+          <span class="success-label">Điểm luyện tập:</span>
+          <span class="success-value" id="success-practice-score"></span>
+        </div>
+        <div class="success-row" id="success-official-row" style="display:none">
+          <span class="success-label">Điểm chính thức:</span>
+          <span class="success-value" id="success-official-score"></span>
+        </div>
+        <div class="success-row" id="success-updated-row" style="display:none">
+          <span class="success-label">Cập nhật lúc:</span>
+          <span class="success-value" id="success-last-updated"></span>
+        </div>
       </div>
       <button class="btn-confirm success-btn" onclick="closeSuccessModal()">Đóng</button>
     </div>
@@ -217,6 +228,7 @@
           <div>
             <label class="modal-label">Mức độ</label>
             <select class="modal-input" id="new-error-severity">
+              <option value="thap">Thấp</option>
               <option value="trung-binh">Trung bình</option>
               <option value="cao">Nghiêm trọng</option>
             </select>

@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - HACTECH</title>
-  <base href="/WebChamDiemDongTacQuocPhong/">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body>
   <div class="admin-app">
@@ -49,10 +48,17 @@
             <div class="admin-action-btns">
               <button class="admin-primary-btn" onclick="openAccountModal()"><i class="fas fa-plus"></i> Thêm tài khoản</button>
               <button class="admin-secondary-btn" id="importExcelBtn" type="button"><i class="fas fa-file-excel"></i> Nhập từ Excel</button>
+              <button class="admin-secondary-btn" id="downloadAccountTemplateBtn" type="button"><i class="fas fa-download"></i> Tải mẫu</button>
               <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
             </div>
           </div>
-          <div class="admin-search-row">
+          <div class="admin-search-row" style="gap:8px;">
+            <select id="accountRoleFilter" class="admin-search-input" style="max-width:180px;">
+              <option value="">Tất cả vai trò</option>
+              <option value="admin">Quản trị</option>
+              <option value="teacher">Giảng viên</option>
+              <option value="student">Sinh viên</option>
+            </select>
             <input id="accountSearchInput" type="text" placeholder="Tìm kiếm tài khoản theo tên, mã, username..." class="admin-search-input" />
           </div>
           <div id="accountsContent"></div>
@@ -67,11 +73,15 @@
             <div class="admin-action-btns">
               <button class="admin-primary-btn" onclick="openClassModal()"><i class="fas fa-plus"></i> Thêm lớp</button>
               <button class="admin-secondary-btn" id="importClassExcelBtn" type="button"><i class="fas fa-file-excel"></i> Nhập từ Excel</button>
+              <button class="admin-secondary-btn" id="downloadClassTemplateBtn" type="button"><i class="fas fa-download"></i> Tải mẫu</button>
               <input type="file" id="classExcelFileInput" accept=".xlsx,.xls" style="display:none" />
             </div>
           </div>
-          <div class="admin-search-row">
+          <div class="admin-search-row" style="gap:8px;">
             <input id="classSearchInput" type="text" placeholder="Tìm kiếm lớp theo tên, mã..." class="admin-search-input" />
+            <select id="classSemesterFilter" class="admin-search-input" style="max-width:160px;">
+              <option value="">Tất cả kỳ</option>
+            </select>
           </div>
           <div id="classesContent"></div>
         </section>
@@ -83,8 +93,11 @@
               <p>Gán lớp cho giảng viên và đồng bộ danh sách lớp sang tài khoản giảng viên.</p>
             </div>
           </div>
-          <div class="admin-search-row">
+          <div class="admin-search-row" style="gap:8px;">
             <input id="assignmentSearchInput" type="text" placeholder="Tìm kiếm lớp hoặc giảng viên..." class="admin-search-input" />
+            <select id="assignmentSemesterFilter" class="admin-search-input" style="max-width:160px;">
+              <option value="">Tất cả kỳ</option>
+            </select>
           </div>
           <div id="assignmentsContent"></div>
         </section>
@@ -94,10 +107,11 @@
     <div class="admin-modal" id="accountModal" style="display:none">
       <div class="admin-modal-content">
         <div class="admin-modal-header">
-          <h3>Thêm tài khoản</h3>
+          <h3 id="accountModalTitle">Thêm tài khoản</h3>
           <button class="admin-modal-close" onclick="closeAccountModal()">&times;</button>
         </div>
         <form class="admin-modal-body" id="accountForm">
+          <!-- Hàng 1: Mã tài khoản + Họ và tên -->
           <div class="admin-form-grid">
             <div class="admin-form-row">
               <label for="accountId">Mã tài khoản</label>
@@ -108,11 +122,19 @@
               <input id="accountName" type="text" placeholder="Ví dụ: Nguyễn Văn B" required>
             </div>
           </div>
+          <!-- Hàng 2: Username + Mật khẩu (mật khẩu ẩn khi cập nhật → username chiếm full) -->
           <div class="admin-form-grid">
             <div class="admin-form-row">
               <label for="accountUsername">Username</label>
               <input id="accountUsername" type="text" placeholder="Ví dụ: nguyenvanb" required>
             </div>
+            <div class="admin-form-row" id="accountPasswordRow">
+              <label for="accountPassword">Mật khẩu</label>
+              <input id="accountPassword" type="password" autocomplete="new-password" placeholder="Tối thiểu 6 ký tự" required>
+            </div>
+          </div>
+          <!-- Hàng 3: Vai trò + Ngày sinh -->
+          <div class="admin-form-grid">
             <div class="admin-form-row">
               <label for="accountRole">Vai trò</label>
               <select id="accountRole" required>
@@ -121,27 +143,47 @@
                 <option value="admin">Quản trị viên</option>
               </select>
             </div>
-          </div>
-          <div class="admin-form-grid">
-            <div class="admin-form-row">
-              <label for="accountPassword">Mật khẩu</label>
-              <input id="accountPassword" type="password" placeholder="Tối thiểu 6 ký tự" required>
-            </div>
             <div class="admin-form-row">
               <label for="accountBirthday">Ngày sinh</label>
               <input id="accountBirthday" type="date" required>
             </div>
           </div>
-          <div class="admin-form-row">
-            <label for="accountEmail">Email</label>
-            <input id="accountEmail" type="email" placeholder="Ví dụ: gv003@hactech.edu.vn" required>
+          <!-- Hàng 4: Email + Giới tính -->
+          <div class="admin-form-grid">
+            <div class="admin-form-row">
+              <label for="accountEmail">Email</label>
+              <input id="accountEmail" type="email" placeholder="Ví dụ: gv003@hactech.edu.vn" required>
+            </div>
+            <div class="admin-form-row">
+              <label for="accountGender">Giới tính</label>
+              <select id="accountGender" required>
+                <option value="MALE">Nam</option>
+                <option value="FEMALE">Nữ</option>
+              </select>
+            </div>
           </div>
+          <!-- Hàng 5: Trạng thái (full width) -->
           <div class="admin-form-row">
             <label for="accountStatus">Trạng thái</label>
             <select id="accountStatus" required>
               <option value="active">Hoạt động</option>
               <option value="locked">Tạm khóa</option>
             </select>
+          </div>
+          <div class="admin-form-row">
+            <label for="accountAvatar">Ảnh đại diện</label>
+            <div class="account-avatar-upload">
+              <div class="account-avatar-preview" id="accountAvatarPreview">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="account-avatar-upload-btn-wrap">
+                <button type="button" class="admin-secondary-btn" onclick="document.getElementById('accountAvatar').click()">
+                  <i class="fas fa-upload"></i> Chọn ảnh
+                </button>
+                <input id="accountAvatar" type="file" accept="image/*" style="display:none" onchange="previewAccountAvatar(event)">
+                <span class="account-avatar-hint">JPG, PNG, GIF – tối đa 2MB</span>
+              </div>
+            </div>
           </div>
           <div class="admin-form-actions">
             <button type="button" class="admin-secondary-btn" onclick="closeAccountModal()">Hủy</button>
@@ -169,10 +211,6 @@
             </div>
           </div>
           <div class="admin-form-grid">
-            <div class="admin-form-row">
-              <label for="adminClassSubject">Môn học</label>
-              <input id="adminClassSubject" type="text" placeholder="Ví dụ: Động tác Quốc phòng" required>
-            </div>
             <div class="admin-form-row">
               <label for="adminClassRoom">Phòng học</label>
               <input id="adminClassRoom" type="text" placeholder="Ví dụ: 201" required>
@@ -216,6 +254,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="/assets/js/api/config.js"></script>
+  <script src="/assets/js/api/auth.js"></script>
   <script src="/assets/js/admin.js"></script>
 </body>
 </html>

@@ -159,6 +159,40 @@ body {
   display: block;
 }
 
+.success-toast {
+  padding: 12px 14px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 8px;
+  color: #16a34a;
+  font-size: 13px;
+  margin-bottom: 8px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-toast.show {
+  display: flex;
+}
+
+.error-toast {
+  padding: 12px 14px;
+  background: rgba(220, 20, 60, 0.10);
+  border: 1px solid rgba(220, 20, 60, 0.35);
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 13px;
+  margin-bottom: 8px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-toast.show {
+  display: flex;
+}
+
 /* ===== MODAL POPUP ===== */
 .modal {
   display: none;

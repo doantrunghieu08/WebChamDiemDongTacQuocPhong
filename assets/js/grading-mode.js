@@ -2,8 +2,8 @@
 
 // Check if user is logged in and student is selected
 function checkSessionStatus() {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  const selectedStudent = JSON.parse(localStorage.getItem('selectedStudent'));
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  const selectedStudent = JSON.parse(sessionStorage.getItem('selectedStudent'));
   
   if (!currentUser || !selectedStudent) {
     window.location.href = '/pages/home.html';
@@ -21,8 +21,8 @@ function renderStudentInfo(selectedStudent) {
 
 // Select grading mode and go to grading page
 function selectMode(mode) {
-  // Store selected mode in localStorage
-  localStorage.setItem('gradingMode', mode);
+  // Store selected mode in sessionStorage
+  sessionStorage.setItem('gradingMode', mode);
   
   // Redirect to chamdiem.html
   window.location.href = '/pages/chamdiem.html';
@@ -37,11 +37,11 @@ function closeLogoutModal() {
 }
 
 function confirmLogout() {
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem('selectedClass');
-  localStorage.removeItem('selectedClassId');
-  localStorage.removeItem('selectedStudent');
-  localStorage.removeItem('gradingMode');
+  sessionStorage.removeItem('currentUser');
+  sessionStorage.removeItem('selectedClass');
+  sessionStorage.removeItem('selectedClassId');
+  sessionStorage.removeItem('selectedStudent');
+  sessionStorage.removeItem('gradingMode');
   window.location.href = '/index.html';
 }
 

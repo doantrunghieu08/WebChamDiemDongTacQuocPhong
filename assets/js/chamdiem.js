@@ -2,9 +2,139 @@
    app.js – Chấm Điểm Bài Tập Đi Đều
    ============================================= */
 
+// ---- LOAD GRADING SESSION ----
+async function loadGradingSession() {
+  const pending = JSON.parse(sessionStorage.getItem('pendingGradingSession') || 'null');
+  if (!pending || !pending.idTeacher) return;
+
+  sessionStorage.removeItem('pendingGradingSession');
+
+  let idSubmission = pending.idSubmission || null;
+
+  // Nếu chưa có idSubmission (SubmissionSummaryResponse không trả về id),
+  // fetch lại danh sách bài nộp theo classExamId và tìm theo studentCode
+  if (!idSubmission && pending.classExamId && pending.studentCode) {
+    try {
+      const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS)
+        ? API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS(pending.classExamId)
+        : `http://localhost:8080/teacher/class/${encodeURIComponent(pending.classExamId)}/submissions`;
+
+      const res = await fetch(url, { credentials: 'include' });
+      const json = await res.json().catch(() => null);
+      const list = Array.isArray(json?.data) ? json.data : [];
+
+      const sub = list.find(item => {
+        const sid = item.idStudent ?? item.studentId ?? item.student_id;
+        return String(sid) === String(pending.studentCode);
+      });
+
+      if (sub) {
+        const rawId = sub.id ?? sub.submissionId ?? sub.submission_id ?? null;
+        if (rawId != null) idSubmission = String(rawId);
+      }
+    } catch (e) {
+      console.warn('[loadGradingSession] Không thể lấy submission ID:', e);
+    }
+  }
+
+  if (!idSubmission) {
+    console.warn('[loadGradingSession] Không tìm được idSubmission, bỏ qua khởi tạo phiên chấm.');
+    return;
+  }
+
+  try {
+    const session = await ExamsService.startGradingSession(
+      idSubmission,
+      pending.idTeacher,
+      pending.gradingMode
+    );
+    sessionStorage.setItem('gradingSession', JSON.stringify(session));
+
+    state.gradingSessionId = session?.id ?? null;
+    // Lưu submissionId để dùng cho API capture-error-frame
+    if (!state.submissionId) state.submissionId = idSubmission;
+
+    const sub = session?.studentSubmissionResponse;
+    if (sub) {
+      const urls = [];
+      if (sub.videoUrl1) urls.push(sub.videoUrl1);
+      if (sub.videoUrl2) urls.push(sub.videoUrl2);
+      state.videoUrls = urls;
+      state.totalVideos = urls.length || 1;
+      document.getElementById('vid-total').textContent = String(state.totalVideos).padStart(2, '0');
+      renderThumbs(urls.length);
+      loadVideoPlayer(1);
+    }
+  } catch (err) {
+    console.warn('Khởi tạo phiên chấm thất bại:', err);
+  }
+}
+
+// ---- RENDER THUMBNAILS ----
+function renderThumbs(count) {
+  const container = document.querySelector('.thumbs');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    div.onclick = () => switchVideo(i);
+    div.innerHTML = `<div class="thumb-img" id="thumb-${i}">&#9654; V0${i}</div><span>Video 0${i}</span>`;
+    container.appendChild(div);
+  }
+  updateThumbActive();
+}
+
+// ---- VIDEO PLAYER (thực) ----
+let _onTimeUpdate = null;
+
+function loadVideoPlayer(index) {
+  const url = state.videoUrls[index - 1];
+  const area = document.getElementById('video-area');
+  if (!url || !area) return;
+
+  let vid = document.getElementById('main-video-player');
+  if (!vid) {
+    vid = document.createElement('video');
+    vid.id = 'main-video-player';
+    vid.style.cssText = 'width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;z-index:1;background:#000;';
+    vid.controls = false;
+    area.insertBefore(vid, area.firstChild);
+  }
+
+  // Xoá timeupdate listener cũ trước khi gán mới
+  if (_onTimeUpdate) vid.removeEventListener('timeupdate', _onTimeUpdate);
+  _onTimeUpdate = () => {
+    state.currentTime = Math.round(vid.currentTime);
+    updateTimeDisplay();
+    updateProgressBar();
+  };
+  vid.addEventListener('timeupdate', _onTimeUpdate);
+
+  vid.addEventListener('loadedmetadata', () => {
+    state.duration = Math.round(vid.duration) || state.duration;
+    updateTimeDisplay();
+    updateProgressBar();
+  }, { once: true });
+
+  // crossOrigin phải đặt TRƯỚC khi gán src để canvas.drawImage() không bị SecurityError
+  vid.crossOrigin = 'anonymous';
+  vid.src = url;
+  vid.load();
+
+  // Ẩn play-icon overlay ngay khi có URL thực
+  const icon = document.getElementById('play-icon');
+  if (icon) icon.style.display = 'none';
+
+  // Hiện lại nếu video lỗi
+  vid.addEventListener('error', () => {
+    if (icon) icon.style.display = '';
+  }, { once: true });
+}
+
 // ---- LOAD GRADING MODE ----
 function loadGradingMode() {
-  const mode = localStorage.getItem('gradingMode') || 'practice';
+  const mode = sessionStorage.getItem('gradingMode') || 'practice';
   state.gradingMode = mode;
   
   // Update UI title based on mode
@@ -17,10 +147,10 @@ function loadGradingMode() {
 
 // ---- LOAD STUDENT INFO ----
 function loadStudentInfo() {
-  const selectedStudent = JSON.parse(localStorage.getItem('selectedStudent'));
-  const selectedClass = JSON.parse(localStorage.getItem('selectedClass'));
-  const gradingStudent = JSON.parse(localStorage.getItem('gradingStudent'));
-  const gradingExam = JSON.parse(localStorage.getItem('gradingExam'));
+  const selectedStudent = JSON.parse(sessionStorage.getItem('selectedStudent'));
+  const selectedClass = JSON.parse(sessionStorage.getItem('selectedClass'));
+  const gradingStudent = JSON.parse(sessionStorage.getItem('gradingStudent'));
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam'));
   
   if (gradingStudent && gradingExam) {
     // Flow from class-detail.js
@@ -76,6 +206,8 @@ const state = {
   assignedErrors: [],   // lỗi gán cho frame hiện tại
   history: [],          // lịch sử tất cả frame đã chấm
   defaultScore: 10,     // điểm mặc định của bài thi
+  gradingSessionId: null,   // ID phiên chấm từ API
+  videoUrls: [],            // [videoUrl1, videoUrl2] từ bài nộp của sinh viên
   errorTypes: [
     { id: 1, name: 'Sai nhịp tay',          score: -1.0, note: 'Tay đánh không đều theo nhịp bước.' },
     { id: 2, name: 'Bàn chân không vuông',  score: -0.5, note: 'Mũi chân và hướng bàn chân chưa đúng quy định.' },
@@ -89,6 +221,8 @@ const state = {
   gradingMode: 'practice', // 'practice' hoặc 'grading'
   gradingDeadline: '',
   gradingLocked: false,
+  submissionId: null,        // ID bài nộp dùng cho API capture-error-frame
+  capturedFrameImageUrl: null, // URL ảnh từ API sau khi chụp frame
 };
 
 function normalizeClassExamAssignment(assignment, index) {
@@ -128,16 +262,16 @@ function isDeadlinePassed(deadline) {
 }
 
 function getCurrentExamAssignment() {
-  const selectedClass = JSON.parse(localStorage.getItem('selectedClass') || 'null');
-  const gradingExam = JSON.parse(localStorage.getItem('gradingExam') || 'null');
+  const selectedClass = JSON.parse(sessionStorage.getItem('selectedClass') || 'null');
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || 'null');
   if (!selectedClass?.classId || !gradingExam?.id) return null;
 
-  const all = JSON.parse(localStorage.getItem('classExams') || '{}');
+  const all = JSON.parse(sessionStorage.getItem('classExams') || '{}');
   const assignments = Array.isArray(all[selectedClass.classId]) ? all[selectedClass.classId].map(normalizeClassExamAssignment) : [];
   const normalizedAssignments = JSON.stringify(assignments);
   if (JSON.stringify(all[selectedClass.classId] || []) !== normalizedAssignments) {
     all[selectedClass.classId] = assignments;
-    localStorage.setItem('classExams', JSON.stringify(all));
+    sessionStorage.setItem('classExams', JSON.stringify(all));
   }
 
   return assignments.find(item => item.id === gradingExam.id) || null;
@@ -167,8 +301,15 @@ function applyGradingLockUI() {
 }
 
 function loadGradingAvailability() {
-  const assignment = getCurrentExamAssignment();
-  state.gradingDeadline = assignment?.gradingDeadline || '';
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || 'null');
+  // Ưu tiên lấy gradingDeadline trực tiếp từ gradingExam (đã có đủ dữ liệu từ API)
+  const deadlineFromExam = gradingExam?.gradingDeadline || '';
+  if (deadlineFromExam) {
+    state.gradingDeadline = deadlineFromExam;
+  } else {
+    const assignment = getCurrentExamAssignment();
+    state.gradingDeadline = assignment?.gradingDeadline || '';
+  }
   state.gradingLocked = isDeadlinePassed(state.gradingDeadline);
   renderGradingDeadlineNotice();
   applyGradingLockUI();
@@ -191,36 +332,81 @@ function getDefaultSharedErrorCatalog() {
 }
 
 function getSharedErrorCatalog() {
-  const stored = JSON.parse(localStorage.getItem('teacherErrorCatalog') || 'null');
+  const stored = JSON.parse(sessionStorage.getItem('teacherErrorCatalog') || 'null');
   if (Array.isArray(stored)) {
     return stored;
   }
 
   const seed = getDefaultSharedErrorCatalog();
-  localStorage.setItem('teacherErrorCatalog', JSON.stringify(seed));
+  sessionStorage.setItem('teacherErrorCatalog', JSON.stringify(seed));
   return seed;
 }
 
 function saveSharedErrorCatalog(errors) {
-  localStorage.setItem('teacherErrorCatalog', JSON.stringify(errors));
+  sessionStorage.setItem('teacherErrorCatalog', JSON.stringify(errors));
 }
 
 function syncStateErrorTypesFromCatalog() {
-  state.errorTypes = getSharedErrorCatalog().map(error => ({
-    id: error.id,
-    name: error.name,
-    score: -(Number(error.deduction) || 0),
-    note: error.note || error.description || ''
-  }));
+  state.errorTypes = getSharedErrorCatalog()
+    .filter(error => error.isActive !== false && !error.deleted)
+    .map(error => ({
+      id: error.id,
+      name: error.name,
+      score: -(Number(error.deduction) || 0),
+      note: error.note || error.description || ''
+    }));
+}
+
+async function fetchAndSyncTeacherErrors() {
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
+  if (!teacherId) return;
+
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_ERRORS)
+      ? API_CONFIG.ENDPOINTS.TEACHER_ERRORS(teacherId)
+      : `http://localhost:8080/api/teacher/error/${encodeURIComponent(teacherId)}`;
+
+    const response = await fetch(url, { credentials: 'include' });
+    const json = await response.json().catch(() => null);
+
+    if (response.ok && Array.isArray(json?.data)) {
+      const serverErrors = json.data
+        .filter(e => e.isActive !== false)
+        .map(e => ({
+          id: e.id,
+          name: e.name,
+          description: e.description || '',
+          note: e.description || '',
+          severity: e.severityType === 'HIGH' ? 'cao' : e.severityType === 'LOW' ? 'thap' : 'trung-binh',
+          deduction: e.deduction,
+          icon: 'fas fa-exclamation-circle',
+          students: []
+        }));
+
+      const local = getSharedErrorCatalog();
+      // Chỉ giữ lại các lỗi đã bị xóa thủ công trên local (không có trên server)
+      const localDeleted = local.filter(e => e.deleted && !json.data.find(s => s.id === e.id));
+      const merged = [...serverErrors, ...localDeleted];
+      saveSharedErrorCatalog(merged);
+      syncStateErrorTypesFromCatalog();
+      renderErrorTypeList();
+    }
+  } catch (err) {
+    console.warn('Không thể tải danh sách lỗi từ API:', err);
+  }
 }
 
 // ---- INIT ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadGradingMode();
   loadStudentInfo();
+  await loadGradingSession();
+  await loadExistingGradingErrors();
   loadGradingAvailability();
   syncStateErrorTypesFromCatalog();
   renderErrorTypeList();
+  fetchAndSyncTeacherErrors();
   updateTimeDisplay();
   updateProgressBar();
   updateThumbActive();
@@ -234,37 +420,131 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ---- LOAD EXISTING GRADING ERRORS FROM API ----
+async function loadExistingGradingErrors() {
+  const idSession = state.gradingSessionId;
+  if (!idSession) return;
+
+  // Map gradingMode sang dạng API cần (PRACTICE / OFFICIAL)
+  const gradingMode = state.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE';
+
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL)
+      ? API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL(idSession, gradingMode)
+      : `http://localhost:8080/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${gradingMode}`;
+
+    const response = await fetch(url, { method: 'GET', credentials: 'include' });
+    if (!response.ok) return;
+
+    const json = await response.json().catch(() => null);
+    const errors = Array.isArray(json?.data) ? json.data : [];
+    if (errors.length === 0) return;
+
+    // Nhóm các lỗi theo frameTimeSeconds để mỗi frame là một hàng trong lịch sử
+    const frameMap = new Map();
+    errors.forEach(err => {
+      const key = String(err.frameTimeSeconds ?? 0);
+      if (!frameMap.has(key)) {
+        frameMap.set(key, {
+          frameTs: Number(err.frameTimeSeconds) || 0,
+          imageUrl: err.frameImageUrl || null,
+          errors: [],
+          total: 0,
+        });
+      }
+      const frame = frameMap.get(key);
+      frame.errors.push({
+        id: err.id,
+        name: err.errorName,
+        score: -Math.abs(Number(err.deduction) || 0),
+        note: err.errorDescription || '',
+      });
+      frame.total -= Math.abs(Number(err.deduction) || 0);
+    });
+
+    frameMap.forEach(frame => {
+      state.history.push({
+        id: state.nextHistoryId++,
+        frameTs: frame.frameTs,
+        errors: frame.errors,
+        total: frame.total,
+        video: 1,
+        imageUrl: frame.imageUrl,
+      });
+    });
+
+    renderHistoryTable();
+  } catch (err) {
+    console.warn('[loadExistingGradingErrors] Không thể tải lỗi từ API:', err);
+  }
+}
+
 // ---- TIMER / PLAYBACK ----
+function _getVideoEl() {
+  return document.getElementById('main-video-player');
+}
+
 function togglePlay() {
+  const vid = _getVideoEl();
   state.isPlaying = !state.isPlaying;
   const btn = document.getElementById('play-btn');
   if (state.isPlaying) {
     btn.innerHTML = '&#9646;&#9646;';
-    state.timerInterval = setInterval(() => {
-      state.currentTime++;
-      if (state.currentTime >= state.duration) {
-        state.currentTime = state.duration;
+    if (vid) {
+      vid.play();
+      vid.addEventListener('ended', () => {
         state.isPlaying = false;
-        clearInterval(state.timerInterval);
         btn.innerHTML = '&#9654;';
-      }
-      updateTimeDisplay();
-      updateProgressBar();
-    }, 1000);
+      }, { once: true });
+    } else {
+      state.timerInterval = setInterval(() => {
+        state.currentTime++;
+        if (state.currentTime >= state.duration) {
+          state.currentTime = state.duration;
+          state.isPlaying = false;
+          clearInterval(state.timerInterval);
+          btn.innerHTML = '&#9654;';
+        }
+        updateTimeDisplay();
+        updateProgressBar();
+      }, 1000);
+    }
   } else {
     btn.innerHTML = '&#9654;';
-    clearInterval(state.timerInterval);
+    if (vid) {
+      vid.pause();
+    } else {
+      clearInterval(state.timerInterval);
+    }
   }
 }
 
 function seek(seconds) {
+  const vid = _getVideoEl();
   state.currentTime = Math.max(0, Math.min(state.duration, state.currentTime + seconds));
+  if (vid) vid.currentTime = state.currentTime;
   updateTimeDisplay();
   updateProgressBar();
 }
 
+// Tua video đến đúng thời điểm của một frame trong lịch sử
+function seekToTime(frameTs, videoIndex) {
+  // Chuyển sang đúng video nếu khác video hiện tại
+  if (videoIndex && videoIndex !== state.currentVideo) {
+    switchVideo(videoIndex);
+  }
+  const vid = _getVideoEl();
+  state.currentTime = frameTs;
+  if (vid) vid.currentTime = frameTs;
+  updateTimeDisplay();
+  updateProgressBar();
+  showToast('Đã tua đến ' + formatTime(frameTs));
+}
+
 function resetVideo() {
+  const vid = _getVideoEl();
   state.currentTime = 0;
+  if (vid) vid.currentTime = 0;
   if (state.isPlaying) togglePlay();
   updateTimeDisplay();
   updateProgressBar();
@@ -275,6 +555,8 @@ function seekByClick(e) {
   const rect = bar.getBoundingClientRect();
   const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   state.currentTime = Math.round(ratio * state.duration);
+  const vid = _getVideoEl();
+  if (vid) vid.currentTime = state.currentTime;
   updateTimeDisplay();
   updateProgressBar();
 }
@@ -287,6 +569,8 @@ function setupProgressBarDrag() {
     const rect = progBar.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     state.currentTime = Math.round(ratio * state.duration);
+    const vid = _getVideoEl();
+    if (vid) vid.currentTime = state.currentTime;
     updateTimeDisplay();
     updateProgressBar();
   }
@@ -312,6 +596,9 @@ function switchVideo(n) {
   state.currentTime  = 0;
   if (state.isPlaying) togglePlay();
   document.getElementById('vid-index').textContent = String(n).padStart(2, '0');
+  if (state.videoUrls.length >= n) {
+    loadVideoPlayer(n);
+  }
   updateTimeDisplay();
   updateProgressBar();
   updateThumbActive();
@@ -331,8 +618,9 @@ function updateProgressBar() {
 }
 
 function updateThumbActive() {
-  document.getElementById('thumb-1').classList.toggle('active', state.currentVideo === 1);
-  document.getElementById('thumb-2').classList.toggle('active', state.currentVideo === 2);
+  document.querySelectorAll('.thumbs .thumb-img').forEach((el, idx) => {
+    el.classList.toggle('active', state.currentVideo === idx + 1);
+  });
 }
 
 function formatTime(secs) {
@@ -342,11 +630,12 @@ function formatTime(secs) {
 }
 
 // ---- CAPTURE FRAME ----
-function captureFrame() {
+async function captureFrame() {
   if (!ensureGradingAvailable('chụp lỗi')) return;
 
-  state.capturedFrameTime = state.currentTime;
-  state.assignedErrors    = [];
+  state.capturedFrameTime    = state.currentTime;
+  state.assignedErrors       = [];
+  state.capturedFrameImageUrl = null;
   const ts = formatTime(state.capturedFrameTime);
 
   // badges trong video area
@@ -369,6 +658,103 @@ function captureFrame() {
   renderErrorTypeList();
 
   showToast('Đã chụp frame tại ' + ts);
+
+  // Gọi API chụp khung hình bằng chứng
+  try {
+    const vid = document.getElementById('main-video-player');
+    if (!vid || vid.readyState < 2) {
+      console.warn('[captureFrame] Video chưa sẵn sàng (readyState=' + (vid?.readyState ?? 'N/A') + ')');
+      return;
+    }
+    if (!vid.videoWidth || !vid.videoHeight) {
+      console.warn('[captureFrame] videoWidth/videoHeight = 0, video chưa load xong.');
+      return;
+    }
+
+    // Chụp khung hình hiện tại vào canvas
+    const canvas = document.createElement('canvas');
+    canvas.width  = vid.videoWidth;
+    canvas.height = vid.videoHeight;
+    const ctx = canvas.getContext('2d');
+    try {
+      ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+    } catch (secErr) {
+      console.error('[captureFrame] Canvas bị tainted (CORS) – không thể drawImage:', secErr);
+      showToast('Không thể chụp khung hình: lỗi CORS video. Liên hệ quản trị.', true);
+      return;
+    }
+
+    // Chuyển canvas → Blob → File
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) {
+      console.error('[captureFrame] toBlob() trả về null – canvas có thể bị tainted.');
+      showToast('Không thể xuất ảnh từ video. Kiểm tra CORS.', true);
+      return;
+    }
+    const studentName = (state.currentStudent?.name || 'unknown').toLowerCase().replace(/\s+/g, '_');
+    const fileName = `frame_${studentName}_${Date.now()}.png`;
+    const file = new File([blob], fileName, { type: 'image/png' });
+    console.log('[captureFrame] Blob size:', blob.size, 'File name:', fileName);
+
+    // Lấy submissionId
+    const submissionId = state.submissionId
+      || JSON.parse(sessionStorage.getItem('gradingSession') || '{}')?.studentSubmissionResponse?.id
+      || '';
+
+    console.log('[captureFrame] submissionId:', submissionId, '| studentName:', state.currentStudent?.name || '(none)');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('studentName', state.currentStudent?.name || '');
+    formData.append('submissionId', String(submissionId));
+
+    const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME)
+      ? API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME
+      : 'http://localhost:8080/public/capture-error-frame';
+
+    // Hiển thị thanh loading
+    const preview = document.getElementById('frame-preview');
+    let loadingBar = null;
+    if (preview) {
+      loadingBar = document.createElement('div');
+      loadingBar.className = 'frame-upload-loading';
+      preview.appendChild(loadingBar);
+    }
+
+    console.log('[captureFrame] POST →', apiUrl);
+    let resp, json;
+    try {
+      resp = await fetch(apiUrl, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      json = await resp.json().catch(() => null);
+    } finally {
+      // Ẩn thanh loading dù thành công hay lỗi
+      if (loadingBar && loadingBar.parentNode) loadingBar.parentNode.removeChild(loadingBar);
+    }
+    console.log('[captureFrame] API response', resp.status, json);
+
+    if ((resp.ok || resp.status === 201) && json?.data?.imageUrl) {
+      state.capturedFrameImageUrl = json.data.imageUrl;
+      // Hiển thị ảnh bằng chứng trong panel bên phải
+      if (preview) {
+        preview.innerHTML =
+          '<a href="' + json.data.imageUrl + '" target="_blank" rel="noopener">' +
+            '<img src="' + json.data.imageUrl + '" alt="Frame t=' + ts + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block;"/>' +
+          '</a>' +
+          '<div class="frame-badge-overlay" id="frame-badge-overlay" style="display:block">' +
+            'Frame t=<span id="overlay-frame-time">' + ts + '</span>' +
+          '</div>';
+      }
+      showToast('Đã lưu ảnh bằng chứng khung hình!');
+    } else {
+      console.warn('[captureFrame] API trả về lỗi:', json?.message || `HTTP ${resp.status}`);
+    }
+  } catch (err) {
+    console.warn('[captureFrame] Không thể gọi API capture-error-frame:', err);
+  }
 }
 
 // ---- ERROR TYPE LIST ----
@@ -507,7 +893,7 @@ function updateVideoErrorTags() {
 }
 
 // ---- FINISH GRADING ----
-function finishGrading() {
+async function finishGrading() {
   if (!ensureGradingAvailable('lưu frame chấm')) return;
 
   if (state.capturedFrameTime === null) {
@@ -519,6 +905,42 @@ function finishGrading() {
     return;
   }
 
+  // Gọi API thêm lỗi vào phiên chấm cho từng lỗi đã gán
+  const idSession = state.gradingSessionId;
+  if (idSession) {
+    const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.GRADING_SESSION_ADD_ERROR)
+      ? API_CONFIG.ENDPOINTS.GRADING_SESSION_ADD_ERROR(idSession)
+      : `http://localhost:8080/teacher/grading-session/${encodeURIComponent(idSession)}/add-error`;
+
+    for (const e of state.assignedErrors) {
+      try {
+        const body = {
+          errorTypeId:   e.id,
+          deduction:     Math.abs(e.score),
+          frameTime:     state.capturedFrameTime,
+          frameImageUrl: state.capturedFrameImageUrl || null,
+          notes:         e.note || '',
+        };
+        console.log('[finishGrading] POST add-error →', apiUrl, body);
+        const resp = await fetch(apiUrl, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const json = await resp.json().catch(() => null);
+        console.log('[finishGrading] add-error response', resp.status, json);
+        if (!resp.ok && resp.status !== 201) {
+          console.warn('[finishGrading] Lỗi khi thêm lỗi "' + e.name + '":', json?.message || `HTTP ${resp.status}`);
+        }
+      } catch (err) {
+        console.warn('[finishGrading] Không thể gọi add-error cho "' + e.name + '":', err);
+      }
+    }
+  } else {
+    console.warn('[finishGrading] Không có gradingSessionId, bỏ qua gọi API add-error.');
+  }
+
   const total = state.assignedErrors.reduce((sum, e) => sum + e.score, 0);
   const record = {
     id:       state.nextHistoryId++,
@@ -526,6 +948,7 @@ function finishGrading() {
     errors:   [...state.assignedErrors],
     total:    total,
     video:    state.currentVideo,
+    imageUrl: state.capturedFrameImageUrl || null,
   };
   state.history.push(record);
   renderHistoryTable();
@@ -533,10 +956,18 @@ function finishGrading() {
   // Reset frame
   state.capturedFrameTime = null;
   state.assignedErrors    = [];
+  state.capturedFrameImageUrl = null;
   document.getElementById('frame-badge').style.display         = 'none';
-  document.getElementById('frame-badge-overlay').style.display = 'none';
+  document.getElementById('frame-badge-overlay') && (document.getElementById('frame-badge-overlay').style.display = 'none');
   document.getElementById('err-tag-r').style.display           = 'none';
   document.getElementById('err-tag-a').style.display           = 'none';
+  // Khôi phục placeholder preview
+  const preview = document.getElementById('frame-preview');
+  if (preview) {
+    preview.innerHTML =
+      '<div class="frame-placeholder"><div class="frame-icon">&#9654;</div><span>Chưa chụp frame</span></div>' +
+      '<div class="frame-badge-overlay" id="frame-badge-overlay" style="display:none">Frame t=<span id="overlay-frame-time">00:00</span></div>';
+  }
   renderAssignedErrors();
   renderErrorTypeList();
 
@@ -544,13 +975,45 @@ function finishGrading() {
 }
 
 // ---- SUBMIT EXAM SCORE ----
-function submitExamScore() {
+async function submitExamScore() {
   if (!ensureGradingAvailable('hoàn thành bài thi')) return;
 
   const totalDeductions = state.history.reduce((sum, rec) => sum + rec.total, 0);
-  const finalScore = Math.max(0, state.defaultScore + totalDeductions);
+  let finalScore = Math.max(0, state.defaultScore + totalDeductions);
   const submittedAt = new Date();
-  
+
+  // Gọi API tính điểm cuối cùng cho phiên chấm
+  const idSession = state.gradingSessionId;
+  const idSubmission = state.submissionId
+    || JSON.parse(sessionStorage.getItem('gradingSession') || '{}')?.studentSubmissionResponse?.id
+    || '';
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
+  const gradingModeApi = state.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE';
+
+  const btnFinish = document.querySelector('.btn-finish');
+  if (btnFinish) btnFinish.disabled = true;
+
+  if (idSubmission && idTeacher) {
+    try {
+      const result = await ExamsService.finalizeGradingSession(
+        String(idSubmission),
+        idTeacher,
+        gradingModeApi
+      );
+      console.log('[submitExamScore] finalizeGradingSession →', result);
+      if (result?.finalScore != null) {
+        finalScore = Number(result.finalScore);
+      }
+    } catch (err) {
+      console.warn('[submitExamScore] Không thể tính điểm từ API, dùng điểm tính cục bộ:', err);
+    }
+  } else {
+    console.warn('[submitExamScore] Thiếu idSubmission hoặc idTeacher, bỏ qua API tính điểm.');
+  }
+
+  if (btnFinish) btnFinish.disabled = false;
+
   // Chuẩn bị dữ liệu để lưu
   const examData = {
     timestamp: submittedAt.toLocaleString('vi-VN'),
@@ -561,26 +1024,26 @@ function submitExamScore() {
     history: state.history,
   };
 
-  // Lưu vào localStorage
-  localStorage.setItem('examGradingResult', JSON.stringify(examData));
+  // Lưu vào sessionStorage
+  sessionStorage.setItem('examGradingResult', JSON.stringify(examData));
 
   // Lưu điểm theo sinh viên + bài thi + chế độ
-  const classId = JSON.parse(localStorage.getItem('selectedClass'))?.classId;
-  const className = JSON.parse(localStorage.getItem('selectedClass'))?.className || '';
+  const classId = JSON.parse(sessionStorage.getItem('selectedClass'))?.classId;
+  const className = JSON.parse(sessionStorage.getItem('selectedClass'))?.className || '';
   const studentCode = state.currentStudent?.code || state.currentStudent?.studentId;
   const studentName = state.currentStudent ? state.currentStudent.name : 'Học sinh';
-  const examId = state.currentStudent?.examId || JSON.parse(localStorage.getItem('gradingExam'))?.id;
+  const examId = state.currentStudent?.examId || JSON.parse(sessionStorage.getItem('gradingExam'))?.id;
   const examName = state.currentStudent && state.currentStudent.subject
     ? state.currentStudent.subject
     : 'Động tác Quốc phòng';
   const modeSuffix = state.gradingMode === 'official' ? '_official' : '_practice';
   if (classId && studentCode && examId) {
-    const scores = JSON.parse(localStorage.getItem('examScores') || '{}');
+    const scores = JSON.parse(sessionStorage.getItem('examScores') || '{}');
     const key = `${classId}_${studentCode}_${examId}${modeSuffix}`;
     scores[key] = finalScore;
-    localStorage.setItem('examScores', JSON.stringify(scores));
+    sessionStorage.setItem('examScores', JSON.stringify(scores));
 
-    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
     const videoStorageKey = `examVideos_${classId}_${studentCode}_${examId}`;
     const gradingHistory = JSON.parse(localStorage.getItem('gradingHistoryRecords') || '[]');
     gradingHistory.unshift({
@@ -594,6 +1057,7 @@ function submitExamScore() {
       examId,
       examName,
       gradingMode: state.gradingMode,
+      gradingSessionId: state.gradingSessionId ?? null,
       timestamp: submittedAt.toLocaleString('vi-VN'),
       timestampIso: submittedAt.toISOString(),
       finalScore,
@@ -620,7 +1084,38 @@ function submitExamScore() {
   document.getElementById('success-student').textContent = studentName;
   document.getElementById('success-exam').textContent = examName;
   document.getElementById('success-score').textContent = finalScore.toFixed(1) + '/10';
+  // Ẩn các hàng bảng điểm trước khi gọi API
+  ['success-practice-row', 'success-official-row', 'success-updated-row'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
   document.getElementById('success-modal').style.display = 'flex';
+
+  // Gọi API bảng điểm để hiển thị thêm thông tin bài nộp
+  if (idSubmission) {
+    try {
+      const gradeBoardData = await ExamsService.getGradeBoard(idSubmission);
+      if (Array.isArray(gradeBoardData) && gradeBoardData.length > 0) {
+        const entry = gradeBoardData[0];
+        if (entry.practiceScore != null) {
+          document.getElementById('success-practice-score').textContent =
+            `${Number(entry.practiceScore).toFixed(1)}/10 (${entry.practiceStatus || ''})`;
+          document.getElementById('success-practice-row').style.display = '';
+        }
+        if (entry.officialScore != null) {
+          document.getElementById('success-official-score').textContent =
+            `${Number(entry.officialScore).toFixed(1)}/10 (${entry.officialStatus || ''})`;
+          document.getElementById('success-official-row').style.display = '';
+        }
+        if (entry.lastUpdated) {
+          document.getElementById('success-last-updated').textContent =
+            new Date(entry.lastUpdated).toLocaleString('vi-VN');
+          document.getElementById('success-updated-row').style.display = '';
+        }
+      }
+    } catch (err) {
+      console.warn('[submitExamScore] Không thể lấy bảng điểm:', err);
+    }
+  }
 }
 
 function closeSuccessModal(e) {
@@ -631,7 +1126,7 @@ function closeSuccessModal(e) {
 }
 
 function getBackNavigationTarget() {
-  const selectedClass = JSON.parse(localStorage.getItem('selectedClass') || 'null');
+  const selectedClass = JSON.parse(sessionStorage.getItem('selectedClass') || 'null');
   if (selectedClass && selectedClass.classId) {
     return '/pages/class-detail.html';
   }
@@ -667,10 +1162,15 @@ function renderHistoryTable() {
 
   state.history.forEach((rec, idx) => {
     const errStr = rec.errors.map(e => e.name + (e.note ? ' - ' + e.note : '') + ' (' + e.score.toFixed(1) + ')').join(', ');
+    const imgCell = rec.imageUrl
+      ? '<a href="' + rec.imageUrl + '" target="_blank" rel="noopener" title="Xem ảnh bằng chứng t=' + formatTime(rec.frameTs) + '">' +
+          '<img src="' + rec.imageUrl + '" alt="t=' + formatTime(rec.frameTs) + '" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border);display:block;"/>' +
+        '</a>'
+      : '<div class="thumb-cell">V0' + rec.video + '</div>';
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td style="color:var(--txt3)">' + (idx + 1) + '</td>' +
-      '<td><div class="thumb-cell">V0' + rec.video + '</div></td>' +
+      '<td>' + imgCell + '</td>' +
       '<td>' + formatTime(rec.frameTs) + '</td>' +
       '<td style="word-break:break-word">' + errStr + '</td>' +
       '<td class="score-neg">' + rec.total.toFixed(1) + '</td>' +
@@ -678,6 +1178,15 @@ function renderHistoryTable() {
         '<button type="button" class="adel" data-id="' + rec.id + '" aria-label="Xóa bản ghi">&times;</button>' +
       '</td>';
     tr.querySelector('.adel').addEventListener('click',  () => deleteRecord(rec.id));
+
+    // Click vào hàng → tua video đến thời điểm frame
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('click', (e) => {
+      // Không kích hoạt khi click vào nút xóa hoặc link ảnh
+      if (e.target.closest('.adel') || e.target.closest('a')) return;
+      seekToTime(rec.frameTs, rec.video);
+    });
+
     tbody.appendChild(tr);
   });
 
@@ -739,7 +1248,7 @@ function closeModal(e) {
   if (e.target.id === 'modal-backdrop') closeAddErrorModal();
 }
 
-function addNewErrorType() {
+async function addNewErrorType() {
   const name = document.getElementById('new-error-name').value.trim();
   const description = document.getElementById('new-error-description').value.trim();
   const severity = document.getElementById('new-error-severity').value;
@@ -761,7 +1270,36 @@ function addNewErrorType() {
     return;
   }
 
-  const newId = Math.max(...catalog.map(e => e.id || 0), 0) + 1;
+  const severityApiMap = { 'cao': 'HIGH', 'trung-binh': 'MEDIUM', 'thap': 'LOW' };
+  const severityType = severityApiMap[severity] || 'MEDIUM';
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
+
+  let newId = Math.max(...catalog.map(e => e.id || 0), 0) + 1;
+
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR)
+      ? API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR
+      : 'http://localhost:8080/api/teacher/error';
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idTeacher, name, description, severityType, deduction })
+    });
+
+    const json = await response.json().catch(() => null);
+
+    if ((response.ok || response.status === 201) && json?.data?.id) {
+      newId = json.data.id;
+    } else {
+      console.warn('API thêm lỗi thất bại:', json?.message || `HTTP ${response.status}`);
+    }
+  } catch (err) {
+    console.warn('Không thể kết nối API thêm lỗi, lưu local:', err);
+  }
+
   catalog.unshift({
     id: newId,
     name,

@@ -12,6 +12,89 @@ const ExamsService = {
     },
 
     /**
+     * Lấy danh sách bài thi của một lớp học
+     * @param {string} classId - Mã lớp (ví dụ: QS_D07)
+     * @returns {Promise<Array>} Mảng exam objects đã được chuẩn hoá
+     */
+    async getExamsByClass(classId, page = 0, size = 3) {
+        const url = API_CONFIG.ENDPOINTS.CLASS_EXAMS(classId, page, size);
+        const response = await ApiClient.fetchWithAuth(url, { method: 'GET' });
+        if (!response.ok) throw new Error(`Lấy danh sách bài thi thất bại: HTTP ${response.status}`);
+        const json = await response.json().catch(() => null);
+
+        // Spring Page<> format: { data: { content, totalPages, totalElements, number } }
+        if (json?.data?.content != null && json?.data?.totalPages != null) {
+            return {
+                exams: this._normalizeClassExams(json.data.content),
+                totalPages: json.data.totalPages,
+                totalElements: json.data.totalElements,
+                page: json.data.number ?? page,
+                allLoaded: false,
+            };
+        }
+
+        // Flat array format — backend không hỗ trợ phân trang
+        const flatData = json?.data ?? json ?? [];
+        const exams = this._normalizeClassExams(Array.isArray(flatData) ? flatData : []);
+        return {
+            exams,
+            totalPages: Math.ceil(exams.length / size) || 1,
+            totalElements: exams.length,
+            page: 0,
+            allLoaded: true,
+        };
+    },
+
+    /**
+     * Chuẩn hoá mảng bài thi từ API /public/exam/class/{classId}
+     */
+    _normalizeClassExams(data) {
+        if (!Array.isArray(data)) return [];
+        return data.map(item => {
+            const et = item.examTypeResponse || {};
+            return {
+                id: String(et.id ?? ''),
+                classExamId: item.id ?? null,
+                name: et.name || 'Bài thi',
+                description: et.description || '',
+                icon: '📝',
+                iconClass: 'custom-exam',
+                sampleVideoUrl: et.sampleVideoUrl || null,
+                videos: et.sampleVideoUrl ? [{ name: et.name || 'Video mẫu', url: et.sampleVideoUrl }] : [],
+                submissionDeadline: item.submissionDeadline || '',
+                gradingDeadline: item.gradingDeadline || '',
+            };
+        });
+    },
+
+    /**
+     * Lấy danh sách bài thi của giáo viên
+     * @param {string} teacherId - Mã giáo viên (ví dụ: GV_HT_10)
+     * @returns {Promise<Array>} Mảng exam objects
+     */
+    async getTeacherExams(teacherId, page = 0, size = 9) {
+        const url = API_CONFIG.ENDPOINTS.TEACHER_EXAMS(teacherId, page, size);
+        const response = await ApiClient.fetchWithAuth(url);
+        if (!response.ok) {
+            throw new Error(`Lấy danh sách bài thi thất bại: HTTP ${response.status}`);
+        }
+        const json = await response.json().catch(() => null);
+        // Hỗ trợ dạng Page<> { data: { content, totalPages, totalElements } }
+        const pageData = json?.data;
+        if (pageData && Array.isArray(pageData.content)) {
+            return {
+                exams: pageData.content,
+                totalPages: pageData.totalPages ?? 1,
+                totalElements: pageData.totalElements ?? pageData.content.length,
+                page: pageData.number ?? page,
+            };
+        }
+        // Fallback: mảng trực tiếp
+        const list = Array.isArray(json) ? json : (Array.isArray(pageData) ? pageData : []);
+        return { exams: list, totalPages: 1, totalElements: list.length, page: 0 };
+    },
+
+    /**
      * Lấy danh sách bài thi đã gán cho sinh viên
      * @param {string} classId
      * @param {string} studentCode
@@ -58,6 +141,173 @@ const ExamsService = {
             scoreData
         );
     },
+
+    /**
+     * Upload video mẫu bài thi lên Cloudinary qua server
+     * @param {File} file - File video cần upload
+     * @param {string} title - Tiêu đề video mẫu
+     * @returns {Promise<string>} URL Cloudinary của video đã upload
+     */
+    async uploadSampleVideo(file, title) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', title);
+
+        const headers = {};
+        const csrfToken = _getCsrfToken();
+        if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
+
+        const response = await fetch(API_CONFIG.ENDPOINTS.UPLOAD_SAMPLE_VIDEO, {
+            method: 'POST',
+            headers,
+            body: formData,
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Upload video mẫu thất bại: HTTP ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        if (data?.code === 200 && data?.data) {
+            return data.data;
+        }
+        throw new Error(data?.message || 'Upload video mẫu thất bại');
+    },
+
+    /**
+     * Tạo bài thi mới cho giáo viên
+     * @param {string} name - Tên bài thi
+     * @param {string} description - Mô tả
+     * @param {string} sampleVideoUrl - URL Cloudinary của video mẫu
+     * @param {string} teacherId - Mã giáo viên
+     * @returns {Promise<object>} Bài thi vừa tạo từ server
+     */
+    async createTeacherExam(name, description, sampleVideoUrl, teacherId) {
+        const headers = { 'Content-Type': 'application/json' };
+        const csrfToken = _getCsrfToken();
+        if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
+
+        const response = await fetch(API_CONFIG.ENDPOINTS.CREATE_TEACHER_EXAM, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Tạo bài thi thất bại: HTTP ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        return data?.data || data || null;
+    },
+
+    /**
+     * Khởi tạo phiên chấm điểm
+     * POST http://localhost:8080/teacher/grading-session/start
+     * @param {string} idSubmission - ID bài nộp của sinh viên
+     * @param {string} idTeacher - ID giáo viên chấm
+     * @param {string} gradingMode - "OFFICIAL" hoặc "PRACTICE"
+     * @returns {Promise<object>} Thông tin phiên chấm (id, studentSubmissionResponse, userResponse, gradingMode, totalDeduction, totalScore, status)
+     */
+    async startGradingSession(idSubmission, idTeacher, gradingMode) {
+        const headers = { 'Content-Type': 'application/json' };
+        const csrfToken = _getCsrfToken();
+        if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
+
+        const response = await fetch(API_CONFIG.ENDPOINTS.GRADING_SESSION_START, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: JSON.stringify({ idSubmission, idTeacher, gradingMode }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Khởi tạo phiên chấm thất bại: HTTP ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        return data?.data ?? data;
+    },
+
+    /**
+     * Lấy chi tiết lỗi theo phiên chấm
+     * GET http://localhost:8080/public/grading-error/{idSession}
+     * @param {number|string} idSession - ID phiên chấm
+     * @returns {Promise<Array>} Mảng error detail objects
+     */
+    async getGradingErrorDetail(idSession, gradingMode) {
+        const url = API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL(idSession, gradingMode);
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            throw new Error(`Lấy chi tiết lỗi thất bại: HTTP ${response.status}`);
+        }
+        const json = await response.json().catch(() => null);
+        return Array.isArray(json?.data) ? json.data : [];
+    },
+
+    /**
+     * Tính điểm cuối cùng cho phiên chấm
+     * POST http://localhost:8080/public/grading-session
+     * @param {string} idSubmission - ID bài nộp của sinh viên
+     * @param {string} idTeacher - ID giáo viên chấm
+     * @param {string} gradingMode - "OFFICIAL" hoặc "PRACTICE"
+     * @returns {Promise<object>} { id, totalDeduction, finalScore, status, ... }
+     */
+    async finalizeGradingSession(idSubmission, idTeacher, gradingMode) {
+        const headers = { 'Content-Type': 'application/json' };
+        const csrfToken = _getCsrfToken();
+        if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
+
+        const response = await fetch(API_CONFIG.ENDPOINTS.GRADING_SESSION_FINALIZE, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: JSON.stringify({ idSubmission, idTeacher, gradingMode }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Tính điểm phiên chấm thất bại: HTTP ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        return data?.data ?? data;
+    },
+
+    /**
+     * Lấy trạng thái phiên chấm theo submissionId
+     * GET http://localhost:8080/public/grading-session/submission/{submissionId}
+     * @param {string|number} submissionId - ID bài nộp
+     * @returns {Promise<object|null>} { id, status, gradingMode, ... } hoặc null
+     */
+    async getGradingSessionBySubmission(submissionId, page = 0, size = 3) {
+        const url = API_CONFIG.ENDPOINTS.GRADING_SESSION_BY_SUBMISSION(submissionId, page, size);
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) return null;
+        const json = await response.json().catch(() => null);
+        // Hỗ trợ cả dạng Page<> (content) và dạng list/object đơn
+        return json?.data?.content ?? json?.data ?? json ?? null;
+    },
+
+    /**
+     * Lấy bảng điểm theo submissionId
+     * GET http://localhost:8080/public/grade-board/{submissionId}
+     * @param {string|number} submissionId - ID bài nộp
+     * @returns {Promise<Array>} Mảng grade board entries
+     */
+    async getGradeBoard(submissionId) {
+        const url = API_CONFIG.ENDPOINTS.GRADE_BOARD(submissionId);
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) {
+            throw new Error(`Lấy bảng điểm thất bại: HTTP ${response.status}`);
+        }
+        const json = await response.json().catch(() => null);
+        return Array.isArray(json?.data) ? json.data : [];
+    },
 };
 
 // ============================================
@@ -71,27 +321,5 @@ const ErrorsService = {
      */
     async getErrors() {
         return ApiClient.get(API_CONFIG.ENDPOINTS.ERRORS);
-    },
-};
-
-// ============================================
-//  Report API Service
-// ============================================
-
-const ReportService = {
-    /**
-     * Lấy dữ liệu tổng hợp cho báo cáo (4 summary cards)
-     * @returns {Promise<object>} { totalStudents, totalClasses, averageScore, completionRate }
-     */
-    async getSummary() {
-        return ApiClient.get(API_CONFIG.ENDPOINTS.REPORT_SUMMARY);
-    },
-
-    /**
-     * Lấy dữ liệu biểu đồ
-     * @returns {Promise<object>} Chart data
-     */
-    async getChartData() {
-        return ApiClient.get(API_CONFIG.ENDPOINTS.REPORT_CHARTS);
     },
 };

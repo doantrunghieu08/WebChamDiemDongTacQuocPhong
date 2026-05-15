@@ -4,7 +4,50 @@
 
 const ClassesService = {
     /**
-     * Lấy danh sách lớp của giảng viên
+     * Lấy danh sách lớp của giảng viên có phân trang
+     * @param {string} teacherId
+     * @param {number} page - 0-based
+     * @param {number} size
+     * @returns {Promise<{ classes, totalPages, totalElements }>}
+     */
+    async getClassesByTeacher(teacherId, page = 0, size = 8) {
+        const url = `${API_CONFIG.ENDPOINTS.TEACHER_CLASSES(teacherId)}?page=${page}&size=${size}`;
+
+        const response = await ApiClient.fetchWithAuth(url, { method: 'GET' });
+        if (response.status === 401) {
+            throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+        }
+        const json = await response.json();
+
+        let rawList, totalPages, totalElements;
+
+        // Spring Page trong json.data
+        if (json.data && !Array.isArray(json.data) && Array.isArray(json.data.content)) {
+            rawList       = json.data.content;
+            totalPages    = json.data.totalPages    ?? null;
+            totalElements = json.data.totalElements ?? null;
+        }
+        // Flat array trong json.data (fallback)
+        else {
+            rawList       = Array.isArray(json.data) ? json.data : [];
+            totalPages    = json.totalPages    ?? null;
+            totalElements = json.totalElements ?? null;
+        }
+
+        if (totalElements === null) totalElements = rawList.length;
+        if (totalPages === null) {
+            totalPages = rawList.length > 0 ? page + 2 : Math.max(1, page);
+        }
+
+        return {
+            classes: rawList,
+            totalPages: Math.max(1, totalPages),
+            totalElements,
+        };
+    },
+
+    /**
+     * Lấy danh sách lớp của giảng viên (endpoint cũ)
      * @returns {Promise<Array>} Mảng class objects
      */
     async getClasses() {

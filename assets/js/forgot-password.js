@@ -1,57 +1,78 @@
-/* =============================================
-   forgot-password.js – Quên Mật Khẩu
+﻿/* =============================================
+   forgot-password.js – HACTECH 2026
+   Nhập email → gửi mật khẩu → popup → về login
    ============================================= */
 
-function handleForgotPassword(event) {
+/* ---- INIT ---- */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('email-input')?.focus();
+});
+
+/* ---- EMAIL SUBMIT ---- */
+async function handleEmailSubmit(event) {
   event.preventDefault();
 
-  const studentId = document.getElementById('student-id-forgot').value.trim();
+  const emailInput = document.getElementById('email-input');
+  const email = emailInput.value.trim();
 
-  if (!studentId) {
-    showError('Vui lòng nhập mã sinh viên!');
+  clearFieldError('email-error');
+
+  if (!email) {
+    setFieldError('email-error', 'Vui lòng nhập email.');
+    emailInput.classList.add('is-error');
+    return;
+  }
+  if (!validateEmail(email)) {
+    setFieldError('email-error', 'Địa chỉ email không hợp lệ.');
+    emailInput.classList.add('is-error');
     return;
   }
 
-  if (studentId.length < 3) {
-    showError('Mã sinh viên phải có ít nhất 3 ký tự!');
-    return;
+  emailInput.classList.remove('is-error');
+  const submitBtn = document.getElementById('email-submit');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.querySelector('span').textContent = 'Đang gửi...'; }
+
+  try {
+    if (typeof AuthService !== 'undefined' && AuthService.forgotPassword) {
+      await AuthService.forgotPassword(email);
+    }
+    showFpModal('Mật khẩu mới đã được gửi vào email của bạn. Vui lòng kiểm tra hộp thư!');
+  } catch (err) {
+    const msg = err?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+    showFpModal(msg, true);
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.querySelector('span').textContent = 'Gửi mật khẩu'; }
   }
-
-  // Giả lập gửi yêu cầu
-  processForgotPassword(studentId);
 }
 
-function processForgotPassword(studentId) {
-  showSuccess(`Mật khẩu mới đã được gửi tới email của ${studentId}. Vui lòng kiểm tra hộp thư!`);
-
-  // Quay lại trang đăng nhập sau 2 giây
-  setTimeout(() => {
-    window.location.href = '/index.html';
-  }, 2000);
+/* ---- POPUP ---- */
+function showFpModal(message, isError = false) {
+  const modal = document.getElementById('fp-modal');
+  const msgEl = document.getElementById('fp-modal-message');
+  if (!modal || !msgEl) return;
+  msgEl.textContent = message;
+  modal.style.display = 'flex';
+  // Nếu thành công, sau khi bấm OK sẽ về login (xử lý ở closeFpModal)
+  modal._isSuccess = !isError;
 }
 
-function showError(message) {
-  const form = document.querySelector('.login-form');
-  let errorEl = form.querySelector('.error-message');
-
-  if (!errorEl) {
-    errorEl = document.createElement('div');
-    errorEl.className = 'error-message';
-    form.insertBefore(errorEl, form.firstChild);
+function closeFpModal() {
+  const modal = document.getElementById('fp-modal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  if (modal._isSuccess) {
+    window.location.href = '../index.html';
   }
-
-  errorEl.textContent = message;
-  errorEl.classList.add('show');
-
-  setTimeout(() => {
-    errorEl.classList.remove('show');
-  }, 5000);
 }
 
-function showSuccess(message) {
-  alert(message);
+/* ---- Helpers ---- */
+function setFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = msg;
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('student-id-forgot').focus();
-});
+function clearFieldError(id) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = '';
+}
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}

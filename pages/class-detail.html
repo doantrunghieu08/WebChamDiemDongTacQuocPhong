@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi Tiết Lớp Học - HACTECH</title>
-  <base href="/WebChamDiemDongTacQuocPhong/">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/assets/css/class-detail.css">
+  <link rel="stylesheet" href="../assets/css/class-detail.css">
 </head>
 <body>
   <!-- Header -->
@@ -67,26 +66,46 @@
         <button class="cd-modal-close" onclick="closeAddExamModal()">&times;</button>
       </div>
       <div class="cd-modal-body">
-        <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong lớp</p>
-        <div class="cd-assigned-exams-section">
-          <div class="cd-assigned-exams-title">Bài thi đã thêm</div>
-          <div id="assignedExamList" class="cd-assigned-exam-list"></div>
+        <!-- Tab bar -->
+        <div class="cd-modal-tab-bar">
+          <button class="cd-modal-tab cd-modal-tab--active" id="examTabBtnActive" onclick="switchExamTab('active')">
+            <i class="fas fa-check-circle"></i> Đang áp dụng
+          </button>
+          <button class="cd-modal-tab" id="examTabBtnDeleted" onclick="switchExamTab('deleted')">
+            <i class="fas fa-trash-restore-alt"></i> Đã xóa
+          </button>
         </div>
-        <div class="cd-deadline-grid">
-          <div class="cd-form-group">
-            <label>Hạn nộp bài</label>
-            <input type="datetime-local" id="submissionDeadline">
+
+        <!-- Tab: Đang áp dụng -->
+        <div id="examTabActive">
+          <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong lớp</p>
+          <div class="cd-assigned-exams-section">
+            <div class="cd-assigned-exams-title">Bài thi đã thêm</div>
+            <div id="assignedExamList" class="cd-assigned-exam-list"></div>
           </div>
-          <div class="cd-form-group">
-            <label>Hạn chấm bài</label>
-            <input type="datetime-local" id="gradingDeadline">
+          <div class="cd-deadline-grid">
+            <div class="cd-form-group">
+              <label>Hạn nộp bài</label>
+              <input type="datetime-local" id="submissionDeadline">
+            </div>
+            <div class="cd-form-group">
+              <label>Hạn chấm bài</label>
+              <input type="datetime-local" id="gradingDeadline">
+            </div>
+          </div>
+          <div id="examCheckboxList" class="cd-exam-checklist"></div>
+          <div class="cd-form-actions">
+            <button type="button" class="cd-btn-cancel" onclick="closeAddExamModal()">Hủy</button>
+            <button type="button" class="cd-btn-submit" onclick="addExamsToClass()">Thêm</button>
           </div>
         </div>
-        <p class="cd-deadline-note">Thời gian này sẽ áp dụng cho tất cả bài thi được chọn trong lần thêm hiện tại.</p>
-        <div id="examCheckboxList" class="cd-exam-checklist"></div>
-        <div class="cd-form-actions">
-          <button type="button" class="cd-btn-cancel" onclick="closeAddExamModal()">Hủy</button>
-          <button type="button" class="cd-btn-submit" onclick="addExamsToClass()">Thêm</button>
+
+        <!-- Tab: Đã xóa -->
+        <div id="examTabDeleted" style="display:none">
+          <div id="deletedExamList" class="cd-assigned-exam-list" style="margin-top:4px;"></div>
+          <div class="cd-form-actions">
+            <button type="button" class="cd-btn-cancel" onclick="closeAddExamModal()">Đóng</button>
+          </div>
         </div>
       </div>
     </div>
@@ -132,6 +151,21 @@
       <div class="cd-delete-modal-actions">
         <button class="cd-delete-btn-cancel" onclick="closeDeleteExamModal()">Hủy</button>
         <button class="cd-delete-btn-confirm" onclick="confirmDeleteExam()"><i class="fas fa-trash-alt"></i> Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Restore Exam Confirm Modal -->
+  <div class="cd-delete-modal" id="restoreExamModal" style="display:none">
+    <div class="cd-delete-modal-content">
+      <div class="cd-delete-modal-icon" style="background: linear-gradient(135deg, #16a34a, #15803d)">
+        <i class="fas fa-undo"></i>
+      </div>
+      <h3 class="cd-delete-modal-title">Khôi phục bài thi</h3>
+      <p class="cd-delete-modal-text" id="restoreExamMessage">Khôi phục bài thi này vào lớp?</p>
+      <div class="cd-delete-modal-actions">
+        <button class="cd-delete-btn-cancel" onclick="closeRestoreExamModal()">Hủy</button>
+        <button class="cd-restore-btn-confirm" onclick="confirmRestoreExam()"><i class="fas fa-undo"></i> Khôi phục</button>
       </div>
     </div>
   </div>

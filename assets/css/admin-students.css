@@ -89,6 +89,10 @@ body {
   margin-bottom: 16px;
 }
 
+.admin-students-search-row {
+  margin-bottom: 14px;
+}
+
 .admin-students-panel-header h2 {
   font-size: 24px;
   margin-bottom: 6px;
@@ -150,6 +154,32 @@ body {
   border: 1px solid #f1dfd3;
   border-radius: 16px;
   background: #fffaf7;
+}
+
+.admin-student-avatar {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.admin-student-avatar-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f1dfd3;
+  display: block;
+}
+
+.admin-student-avatar-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  color: #ffffff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-student-order {
