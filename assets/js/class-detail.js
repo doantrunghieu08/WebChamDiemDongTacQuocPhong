@@ -20,6 +20,7 @@ let classData = null;
 let studentsData = [];
 let serverClassExams = null; // bài thi từ API, null = chưa tải
 let classBoardAvatarBySubmission = {}; // { submissionId: avatarImage } — link đáng tin cậy giữa grade board và studentsData
+let classBoardStudentList = []; // danh sách sinh viên trích từ grade board (fallback khi fetchClassStudentsFromServer thất bại)
 let classExamTotalPages = 1;  // tổng số trang exam từ server
 let classExamSize = 3;        // số bài thi mỗi trang (= CARDS_PER_PAGE)
 const classExamLoadedPages = new Set(); // các trang đã tải
@@ -426,6 +427,34 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   studentsData = getClassStudents(classData.classId);
 
+  // Nếu fetchClassStudentsFromServer thất bại (endpoint chưa có hoặc trả lỗi),
+  // fallback dùng danh sách sinh viên trích từ grade board
+  if (studentsData.length === 0 && classBoardStudentList.length > 0) {
+    studentsData = classBoardStudentList;
+    saveClassStudents(classData.classId, studentsData);
+  }
+
+  // Nếu vẫn rỗng, thử build từ submissionsMap
+  if (studentsData.length === 0 && Object.keys(submissionsMap).length > 0) {
+    const seen = new Set();
+    for (const examMap of Object.values(submissionsMap)) {
+      for (const item of Object.values(examMap)) {
+        const code = String(item.studentCode ?? item.idStudent ?? item.studentId ?? '');
+        if (code && !seen.has(code)) {
+          seen.add(code);
+          studentsData.push({
+            code,
+            name: item.studentName || item.fullName || '',
+            birthday: '',
+            gender: '',
+            avatarImage: item.avatarImage || ''
+          });
+        }
+      }
+    }
+    if (studentsData.length > 0) saveClassStudents(classData.classId, studentsData);
+  }
+
   // Enrich avatarImage từ grade board: tìm theo submissionId (khóa chắc chắn, vì
   // grade board dùng login username ("cuongdv") nhưng studentsData dùng mã quân sự ("SV006", "233730"))
   if (Object.keys(classBoardAvatarBySubmission).length > 0) {
@@ -470,11 +499,23 @@ async function fetchClassGradeBoard(classId) {
     const list = Array.isArray(json?.data) ? json.data : [];
     classBoardCache = {};
     classBoardAvatarBySubmission = {};
+    classBoardStudentList = [];
     list.forEach(entry => {
       const exams = Array.isArray(entry.exams) ? entry.exams : [];
       // Index grade entries bằng cả studentCode (login: "cuongdv") lẫn studentId
       if (entry.studentCode) classBoardCache[entry.studentCode] = exams;
       if (entry.studentId != null) classBoardCache[String(entry.studentId)] = exams;
+      // Thu thập thông tin sinh viên để dùng làm fallback cho studentsData
+      if (entry.studentCode || entry.studentName) {
+        const avatarFromExam = exams.find(e => e.avatarImage)?.avatarImage || '';
+        classBoardStudentList.push({
+          code: entry.studentCode || '',
+          name: entry.studentName || '',
+          birthday: '',
+          gender: '',
+          avatarImage: entry.avatarImage || avatarFromExam
+        });
+      }
       // avatarImage nằm trong từng exam entry — index theo submissionId (khóa đáng tin cậy)
       exams.forEach(e => {
         if (e.submissionId != null && e.avatarImage) {
