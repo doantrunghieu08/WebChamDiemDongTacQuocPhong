@@ -267,7 +267,7 @@ async function fetchSubmissionsForAllExams() {
     try {
       const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS)
         ? API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS(classExamId)
-        : `http://localhost:8080/teacher/class/${encodeURIComponent(classExamId)}/submissions`;
+        : `/teacher/class/${encodeURIComponent(classExamId)}/submissions`;
 
       const response = await fetch(url, { credentials: 'include' });
       if (!response.ok) return;

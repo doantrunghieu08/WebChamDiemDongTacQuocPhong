@@ -344,7 +344,20 @@ async function loadStudentListPage(page = 0) {
   if (!activeClassId) return;
   studentListPage = page;
   const result = await searchClassStudentsFromServer(activeClassId, studentListKeyword, page, studentListPageSize);
-  if (!result) return;
+  if (!result) {
+    // Fallback: render từ dữ liệu đã lưu trong sessionStorage khi search endpoint thất bại
+    if (page === 0) {
+      const storedStudents = getStoredClassStudents()[activeClassId] || [];
+      const filtered = studentListKeyword
+        ? storedStudents.filter(s =>
+            (s.name || '').toLowerCase().includes(studentListKeyword.toLowerCase()) ||
+            (s.code || '').toLowerCase().includes(studentListKeyword.toLowerCase())
+          )
+        : storedStudents;
+      renderStudentManagerListFromData(filtered);
+    }
+    return;
+  }
   studentListTotalPages = result.totalPages;
   renderStudentManagerListFromData(result.students);
   renderStudentListPagination();
@@ -397,7 +410,7 @@ function renderStudentListPagination() {
 async function loadClassStudentsFromServer(classId) {
   if (!classId) return null;
   const adminBase = API_CONFIG?.ADMIN_BASE_URL || '';
-  const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || 'http://localhost:8080';
+  const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || '';
   const url = `${baseHost}/classes/api/${encodeURIComponent(classId)}`;
   const headers = { Accept: 'application/json' };
   try {
@@ -658,7 +671,7 @@ async function handleStudentExcelFile(event) {
   event.target.value = '';
 
   const adminBase = API_CONFIG?.ADMIN_BASE_URL || '';
-  const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || 'http://localhost:8080';
+  const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || '';
   const importUrl = `${baseHost}/admin/import-to-class/${encodeURIComponent(activeClassId)}`;
 
   // Thử upload lên server trước

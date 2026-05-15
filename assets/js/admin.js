@@ -110,7 +110,7 @@ async function loadUsersFromApi(page = 0, size = userPageSize, search = '', role
 
     let url;
     const adminBase = API_CONFIG?.ADMIN_BASE_URL || '';
-    const baseHost = (adminBase.split('/admin')[0]) || 'http://localhost:8080';
+    const baseHost = (adminBase.split('/admin')[0]) || '';
 
     if (search) {
       // Dùng endpoint global-search khi có keyword
@@ -177,7 +177,7 @@ async function loadUsersFromApi(page = 0, size = userPageSize, search = '', role
   async function loadTeacherListFromApi() {
     try {
       const adminBase = API_CONFIG?.ADMIN_BASE_URL || '';
-      const baseHost = (adminBase.split('/admin')[0]) || 'http://localhost:8080';
+      const baseHost = (adminBase.split('/admin')[0]) || '';
       const url = `${baseHost}/admin/teacher-list`;
       const response = await fetchWithAuth(url, { headers: {} });
       if (!response.ok) throw new Error('Lỗi tải danh sách giảng viên');
@@ -254,7 +254,7 @@ function _updateSummaryCards() {
   if (el('summaryLocked'))  el('summaryLocked').textContent  = adminAccounts.filter(a => a.status === 'locked').length;
 
   // Lấy thống kê chính xác từ API
-  fetchWithAuth('http://localhost:8080/public/statistics', { headers: {} })
+  fetchWithAuth('/public/statistics', { headers: {} })
     .then(r => r.json())
     .then(json => {
       const d = json?.data;
@@ -1037,7 +1037,7 @@ async function uploadAvatarToCloud(id) {
   const formData = new FormData();
   formData.append('id', id);
   formData.append('file', file);
-  const response = await fetch('http://localhost:8080/public/upload-avatar', {
+  const response = await fetch('/public/upload-avatar', {
     method: 'POST',
     body: formData,
     credentials: 'include'
@@ -1050,7 +1050,7 @@ async function uploadAvatarToCloud(id) {
   const imageUrl = json?.data?.imageUrl || null;
   if (imageUrl) {
     // Gán avatar vào user
-    const saveRes = await fetchWithAuth(`http://localhost:8080/public/upload/avatar/${id}`, {
+    const saveRes = await fetchWithAuth(`/public/upload/avatar/${id}`, {
       method: 'POST',
       body: JSON.stringify(imageUrl)
     });
@@ -1929,7 +1929,7 @@ async function initializeAdminPage() {
   // Load total student counts per class (best-effort) and apply to adminClasses
   try {
     const adminBase = API_CONFIG?.ADMIN_BASE_URL || '';
-    const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || 'http://localhost:8080';
+    const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || '';
     const totalsUrl = `${baseHost}/classes/total-student`;
     const headers = { Accept: 'application/json' };
     let res = await fetch(totalsUrl, { headers, credentials: 'include' });

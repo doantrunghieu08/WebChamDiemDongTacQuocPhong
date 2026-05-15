@@ -929,7 +929,7 @@ async function uploadFileToServer(file) {
     const uploadHeaders = {};
     if (uploadCsrf) uploadHeaders['X-XSRF-TOKEN'] = uploadCsrf;
 
-    const response = await fetch('http://localhost:8080/public/upload-student-exam', {
+    const response = await fetch('/public/upload-student-exam', {
       method: 'POST',
       headers: uploadHeaders,
       credentials: 'include',
@@ -1217,7 +1217,7 @@ async function fetchAndRestoreSubmissionStatus() {
 
   const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT)
     ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT(studentId)
-    : `http://localhost:8080/student/submission/${encodeURIComponent(studentId)}`;
+    : `/student/submission/${encodeURIComponent(studentId)}`;
 
   try {
     const response = await fetch(url, { credentials: 'include' });
@@ -1312,7 +1312,7 @@ async function callSubmissionApi(status) {
   const payload = buildSubmissionPayload(status);
   const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSION)
     ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSION
-    : 'http://localhost:8080/student/submission';
+    : '/student/submission';
 
   try {
     const csrfToken = (typeof _getCsrfToken === 'function') ? _getCsrfToken() : null;
