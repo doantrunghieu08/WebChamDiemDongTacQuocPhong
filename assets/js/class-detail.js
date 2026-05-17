@@ -364,23 +364,54 @@ async function fetchClassStudentsFromServer(classId) {
   if (!classId) return null;
   const adminBase = API_CONFIG?.ADMIN_BASE_URL || '';
   const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || `${location.protocol}//${location.host}`;
-  const url = `${baseHost}/classes/api/${encodeURIComponent(classId)}`;
   const headers = { Accept: 'application/json' };
-  try {
+
+  const _fetchPage = async (page, size) => {
+    const url = `${baseHost}/classes/api/${encodeURIComponent(classId)}?page=${page}&size=${size}`;
     let res = await fetch(url, { headers, credentials: 'include' });
     if (res.status === 401 && typeof ApiClient?._refreshToken === 'function') {
       const refreshed = await ApiClient._refreshToken();
-      if (refreshed) {
-        res = await fetch(url, { headers, credentials: 'include' });
-      }
+      if (refreshed) res = await fetch(url, { headers, credentials: 'include' });
     }
     if (!res.ok) return null;
-    const json = await res.json().catch(() => null);
-    // API trả về dạng phân trang: { data: { content: [...] } } hoặc mảng thẳng
-    const list = Array.isArray(json?.data?.content) ? json.data.content
-               : Array.isArray(json?.data) ? json.data
-               : Array.isArray(json?.content) ? json.content
-               : Array.isArray(json) ? json
+    return res.json().catch(() => null);
+  };
+
+  try {
+    const PAGE_SIZE = 100;
+    const firstJson = await _fetchPage(0, PAGE_SIZE);
+    if (!firstJson) return null;
+
+    // Kiểm tra dạng phân trang Spring Page<>
+    const pageData = firstJson?.data;
+    if (pageData && Array.isArray(pageData.content) && pageData.totalPages != null) {
+      let allContent = [...pageData.content];
+      const totalPages = pageData.totalPages;
+      if (totalPages > 1) {
+        const remaining = [];
+        for (let p = 1; p < totalPages; p++) remaining.push(_fetchPage(p, PAGE_SIZE));
+        const results = await Promise.all(remaining);
+        for (const json of results) {
+          const content = json?.data?.content ?? json?.content ?? [];
+          allContent = allContent.concat(content);
+        }
+      }
+      const students = allContent.map(s => ({
+        code: s.studentCode || s.id || s.code || s.studentId,
+        name: s.studentName || s.fullName || s.name || '',
+        birthday: s.birthday ? s.birthday.split('T')[0] : (s.dob ? s.dob.split('T')[0] : ''),
+        gender: s.gender || s.sex || '',
+        avatarImage: s.avatarImage || s.exams?.find(e => e.avatarImage)?.avatarImage || ''
+      }));
+      saveClassStudents(classId, students);
+      return students;
+    }
+
+    // Fallback: mảng thẳng không phân trang
+    const list = Array.isArray(pageData?.content) ? pageData.content
+               : Array.isArray(pageData) ? pageData
+               : Array.isArray(firstJson?.content) ? firstJson.content
+               : Array.isArray(firstJson) ? firstJson
                : null;
     if (!list) return null;
     const students = list.map(s => ({
