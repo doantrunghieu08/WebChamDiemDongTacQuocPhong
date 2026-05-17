@@ -154,6 +154,9 @@ body {
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .banner-icon {
