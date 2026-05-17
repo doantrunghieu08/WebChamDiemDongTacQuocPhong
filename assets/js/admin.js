@@ -254,7 +254,7 @@ function _updateSummaryCards() {
   if (el('summaryLocked'))  el('summaryLocked').textContent  = adminAccounts.filter(a => a.status === 'locked').length;
 
   // Lấy thống kê chính xác từ API
-  fetchWithAuth('/public/statistics', { headers: {} })
+  fetchWithAuth('http://103.75.182.246:8080/public/statistics', { headers: {} })
     .then(r => r.json())
     .then(json => {
       const d = json?.data;
@@ -1037,7 +1037,7 @@ async function uploadAvatarToCloud(id) {
   const formData = new FormData();
   formData.append('id', id);
   formData.append('file', file);
-  const response = await fetch('/public/upload-avatar', {
+  const response = await fetch('http://103.75.182.246:8080/public/upload-avatar', {
     method: 'POST',
     body: formData,
     credentials: 'include'
@@ -1050,7 +1050,7 @@ async function uploadAvatarToCloud(id) {
   const imageUrl = json?.data?.imageUrl || null;
   if (imageUrl) {
     // Gán avatar vào user
-    const saveRes = await fetchWithAuth(`/public/upload/avatar/${id}`, {
+    const saveRes = await fetchWithAuth(`http://103.75.182.246:8080/public/upload/avatar/${id}`, {
       method: 'POST',
       body: JSON.stringify(imageUrl)
     });

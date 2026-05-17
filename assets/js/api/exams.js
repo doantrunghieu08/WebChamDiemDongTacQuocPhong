@@ -216,6 +216,8 @@ const ExamsService = {
         const csrfToken = _getCsrfToken();
         if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
 
+        console.log('[startGradingSession] payload:', { idSubmission, idTeacher, gradingMode });
+
         const response = await fetch(API_CONFIG.ENDPOINTS.GRADING_SESSION_START, {
             method: 'POST',
             headers,
@@ -224,7 +226,10 @@ const ExamsService = {
         });
 
         if (!response.ok) {
-            throw new Error(`Khởi tạo phiên chấm thất bại: HTTP ${response.status}`);
+            const errBody = await response.json().catch(() => null);
+            const errMsg = errBody?.message || errBody?.error || JSON.stringify(errBody) || '';
+            console.error('[startGradingSession] HTTP', response.status, errBody);
+            throw new Error(`Khởi tạo phiên chấm thất bại: HTTP ${response.status}${errMsg ? ' – ' + errMsg : ''}`);
         }
 
         const data = await response.json().catch(() => null);

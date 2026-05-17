@@ -1477,7 +1477,15 @@ function deleteExam(examId) {
     try {
       const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.DELETE_TEACHER_EXAM)
         ? API_CONFIG.ENDPOINTS.DELETE_TEACHER_EXAM(examId)
-        : `/api/teacher/exam/${encodeURIComponent(examId)}`;
+        : `http://103.75.182.246:8080/api/teacher/exam/${encodeURIComponent(examId)}`;
+
+      const headers = {};
+      const csrfToken = typeof _getCsrfToken === 'function' ? _getCsrfToken() : null;
+      if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
+      const accessToken = typeof TokenManager !== 'undefined' ? TokenManager.getAccessToken() : null;
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+      const response = await fetch(url, { method: 'DELETE', credentials: 'include', headers });
       if (!response.ok) {
         const msg = await response.text().catch(() => '');
         showHomeToast('Xóa bài thi thất bại: ' + (msg || `HTTP ${response.status}`));
@@ -1506,7 +1514,7 @@ async function restoreExam(examId) {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.RESTORE_TEACHER_EXAM)
       ? API_CONFIG.ENDPOINTS.RESTORE_TEACHER_EXAM(examId)
-      : `/api/teacher/exam/${encodeURIComponent(examId)}`;
+      : `http://103.75.182.246:8080/api/teacher/exam/${encodeURIComponent(examId)}`;
 
     const response = await fetch(url, { method: 'PUT', credentials: 'include' });
     if (!response.ok) {
@@ -1761,7 +1769,7 @@ function deleteError(errorId) {
     try {
       const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.DELETE_TEACHER_ERROR)
         ? API_CONFIG.ENDPOINTS.DELETE_TEACHER_ERROR(errorId)
-        : `/api/teacher/error/${encodeURIComponent(errorId)}`;
+        : `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(errorId)}`;
 
       const response = await fetch(url, { method: 'DELETE', credentials: 'include' });
       if (!response.ok) {
@@ -1788,7 +1796,7 @@ async function restoreError(errorId) {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.RESTORE_TEACHER_ERROR)
       ? API_CONFIG.ENDPOINTS.RESTORE_TEACHER_ERROR(errorId)
-      : `/api/teacher/error/${encodeURIComponent(errorId)}`;
+      : `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(errorId)}`;
 
     const csrfCookie = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
     const csrfToken = csrfCookie ? decodeURIComponent(csrfCookie.split('=')[1]) : '';
@@ -1868,7 +1876,7 @@ async function addErrorCatalog(event) {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR)
       ? API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR
-      : '/api/teacher/error';
+      : 'http://103.75.182.246:8080/api/teacher/error';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -2289,7 +2297,7 @@ async function _fetchHistoryDetailApi(record) {
       ? fetch(
           API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL
             ? API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL(idSession, record.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE')
-            : `/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${record.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE'}`,
+            : `http://103.75.182.246:8080/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${record.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE'}`,
           { credentials: 'include' }
         ).then(r => r.json()).catch(() => null)
       : Promise.resolve(null),
@@ -2297,7 +2305,7 @@ async function _fetchHistoryDetailApi(record) {
       ? fetch(
           API_CONFIG.ENDPOINTS.GRADE_BOARD
             ? API_CONFIG.ENDPOINTS.GRADE_BOARD(submissionId)
-            : `/public/grade-board/${encodeURIComponent(submissionId)}`,
+            : `http://103.75.182.246:8080/public/grade-board/${encodeURIComponent(submissionId)}`,
           { credentials: 'include' }
         ).then(r => r.json()).catch(() => null)
       : Promise.resolve(null)
@@ -2845,7 +2853,7 @@ async function handleProfileAvatarChange(event) {
     formData.append('id', userId);
     formData.append('file', file);
 
-    const res = await fetch('/public/upload-avatar', {
+    const res = await fetch('http://103.75.182.246:8080/public/upload-avatar', {
       method: 'POST',
       body: formData,
       credentials: 'include'
@@ -2855,7 +2863,7 @@ async function handleProfileAvatarChange(event) {
     const imageUrl = json?.data?.imageUrl;
     if (imageUrl) {
       // Gán avatar vào user
-      const saveRes = await fetch(`/public/upload/avatar/${userId}`, {
+      const saveRes = await fetch(`http://103.75.182.246:8080/public/upload/avatar/${userId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: imageUrl,
@@ -2941,7 +2949,7 @@ async function fetchStudentSubmissions(studentId) {
   if (!studentId) return {};
   const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT)
     ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT(studentId)
-    : `/student/submission/${encodeURIComponent(studentId)}`;
+    : `http://103.75.182.246:8080/student/submission/${encodeURIComponent(studentId)}`;
   try {
     const response = await ApiClient.fetchWithAuth(url);
     if (!response.ok) return {};

@@ -17,7 +17,7 @@ async function loadGradingSession() {
     try {
       const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS)
         ? API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS(pending.classExamId)
-        : `/teacher/class/${encodeURIComponent(pending.classExamId)}/submissions`;
+        : `http://103.75.182.246:8080/teacher/class/${encodeURIComponent(pending.classExamId)}/submissions`;
 
       const res = await fetch(url, { credentials: 'include' });
       const json = await res.json().catch(() => null);
@@ -365,7 +365,7 @@ async function fetchAndSyncTeacherErrors() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_ERRORS)
       ? API_CONFIG.ENDPOINTS.TEACHER_ERRORS(teacherId)
-      : `/api/teacher/error/${encodeURIComponent(teacherId)}`;
+      : `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(teacherId)}`;
 
     const response = await fetch(url, { credentials: 'include' });
     const json = await response.json().catch(() => null);
@@ -431,7 +431,7 @@ async function loadExistingGradingErrors() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL)
       ? API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL(idSession, gradingMode)
-      : `/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${gradingMode}`;
+      : `http://103.75.182.246:8080/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${gradingMode}`;
 
     const response = await fetch(url, { method: 'GET', credentials: 'include' });
     if (!response.ok) return;
@@ -710,7 +710,7 @@ async function captureFrame() {
 
     const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME)
       ? API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME
-      : '/public/capture-error-frame';
+      : 'http://103.75.182.246:8080/public/capture-error-frame';
 
     // Hiển thị thanh loading
     const preview = document.getElementById('frame-preview');
@@ -910,7 +910,7 @@ async function finishGrading() {
   if (idSession) {
     const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.GRADING_SESSION_ADD_ERROR)
       ? API_CONFIG.ENDPOINTS.GRADING_SESSION_ADD_ERROR(idSession)
-      : `/teacher/grading-session/${encodeURIComponent(idSession)}/add-error`;
+      : `http://103.75.182.246:8080/teacher/grading-session/${encodeURIComponent(idSession)}/add-error`;
 
     for (const e of state.assignedErrors) {
       try {
@@ -1280,7 +1280,7 @@ async function addNewErrorType() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR)
       ? API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR
-      : '/api/teacher/error';
+      : 'http://103.75.182.246:8080/api/teacher/error';
 
     const response = await fetch(url, {
       method: 'POST',

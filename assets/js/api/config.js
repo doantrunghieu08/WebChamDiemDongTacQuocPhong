@@ -3,9 +3,9 @@
 // ============================================
 
 const API_CONFIG = {
-    BASE_URL: '/public/api',
-    ADMIN_BASE_URL: '/admin/api',
-    TEACHER_BASE_URL: '/teacher/api',
+    BASE_URL: 'http://103.75.182.246:8080/public/api',
+    ADMIN_BASE_URL: 'http://103.75.182.246:8080/admin/api',
+    TEACHER_BASE_URL: 'http://103.75.182.246:8080/teacher/api',
 
     // Timeout (ms)
     TIMEOUT: 15000,
