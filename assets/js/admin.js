@@ -1233,7 +1233,7 @@ async function addAccount(event) {
       ...(avatarImage ? { avatarImage } : {})
     };
 
-    const response = await fetchWithAuth(API_CONFIG.ENDPOINTS.USER_CREATE, {
+    const response = await fetchWithAuth(`${API_CONFIG.ADMIN_BASE_URL}/user/create`, {
       method: 'POST',
       headers: {},
       body: JSON.stringify(payload)
