@@ -378,7 +378,7 @@ async function fetchClassStudentsFromServer(classId) {
   };
 
   try {
-    const PAGE_SIZE = 100;
+    const PAGE_SIZE = 30;
     const firstJson = await _fetchPage(0, PAGE_SIZE);
     if (!firstJson) return null;
 
