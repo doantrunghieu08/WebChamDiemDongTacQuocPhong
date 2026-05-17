@@ -1030,7 +1030,7 @@ function toggleClassField() {
   }
 }
 
-async function uploadAvatarToCloud(id) {
+async function uploadAvatarToCloud(id, saveToUser = true) {
   const input = document.getElementById('accountAvatar');
   const file = input && input.files && input.files[0];
   if (!file) return null;
@@ -1048,8 +1048,8 @@ async function uploadAvatarToCloud(id) {
   }
   const json = await response.json();
   const imageUrl = json?.data?.imageUrl || null;
-  if (imageUrl) {
-    // Gán avatar vào user
+  if (imageUrl && saveToUser) {
+    // Gán avatar vào user (chỉ dùng khi cập nhật user đã tồn tại)
     const saveRes = await fetchWithAuth(`http://103.75.182.246:8080/public/upload/avatar/${id}`, {
       method: 'POST',
       body: JSON.stringify(imageUrl)
@@ -1219,7 +1219,8 @@ async function addAccount(event) {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Đang lưu...'; }
 
   try {
-    const avatarImage = await uploadAvatarToCloud(id);
+    // Truyền saveToUser = false vì user chưa tồn tại, avatarImage sẽ được gửi trong payload tạo mới
+    const avatarImage = await uploadAvatarToCloud(id, false);
     const payload = {
       id,
       fullName: name,
@@ -1228,7 +1229,7 @@ async function addAccount(event) {
       role: role.toUpperCase(),
       birthday,
       email,
-      gender,
+      gender: (gender || 'MALE').toUpperCase(),
       statusType: status === 'active' ? 'ACTIVE' : 'LOCKED',
       ...(avatarImage ? { avatarImage } : {})
     };
