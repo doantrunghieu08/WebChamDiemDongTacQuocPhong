@@ -235,7 +235,7 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   position: sticky;
-  top: 60px;
+  top: 170px;
   z-index: 100;
   border-radius: 12px 12px 0 0;
 }
@@ -1265,6 +1265,70 @@ body {
   .btn-back { font-size: 12px; padding: 6px 10px; }
   .cd-exam-panel { padding-left: 20px; }
   .grading-mode-card { padding: 14px; }
+}
+
+/* ===== STUDENT PAGINATION ===== */
+#studentPagination {
+  padding: 14px 24px;
+  border-top: 1px solid #f0f0f0;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+}
+
+.cd-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cd-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cd-page-btn:hover:not(:disabled) {
+  border-color: #DC143C;
+  color: #DC143C;
+  background: #fff5f5;
+}
+
+.cd-page-btn.active {
+  background: #DC143C;
+  border-color: #DC143C;
+  color: #fff;
+  font-weight: 700;
+}
+
+.cd-page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cd-page-ellipsis {
+  color: #aaa;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 36px;
+}
+
+.cd-page-info {
+  font-size: 13px;
+  color: #888;
+  margin-left: 8px;
 }
 
 /* ===== DELETE STUDENT MODAL ===== */

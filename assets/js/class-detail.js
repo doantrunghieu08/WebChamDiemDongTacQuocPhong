@@ -26,6 +26,10 @@ let classExamSize = 3;        // số bài thi mỗi trang (= CARDS_PER_PAGE)
 const classExamLoadedPages = new Set(); // các trang đã tải
 let submissionsMap = {}; // { classExamId: { studentId: submissionRecord } }
 let gradingSessionStatusMap = {}; // { submissionId: 'FINALIZED'|'IN_PROGRESS'|null }
+const STUDENTS_PER_PAGE = 20;
+let currentStudentPage = 1;
+let currentDisplayedStudents = [];
+
 let selectedExam = null;
 let selectedStudent = null;
 let selectedSubmissionId = null;
@@ -927,7 +931,14 @@ async function goToExamPage(studentCode, page) {
   slider.dataset.page = page;
 }
 
-function renderStudents(students) {
+function renderStudents(students, resetPage = true) {
+  if (resetPage) currentStudentPage = 1;
+  currentDisplayedStudents = students || [];
+  _renderStudentPage();
+}
+
+function _renderStudentPage() {
+  const students = currentDisplayedStudents;
   const container = document.getElementById('studentList');
   const btnAddExam = document.getElementById('btnAddExam');
 
@@ -939,15 +950,23 @@ function renderStudents(students) {
         <p>Chưa có sinh viên trong lớp</p>
         <span>Danh sách sinh viên được quản lý tại trang admin.</span>
       </div>`;
+    renderStudentPagination(0, 1);
     return;
   }
 
   if (btnAddExam) btnAddExam.style.display = '';
 
-  container.innerHTML = students.map((s, i) => `
+  const totalPages = Math.ceil(students.length / STUDENTS_PER_PAGE);
+  if (currentStudentPage > totalPages) currentStudentPage = totalPages;
+  if (currentStudentPage < 1) currentStudentPage = 1;
+
+  const start = (currentStudentPage - 1) * STUDENTS_PER_PAGE;
+  const pageStudents = students.slice(start, start + STUDENTS_PER_PAGE);
+
+  container.innerHTML = pageStudents.map((s, i) => `
     <div class="cd-student-row" id="student-${s.code}">
       <div class="cd-student-header" onclick="toggleStudent('${s.code}')">
-        <div class="cd-student-number">${i + 1}</div>
+        <div class="cd-student-number">${start + i + 1}</div>
         ${s.avatarImage
           ? `<img src="${s.avatarImage}" alt="avatar" class="cd-student-avatar">`
           : `<div class="cd-student-avatar cd-student-avatar-default">${DEFAULT_AVATAR_SVG}</div>`
@@ -963,6 +982,48 @@ function renderStudents(students) {
       </div>
     </div>
   `).join('');
+
+  renderStudentPagination(students.length, totalPages);
+}
+
+function renderStudentPagination(total, totalPages) {
+  const pag = document.getElementById('studentPagination');
+  if (!pag) return;
+
+  if (totalPages <= 1) {
+    pag.innerHTML = '';
+    return;
+  }
+
+  const page = currentStudentPage;
+  let btns = '';
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
+      btns += `<button class="cd-page-btn${p === page ? ' active' : ''}" onclick="goStudentPage(${p})">${p}</button>`;
+    } else if (p === page - 2 || p === page + 2) {
+      btns += `<span class="cd-page-ellipsis">…</span>`;
+    }
+  }
+
+  pag.innerHTML = `
+    <div class="cd-pagination">
+      <button class="cd-page-btn cd-page-nav" onclick="goStudentPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      ${btns}
+      <button class="cd-page-btn cd-page-nav" onclick="goStudentPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <span class="cd-page-info">${total} sinh viên · Trang ${page}/${totalPages}</span>
+    </div>`;
+}
+
+function goStudentPage(page) {
+  const totalPages = Math.ceil(currentDisplayedStudents.length / STUDENTS_PER_PAGE);
+  if (page < 1 || page > totalPages) return;
+  currentStudentPage = page;
+  _renderStudentPage();
+  document.querySelector('.cd-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ===== INTERACTIONS =====
