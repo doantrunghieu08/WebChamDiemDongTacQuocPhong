@@ -58,6 +58,9 @@ body {
 .admin-header {
   background: linear-gradient(135deg, #7f1d1d, #DC143C 55%, #FF6B35);
   box-shadow: 0 8px 24px rgba(127, 29, 29, 0.18);
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }
 
 .admin-header-inner {
