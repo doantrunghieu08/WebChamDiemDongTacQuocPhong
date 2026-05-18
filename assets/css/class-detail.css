@@ -223,7 +223,6 @@ body {
   border-radius: 12px;
   border: 1px solid #FFD4B4;
   box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-  overflow: hidden;
 }
 
 .cd-section-header {
@@ -235,6 +234,10 @@ body {
   background: linear-gradient(135deg, #fff7f4, #ffffff);
   flex-wrap: wrap;
   gap: 12px;
+  position: sticky;
+  top: 60px;
+  z-index: 100;
+  border-radius: 12px 12px 0 0;
 }
 
 .cd-section-header h2 {
