@@ -141,6 +141,7 @@ body {
   top: 116px;
   align-self: start;
   max-height: calc(100vh - 140px);
+  transition: top 0.1s;
   overflow-y: auto;
   backdrop-filter: blur(12px);
   display: flex;

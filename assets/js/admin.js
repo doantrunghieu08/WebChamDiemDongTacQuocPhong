@@ -1992,4 +1992,18 @@ async function initializeAdminPage() {
   attachAdminEvents();
 }
 
-document.addEventListener('DOMContentLoaded', initializeAdminPage);
+function syncSidebarTop() {
+  const header = document.querySelector('.admin-header');
+  const sidebar = document.querySelector('.admin-sidebar');
+  if (!header || !sidebar) return;
+  const h = header.getBoundingClientRect().height;
+  const top = Math.round(h) + 16;
+  sidebar.style.top = top + 'px';
+  sidebar.style.maxHeight = `calc(100vh - ${top + 24}px)`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initializeAdminPage();
+  syncSidebarTop();
+  window.addEventListener('resize', syncSidebarTop);
+});
