@@ -138,9 +138,9 @@ body {
   border-radius: 18px;
   padding: 18px;
   position: sticky;
-  top: 24px;
+  top: 116px;
   align-self: start;
-  max-height: calc(100vh - 48px);
+  max-height: calc(100vh - 140px);
   overflow-y: auto;
   backdrop-filter: blur(12px);
   display: flex;
