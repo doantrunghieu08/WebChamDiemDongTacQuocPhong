@@ -1336,8 +1336,14 @@ async function callAIGrading() {
       ? API_CONFIG.ENDPOINTS.AI_GRADE(idTeacher, videoUrl)
       : `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`;
 
-    const resp = await fetch(url, { credentials: 'include' });
-    const json = await resp.json().catch(() => null);
+    const resp = await fetch(url, { method: 'POST', credentials: 'include' });
+    let json = null;
+    try {
+      const text = await resp.text();
+      json = JSON.parse(text);
+      // Spring ResponseEntity<String> đôi khi double-serialize → parse thêm lần nữa
+      if (typeof json === 'string') json = JSON.parse(json);
+    } catch (_) { json = null; }
 
     if (!resp.ok || !json) {
       _showAIGradeModal({ error: 'Không thể lấy gợi ý từ AI. Mã lỗi: ' + resp.status });
