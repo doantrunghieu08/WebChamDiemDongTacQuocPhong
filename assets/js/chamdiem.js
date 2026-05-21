@@ -704,8 +704,9 @@ async function captureFrame() {
     console.log('[captureFrame] submissionId:', submissionId, '| studentName:', state.currentStudent?.name || '(none)');
 
     const formData = new FormData();
+    const removeDiacritics = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
     formData.append('file', file);
-    formData.append('studentName', state.currentStudent?.name || '');
+    formData.append('studentName', removeDiacritics(state.currentStudent?.name || ''));
     formData.append('submissionId', String(submissionId));
 
     const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME)
@@ -1315,6 +1316,85 @@ async function addNewErrorType() {
   renderErrorTypeList();
   closeAddErrorModal();
   showToast('Đã thêm loại lỗi: ' + name);
+}
+
+// ---- AI GRADING SUGGESTION ----
+async function callAIGrading() {
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
+  const videoUrl = state.videoUrls[state.currentVideo - 1] || state.videoUrls[0] || '';
+
+  if (!idTeacher || !videoUrl) {
+    showToast('Không đủ thông tin để gọi AI chấm điểm (thiếu giáo viên hoặc video).', true);
+    return;
+  }
+
+  _showAIGradeModal({ loading: true });
+
+  try {
+    const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.AI_GRADE)
+      ? API_CONFIG.ENDPOINTS.AI_GRADE(idTeacher, videoUrl)
+      : `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`;
+
+    const resp = await fetch(url, { credentials: 'include' });
+    const json = await resp.json().catch(() => null);
+
+    if (!resp.ok || !json) {
+      _showAIGradeModal({ error: 'Không thể lấy gợi ý từ AI. Mã lỗi: ' + resp.status });
+      return;
+    }
+
+    _showAIGradeModal({ data: json });
+  } catch (err) {
+    _showAIGradeModal({ error: 'Lỗi kết nối: ' + err.message });
+  }
+}
+
+function _showAIGradeModal({ loading = false, error = null, data = null } = {}) {
+  const modal = document.getElementById('ai-grade-modal');
+  const body = document.getElementById('ai-grade-modal-body');
+  modal.style.display = 'flex';
+
+  if (loading) {
+    body.innerHTML = '<div class="ai-loading"><span class="ai-spin">⏳</span> Đang phân tích video bằng AI, vui lòng chờ...</div>';
+    return;
+  }
+
+  if (error) {
+    body.innerHTML = '<div class="ai-error-msg">⚠️ ' + error + '</div>';
+    return;
+  }
+
+  const score = data?.suggestedScore ?? 'N/A';
+  const errors = Array.isArray(data?.detectedErrors) ? data.detectedErrors : [];
+
+  let html = '<div class="ai-score-row">Điểm gợi ý: <span class="ai-score-val">' + score + '</span> / 10</div>';
+
+  if (errors.length === 0) {
+    html += '<div class="ai-no-errors">✅ AI không phát hiện lỗi nào trong video.</div>';
+  } else {
+    html += '<div class="ai-errors-title">Phát hiện ' + errors.length + ' lỗi:</div><div class="ai-errors-list">';
+    errors.forEach(function(e, i) {
+      const errorName = state.errorTypes.find(function(et) { return et.id === e.errorType; })?.name || ('Lỗi #' + e.errorType);
+      html +=
+        '<div class="ai-error-item">' +
+          '<div class="ai-error-header">' +
+            '<span class="ai-err-num">' + (i + 1) + '</span>' +
+            '<span class="ai-err-time">⏱ ' + (e.timestamp || '--:--') + '</span>' +
+            '<span class="ai-err-type">' + errorName + '</span>' +
+          '</div>' +
+          '<div class="ai-err-desc">' + e.description + '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+function closeAIGradeModal(e) {
+  if (e && e.target !== document.getElementById('ai-grade-modal')) return;
+  document.getElementById('ai-grade-modal').style.display = 'none';
 }
 
 // ---- TOAST ----

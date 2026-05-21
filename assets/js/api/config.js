@@ -99,6 +99,9 @@ const API_CONFIG = {
         // Bảng điểm toàn lớp theo classId
         CLASS_GRADE_BOARD: (classId) => `/public/class-grade-board/submission/${encodeURIComponent(classId)}`,
 
+        // AI gợi ý chấm điểm
+        AI_GRADE: (idTeacher, videoUrl) => `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`,
+
         // Trạng thái phiên chấm theo submissionId
         GRADING_SESSION_BY_SUBMISSION: (submissionId, page = 0, size = 3) => `/teacher/grading-session/submission/${encodeURIComponent(submissionId)}?page=${page}&size=${size}`,
 

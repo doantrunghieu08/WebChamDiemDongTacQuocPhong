@@ -35,7 +35,10 @@
       <!-- Page Header -->
       <div class="header-row">
         <div class="page-title">CHẤM ĐIỂM ĐỘNG TÁC QUỐC PHÒNG</div>
-        <button class="btn-add" onclick="openAddErrorModal()">+ THÊM LỖI MỚI</button>
+        <div class="header-actions">
+          <button class="btn-ai-grade" id="btnAIGrade" onclick="callAIGrading()" title="Gợi ý chấm điểm bằng AI">🤖</button>
+          <button class="btn-add" onclick="openAddErrorModal()">+ THÊM LỖI MỚI</button>
+        </div>
       </div>
 
       <div class="grading-deadline-notice" id="gradingDeadlineNotice" style="display:none"></div>
@@ -243,6 +246,17 @@
         <button class="btn-cancel" onclick="closeAddErrorModal()">Hủy</button>
         <button class="btn-confirm" onclick="addNewErrorType()">Lưu lỗi</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal AI Gợi ý chấm bài -->
+  <div class="modal-backdrop" id="ai-grade-modal" style="display:none" onclick="closeAIGradeModal(event)">
+    <div class="modal ai-grade-modal">
+      <div class="modal-header">
+        <span>🤖 Gợi ý chấm điểm AI</span>
+        <button class="modal-close" onclick="document.getElementById('ai-grade-modal').style.display='none'">&#10005;</button>
+      </div>
+      <div class="modal-body" id="ai-grade-modal-body"></div>
     </div>
   </div>
 

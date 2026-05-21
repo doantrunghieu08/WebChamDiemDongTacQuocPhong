@@ -921,9 +921,10 @@ async function uploadFileToServer(file) {
 
   try {
     const formData = new FormData();
+    const removeDiacritics = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
     formData.append('file', file);
-    formData.append('studentName', currentExam?.studentName || '');
-    formData.append('examTitle', currentExam?.name || '');
+    formData.append('studentName', removeDiacritics(currentExam?.studentName || ''));
+    formData.append('examTitle', removeDiacritics(currentExam?.name || ''));
 
     const uploadCsrf = (typeof _getCsrfToken === 'function') ? _getCsrfToken() : null;
     const uploadHeaders = {};
