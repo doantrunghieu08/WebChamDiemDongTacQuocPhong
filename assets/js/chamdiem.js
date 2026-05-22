@@ -39,16 +39,8 @@ async function loadGradingSession() {
       // Log để debug khi vẫn không tìm được
       if (!idSubmission) {
         console.warn('[loadGradingSession] studentCode cần tìm:', pending.studentCode);
-        console.warn('[loadGradingSession] Danh sách submission từ API:',
-          list.map(item => ({
-            id: item.id ?? item.submissionId,
-            studentCode: item.studentCode,
-            idStudent: item.idStudent,
-            studentId: item.studentId,
-            student_id: item.student_id,
-            student: item.student,
-          }))
-        );
+        console.warn('[loadGradingSession] Raw submission item[0]:', JSON.stringify(list[0] ?? null));
+        console.warn('[loadGradingSession] Tất cả keys của item[0]:', Object.keys(list[0] ?? {}));
       }
     } catch (e) {
       console.warn('[loadGradingSession] Không thể lấy submission ID:', e);
