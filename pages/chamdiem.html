@@ -83,7 +83,7 @@
           </div>
 
           <!-- Thumbnails -->
-          <div class="thumbs">
+          <div class="thumbs" id="thumbs-container">
             <div class="thumb" onclick="switchVideo(1)">
               <div class="thumb-img" id="thumb-1">&#9654; V01</div>
               <span>Video 01</span>
@@ -92,6 +92,13 @@
               <div class="thumb-img" id="thumb-2">&#9654; V02</div>
               <span>Video 02</span>
             </div>
+          </div>
+
+          <!-- Upload video button -->
+          <div class="upload-video-row">
+            <button class="btn-upload-video" onclick="openUploadVideoModal()" title="Tải video bài thi của sinh viên lên">
+              &#128190; TẢI VIDEO LÊN
+            </button>
           </div>
         </div>
       </div>
@@ -257,6 +264,65 @@
         <button class="modal-close" onclick="document.getElementById('ai-grade-modal').style.display='none'">&#10005;</button>
       </div>
       <div class="modal-body" id="ai-grade-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Modal tải video bài thi sinh viên lên -->
+  <div class="modal-backdrop" id="upload-video-modal" style="display:none" onclick="closeUploadVideoModal(event)">
+    <div class="modal upload-video-modal">
+      <div class="modal-header">
+        <span>&#128190; Tải Video Bài Thi Lên</span>
+        <button class="modal-close" onclick="closeUploadVideoModal()">&#10005;</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- PHASE 1: Chọn file -->
+        <div id="upload-phase-1">
+          <p class="upload-video-desc">Chọn tối đa 2 video bài thi của sinh viên. Nhấn <strong>Tải lên</strong> để upload lên hệ thống, sau đó xác nhận để lưu vào bài nộp.</p>
+
+          <div class="upload-slot" id="upload-slot-1">
+            <label class="upload-slot-label">Video 01</label>
+            <div class="upload-drop-zone" id="drop-zone-1" onclick="document.getElementById('video-file-1').click()">
+              <div class="upload-drop-icon">&#127909;</div>
+              <div class="upload-drop-text">Nhấn để chọn hoặc kéo thả video vào đây</div>
+              <div class="upload-drop-sub">MP4, AVI, MOV, MKV — tối đa 500MB</div>
+              <div class="upload-file-name" id="file-name-1" style="display:none"></div>
+            </div>
+            <input type="file" id="video-file-1" accept="video/*" style="display:none" onchange="handleVideoFileSelect(1, this)" />
+          </div>
+
+          <div class="upload-slot" id="upload-slot-2">
+            <label class="upload-slot-label">Video 02 <span class="optional-tag">(tuỳ chọn)</span></label>
+            <div class="upload-drop-zone" id="drop-zone-2" onclick="document.getElementById('video-file-2').click()">
+              <div class="upload-drop-icon">&#127909;</div>
+              <div class="upload-drop-text">Nhấn để chọn hoặc kéo thả video vào đây</div>
+              <div class="upload-drop-sub">MP4, AVI, MOV, MKV — tối đa 500MB</div>
+              <div class="upload-file-name" id="file-name-2" style="display:none"></div>
+            </div>
+            <input type="file" id="video-file-2" accept="video/*" style="display:none" onchange="handleVideoFileSelect(2, this)" />
+          </div>
+
+          <div class="upload-progress-wrap" id="upload-progress-wrap" style="display:none">
+            <div class="upload-progress-label" id="upload-progress-label">Đang tải lên…</div>
+            <div class="upload-progress-bar-outer">
+              <div class="upload-progress-bar-inner" id="upload-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PHASE 2: Xác nhận sau khi upload xong -->
+        <div id="upload-phase-2" style="display:none">
+          <div class="upload-confirm-banner">&#10003; Video đã được tải lên Cloudinary thành công!</div>
+          <div class="upload-confirm-list" id="upload-confirm-list"></div>
+          <p class="upload-video-desc" style="margin-top:12px">Nhấn <strong>Xác nhận nộp bài</strong> để lưu video vào bài thi của sinh viên.</p>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeUploadVideoModal()" id="btn-upload-cancel">Hủy</button>
+        <button class="btn-confirm" onclick="doUploadToCloudinary()" id="btn-upload-confirm">&#128190; Tải lên</button>
+        <button class="btn-confirm" onclick="doConfirmSubmission()" id="btn-upload-submit" style="display:none; background:linear-gradient(135deg,#16a34a,#15803d)">&#10003; Xác nhận nộp bài</button>
+      </div>
     </div>
   </div>
 

@@ -68,6 +68,9 @@ const API_CONFIG = {
         // Sample Video Upload (public endpoint — Cloudinary)
         UPLOAD_SAMPLE_VIDEO: '/public/upload-sample',
 
+        // Teacher: upload video bài thi sinh viên lên Cloudinary (bước 1)
+        UPLOAD_STUDENT_EXAM_VIDEO: '/public/upload-student-exam',
+
         // Student submission (nộp bài)
         STUDENT_SUBMISSION: '/student/submission',
         STUDENT_SUBMISSIONS_BY_STUDENT: (studentId) => `/student/submission/${encodeURIComponent(studentId)}`,
@@ -98,6 +101,9 @@ const API_CONFIG = {
 
         // Bảng điểm toàn lớp theo classId
         CLASS_GRADE_BOARD: (classId) => `/public/class-grade-board/submission/${encodeURIComponent(classId)}`,
+
+        // Teacher: tải video bài thi của sinh viên lên (thay thế / bổ sung video)
+        TEACHER_UPLOAD_SUBMISSION_VIDEO: (submissionId) => `/teacher/submission/${encodeURIComponent(submissionId)}/upload-video`,
 
         // AI gợi ý chấm điểm
         AI_GRADE: (idTeacher, videoUrl) => `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`,

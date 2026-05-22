@@ -1230,6 +1230,269 @@ function editRecord(id) {
 }
 
 // ---- ADD NEW ERROR TYPE ----
+
+// ---- UPLOAD STUDENT VIDEO ----
+const _uploadVideoState = {
+  file1: null, file2: null,
+  uploadedUrl1: null, uploadedUrl2: null,
+  uploadedSize1: 0,   uploadedSize2: 0,
+};
+
+function openUploadVideoModal() {
+  Object.assign(_uploadVideoState, { file1: null, file2: null, uploadedUrl1: null, uploadedUrl2: null, uploadedSize1: 0, uploadedSize2: 0 });
+  ['1', '2'].forEach(n => {
+    const fn = document.getElementById('file-name-' + n);
+    if (fn) { fn.style.display = 'none'; fn.textContent = ''; }
+    const dz = document.getElementById('drop-zone-' + n);
+    if (dz) dz.classList.remove('has-file');
+    const inp = document.getElementById('video-file-' + n);
+    if (inp) inp.value = '';
+  });
+  const wrap = document.getElementById('upload-progress-wrap');
+  if (wrap) wrap.style.display = 'none';
+  _switchUploadPhase(1);
+  document.getElementById('upload-video-modal').style.display = 'flex';
+  setupDropZones();
+}
+
+function closeUploadVideoModal(e) {
+  if (e && e.target !== document.getElementById('upload-video-modal')) return;
+  document.getElementById('upload-video-modal').style.display = 'none';
+}
+
+function _switchUploadPhase(phase) {
+  document.getElementById('upload-phase-1').style.display = phase === 1 ? '' : 'none';
+  document.getElementById('upload-phase-2').style.display = phase === 2 ? '' : 'none';
+  document.getElementById('btn-upload-confirm').style.display = phase === 1 ? '' : 'none';
+  document.getElementById('btn-upload-submit').style.display = phase === 2 ? '' : 'none';
+}
+
+function setupDropZones() {
+  [1, 2].forEach(n => {
+    const dz = document.getElementById('drop-zone-' + n);
+    if (!dz || dz._dropSetup) return;
+    dz._dropSetup = true;
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('drag-over');
+      const file = e.dataTransfer?.files?.[0];
+      if (file) applyVideoFile(n, file);
+    });
+  });
+}
+
+function handleVideoFileSelect(n, input) {
+  const file = input.files?.[0];
+  if (file) applyVideoFile(n, file);
+}
+
+function applyVideoFile(n, file) {
+  if (!file.type.startsWith('video/')) {
+    showToast('Vui lòng chọn tệp video hợp lệ (MP4, AVI, MOV, MKV…)', true);
+    return;
+  }
+  if (file.size > 500 * 1024 * 1024) {
+    showToast('Tệp video vượt quá giới hạn 500MB.', true);
+    return;
+  }
+  if (n === 1) _uploadVideoState.file1 = file;
+  else _uploadVideoState.file2 = file;
+
+  const fn = document.getElementById('file-name-' + n);
+  if (fn) {
+    fn.textContent = '✓ ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+    fn.style.display = 'block';
+  }
+  document.getElementById('drop-zone-' + n)?.classList.add('has-file');
+}
+
+function setUploadBtnsDisabled(disabled) {
+  ['btn-upload-confirm', 'btn-upload-cancel', 'btn-upload-submit'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = disabled;
+  });
+}
+
+// Bước 1: Upload từng file lên Cloudinary qua /public/upload-student-exam
+async function doUploadToCloudinary() {
+  if (!_uploadVideoState.file1 && !_uploadVideoState.file2) {
+    showToast('Vui lòng chọn ít nhất một tệp video.', true);
+    return;
+  }
+
+  const progressWrap = document.getElementById('upload-progress-wrap');
+  const progressBar  = document.getElementById('upload-progress-bar');
+  const progressLabel = document.getElementById('upload-progress-label');
+  if (progressWrap) progressWrap.style.display = 'block';
+  if (progressBar)  progressBar.style.width = '0%';
+  setUploadBtnsDisabled(true);
+
+  const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.UPLOAD_STUDENT_EXAM_VIDEO)
+    ? API_CONFIG.ENDPOINTS.UPLOAD_STUDENT_EXAM_VIDEO
+    : 'http://103.75.182.246:8080/public/upload-student-exam';
+
+  const studentName = state.currentStudent?.name || 'unknown';
+  const examTitle   = state.currentStudent?.subject || 'exam';
+
+  try {
+    // Upload video 1
+    if (_uploadVideoState.file1) {
+      if (progressLabel) progressLabel.textContent = 'Đang tải Video 01 lên…';
+      const res1 = await _uploadOneVideo(apiUrl, _uploadVideoState.file1, studentName, examTitle, progressBar, 0, 50);
+      _uploadVideoState.uploadedUrl1  = res1.url;
+      _uploadVideoState.uploadedSize1 = _uploadVideoState.file1.size;
+    }
+
+    // Upload video 2
+    if (_uploadVideoState.file2) {
+      if (progressLabel) progressLabel.textContent = 'Đang tải Video 02 lên…';
+      const res2 = await _uploadOneVideo(apiUrl, _uploadVideoState.file2, studentName, examTitle, progressBar, 50, 100);
+      _uploadVideoState.uploadedUrl2  = res2.url;
+      _uploadVideoState.uploadedSize2 = _uploadVideoState.file2.size;
+    }
+
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressLabel) progressLabel.textContent = 'Tải lên hoàn thành!';
+
+    // Hiển thị phase 2 xác nhận
+    _renderConfirmList();
+    _switchUploadPhase(2);
+    setUploadBtnsDisabled(false);
+  } catch (err) {
+    console.error('[doUploadToCloudinary]', err);
+    if (progressLabel) progressLabel.textContent = 'Tải lên thất bại!';
+    showToast(err.message || 'Tải video thất bại. Vui lòng thử lại.', true);
+    setUploadBtnsDisabled(false);
+  }
+}
+
+function _uploadOneVideo(apiUrl, file, studentName, examTitle, progressBar, startPct, endPct) {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('studentName', studentName);
+    formData.append('examTitle', examTitle);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', apiUrl, true);
+    xhr.withCredentials = true;
+
+    const csrfMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
+    if (csrfMatch) xhr.setRequestHeader('X-XSRF-TOKEN', decodeURIComponent(csrfMatch.split('=')[1]));
+    const token = sessionStorage.getItem('accessToken');
+    if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+    xhr.upload.addEventListener('progress', e => {
+      if (e.lengthComputable && progressBar) {
+        const pct = startPct + Math.round((e.loaded / e.total) * (endPct - startPct));
+        progressBar.style.width = pct + '%';
+      }
+    });
+
+    xhr.onload = () => {
+      try {
+        const json = JSON.parse(xhr.responseText);
+        if ((xhr.status === 200 || xhr.status === 201) && json?.data) {
+          // CloudinaryResponse: { url, secureUrl, publicId, ... }
+          const d = json.data;
+          resolve({ url: d.url || d.secureUrl || d.videoUrl || d });
+        } else {
+          reject(new Error(json?.message || 'Upload thất bại: HTTP ' + xhr.status));
+        }
+      } catch {
+        reject(new Error('Không thể đọc phản hồi từ server.'));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Lỗi kết nối khi tải video lên.'));
+    xhr.send(formData);
+  });
+}
+
+function _renderConfirmList() {
+  const list = document.getElementById('upload-confirm-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (_uploadVideoState.uploadedUrl1) {
+    list.innerHTML += `<div class="upload-confirm-item">
+      <span class="upload-confirm-badge">Video 01</span>
+      <a href="${_uploadVideoState.uploadedUrl1}" target="_blank" rel="noopener" class="upload-confirm-url">${_uploadVideoState.uploadedUrl1}</a>
+      <span class="upload-confirm-size">${(_uploadVideoState.uploadedSize1 / 1024 / 1024).toFixed(1)} MB</span>
+    </div>`;
+  }
+  if (_uploadVideoState.uploadedUrl2) {
+    list.innerHTML += `<div class="upload-confirm-item">
+      <span class="upload-confirm-badge">Video 02</span>
+      <a href="${_uploadVideoState.uploadedUrl2}" target="_blank" rel="noopener" class="upload-confirm-url">${_uploadVideoState.uploadedUrl2}</a>
+      <span class="upload-confirm-size">${(_uploadVideoState.uploadedSize2 / 1024 / 1024).toFixed(1)} MB</span>
+    </div>`;
+  }
+}
+
+// Bước 2: Xác nhận nộp bài — gọi teacher/submission/{submissionId}/upload-video với JSON
+async function doConfirmSubmission() {
+  const submissionId = state.submissionId
+    || JSON.parse(sessionStorage.getItem('gradingSession') || '{}')?.studentSubmissionResponse?.id
+    || '';
+
+  if (!submissionId) {
+    showToast('Không xác định được bài nộp. Vui lòng thử lại.', true);
+    return;
+  }
+
+  setUploadBtnsDisabled(true);
+
+  const body = {
+    videoUrl1:      _uploadVideoState.uploadedUrl1 || null,
+    fileSizeBytes1: _uploadVideoState.uploadedSize1 || 0,
+    videoUrl2:      _uploadVideoState.uploadedUrl2 || null,
+    fileSizeBytes2: _uploadVideoState.uploadedSize2 || 0,
+  };
+
+  const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO)
+    ? API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO(submissionId)
+    : `http://103.75.182.246:8080/teacher/submission/${encodeURIComponent(submissionId)}/upload-video`;
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const csrfMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
+    if (csrfMatch) headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfMatch.split('=')[1]);
+    const token = sessionStorage.getItem('accessToken');
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify(body),
+    });
+    const json = await res.json().catch(() => null);
+
+    if (res.ok && json) {
+      const newUrls = [];
+      if (_uploadVideoState.uploadedUrl1) newUrls.push(_uploadVideoState.uploadedUrl1);
+      if (_uploadVideoState.uploadedUrl2) newUrls.push(_uploadVideoState.uploadedUrl2);
+      if (newUrls.length > 0) {
+        state.videoUrls = newUrls;
+        state.totalVideos = newUrls.length;
+        document.getElementById('vid-total').textContent = String(state.totalVideos).padStart(2, '0');
+        renderThumbs(newUrls.length);
+        loadVideoPlayer(1);
+      }
+      showToast('Đã nộp bài thi thành công!');
+      document.getElementById('upload-video-modal').style.display = 'none';
+    } else {
+      throw new Error(json?.message || 'Xác nhận nộp bài thất bại: HTTP ' + res.status);
+    }
+  } catch (err) {
+    console.error('[doConfirmSubmission]', err);
+    showToast(err.message || 'Xác nhận nộp bài thất bại. Vui lòng thử lại.', true);
+    setUploadBtnsDisabled(false);
+  }
+}
+// ---- END UPLOAD STUDENT VIDEO ----
+
 function openAddErrorModal() {
   if (!ensureGradingAvailable('thêm lỗi mới')) return;
 
