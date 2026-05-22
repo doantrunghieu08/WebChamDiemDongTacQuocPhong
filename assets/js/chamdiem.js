@@ -24,21 +24,58 @@ async function loadGradingSession() {
       const list = Array.isArray(json?.data) ? json.data : [];
 
       const sub = list.find(item => {
-        const sid = item.idStudent ?? item.studentId ?? item.student_id;
-        return String(sid) === String(pending.studentCode);
+        // Hỗ trợ cả flat (idStudent) lẫn nested (student.id / student.code)
+        const sid = item.idStudent ?? item.studentId ?? item.student_id
+          ?? item.student?.id ?? item.student?.code ?? item.student?.studentId ?? null;
+        return sid != null && String(sid) === String(pending.studentCode);
       });
 
       if (sub) {
         const rawId = sub.id ?? sub.submissionId ?? sub.submission_id ?? null;
         if (rawId != null) idSubmission = String(rawId);
       }
+
+      // Log để debug khi vẫn không tìm được
+      if (!idSubmission) {
+        console.warn('[loadGradingSession] Submissions từ API:', list);
+        console.warn('[loadGradingSession] studentCode cần tìm:', pending.studentCode);
+      }
     } catch (e) {
       console.warn('[loadGradingSession] Không thể lấy submission ID:', e);
     }
   }
 
+  // Nếu vẫn không có submission → sinh viên chưa nộp bài
+  // Thử tạo submission mới (placeholder) để giáo viên có thể upload video
+  if (!idSubmission && pending.classExamId && pending.studentCode) {
+    try {
+      const createUrl = `http://103.75.182.246:8080/teacher/submission/create`;
+      const headers = { 'Content-Type': 'application/json' };
+      const csrfMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
+      if (csrfMatch) headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfMatch.split('=')[1]);
+      const token = sessionStorage.getItem('accessToken');
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      const res = await fetch(createUrl, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ classExamId: pending.classExamId, studentCode: pending.studentCode }),
+      });
+      const json = await res.json().catch(() => null);
+      const newId = json?.data?.id ?? json?.data?.submissionId ?? null;
+      if (newId != null) {
+        idSubmission = String(newId);
+        console.log('[loadGradingSession] Đã tạo submission mới:', idSubmission);
+      }
+    } catch (e) {
+      console.warn('[loadGradingSession] Không thể tạo submission mới:', e);
+    }
+  }
+
   if (!idSubmission) {
     console.warn('[loadGradingSession] Không tìm được idSubmission, bỏ qua khởi tạo phiên chấm.');
+    showToast('Sinh viên chưa nộp bài. Hãy dùng chức năng "Tải Video Lên" để nộp thay.', true);
     return;
   }
 

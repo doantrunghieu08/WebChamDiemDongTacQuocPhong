@@ -281,7 +281,9 @@ async function fetchSubmissionsForAllExams() {
 
       submissionsMap[String(classExamId)] = {};
       list.forEach(item => {
-        const sid = item.idStudent ?? item.studentId;
+        // Hỗ trợ cả flat (idStudent) lẫn nested (student.id / student.code)
+        const sid = item.idStudent ?? item.studentId ?? item.student_id
+          ?? item.student?.id ?? item.student?.code ?? item.student?.studentId ?? null;
         if (sid != null) submissionsMap[String(classExamId)][String(sid)] = item;
       });
     } catch (err) {
