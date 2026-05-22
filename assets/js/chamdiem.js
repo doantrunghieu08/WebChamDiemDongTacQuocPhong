@@ -25,9 +25,9 @@ async function loadGradingSession() {
 
       const normalize = s => String(s ?? '').trim().toUpperCase();
       const sub = list.find(item => {
-        // Hỗ trợ cả flat (idStudent) lẫn nested (student.id / student.code)
-        const sid = item.idStudent ?? item.studentId ?? item.student_id
-          ?? item.student?.id ?? item.student?.code ?? item.student?.studentId ?? null;
+        // Hỗ trợ cả flat (idStudent / studentCode) lẫn nested (student.id / student.code)
+        const sid = item.studentCode ?? item.idStudent ?? item.studentId ?? item.student_id
+          ?? item.student?.id ?? item.student?.code ?? item.student?.studentCode ?? item.student?.studentId ?? null;
         return normalize(sid) === normalize(pending.studentCode);
       });
 
@@ -42,6 +42,7 @@ async function loadGradingSession() {
         console.warn('[loadGradingSession] Danh sách submission từ API:',
           list.map(item => ({
             id: item.id ?? item.submissionId,
+            studentCode: item.studentCode,
             idStudent: item.idStudent,
             studentId: item.studentId,
             student_id: item.student_id,
@@ -1467,11 +1468,12 @@ async function doConfirmSubmission() {
 
   const body = {
     idStudent:      studentCode,
-    classExamId:    classExamId,
+    idClassExam:    classExamId,   // khớp với DTO: int idClassExam
     videoUrl1:      _uploadVideoState.uploadedUrl1 || null,
     fileSizeBytes1: _uploadVideoState.uploadedSize1 || 0,
     videoUrl2:      _uploadVideoState.uploadedUrl2 || null,
     fileSizeBytes2: _uploadVideoState.uploadedSize2 || 0,
+    status:         'SUBMITTED',
   };
 
   const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO)
