@@ -1505,6 +1505,25 @@ async function doConfirmSubmission() {
       }
       showToast('Đã nộp bài thi thành công!');
       document.getElementById('upload-video-modal').style.display = 'none';
+
+      // Khởi tạo phiên chấm ngay sau khi nộp bài thành công
+      if (newSubmissionId) {
+        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        const idTeacher = currentUser?.id ?? currentUser?.userId ?? null;
+        const rawMode = sessionStorage.getItem('gradingMode') || 'official';
+        const gradingMode = rawMode.toUpperCase() === 'OFFICIAL' ? 'OFFICIAL' : 'PRACTICE';
+
+        if (idTeacher) {
+          try {
+            const session = await ExamsService.startGradingSession(String(newSubmissionId), idTeacher, gradingMode);
+            sessionStorage.setItem('gradingSession', JSON.stringify(session));
+            state.gradingSessionId = session?.id ?? null;
+            console.log('[doConfirmSubmission] Đã khởi tạo phiên chấm:', state.gradingSessionId);
+          } catch (err) {
+            console.warn('[doConfirmSubmission] Khởi tạo phiên chấm thất bại:', err);
+          }
+        }
+      }
     } else {
       throw new Error(json?.message || 'Xác nhận nộp bài thất bại: HTTP ' + res.status);
     }
