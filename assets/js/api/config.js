@@ -102,8 +102,8 @@ const API_CONFIG = {
         // Bảng điểm toàn lớp theo classId
         CLASS_GRADE_BOARD: (classId) => `/public/class-grade-board/submission/${encodeURIComponent(classId)}`,
 
-        // Teacher: tải video bài thi của sinh viên lên (thay thế / bổ sung video)
-        TEACHER_UPLOAD_SUBMISSION_VIDEO: (submissionId) => `/teacher/submission/${encodeURIComponent(submissionId)}/upload-video`,
+        // Teacher: tải video bài thi của sinh viên lên (tìm hoặc tạo mới submission)
+        TEACHER_UPLOAD_SUBMISSION_VIDEO: '/teacher/submission/upload-video',
 
         // AI gợi ý chấm điểm
         AI_GRADE: (idTeacher, videoUrl) => `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`,

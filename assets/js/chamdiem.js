@@ -1451,18 +1451,23 @@ function _renderConfirmList() {
 
 // Bước 2: Xác nhận nộp bài — gọi teacher/submission/{submissionId}/upload-video với JSON
 async function doConfirmSubmission() {
-  const submissionId = state.submissionId
-    || JSON.parse(sessionStorage.getItem('gradingSession') || '{}')?.studentSubmissionResponse?.id
-    || '';
+  setUploadBtnsDisabled(true);
 
-  if (!submissionId) {
-    showToast('Không xác định được bài nộp. Vui lòng thử lại.', true);
+  // Lấy classExamId và studentCode để backend tự tìm hoặc tạo submission
+  const pending = JSON.parse(sessionStorage.getItem('pendingGradingSession') || '{}');
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
+  const classExamId = pending.classExamId ?? gradingExam.classExamId ?? null;
+  const studentCode = state.currentStudent?.code ?? pending.studentCode ?? null;
+
+  if (!classExamId || !studentCode) {
+    showToast('Không xác định được bài thi hoặc sinh viên. Vui lòng thử lại.', true);
+    setUploadBtnsDisabled(false);
     return;
   }
 
-  setUploadBtnsDisabled(true);
-
   const body = {
+    idStudent:      studentCode,
+    classExamId:    classExamId,
     videoUrl1:      _uploadVideoState.uploadedUrl1 || null,
     fileSizeBytes1: _uploadVideoState.uploadedSize1 || 0,
     videoUrl2:      _uploadVideoState.uploadedUrl2 || null,
@@ -1470,8 +1475,8 @@ async function doConfirmSubmission() {
   };
 
   const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO)
-    ? API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO(submissionId)
-    : `http://103.75.182.246:8080/teacher/submission/${encodeURIComponent(submissionId)}/upload-video`;
+    ? API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO
+    : 'http://103.75.182.246:8080/teacher/submission/upload-video';
 
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -1489,6 +1494,11 @@ async function doConfirmSubmission() {
     const json = await res.json().catch(() => null);
 
     if (res.ok && json) {
+      const d = json?.data ?? json;
+      // Lưu submissionId mới để dùng cho grading session
+      const newSubmissionId = d?.id ?? d?.submissionId ?? null;
+      if (newSubmissionId) state.submissionId = String(newSubmissionId);
+
       const newUrls = [];
       if (_uploadVideoState.uploadedUrl1) newUrls.push(_uploadVideoState.uploadedUrl1);
       if (_uploadVideoState.uploadedUrl2) newUrls.push(_uploadVideoState.uploadedUrl2);
