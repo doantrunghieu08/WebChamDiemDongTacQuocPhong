@@ -210,7 +210,7 @@ const ExamsService = {
         return json?.data || json || null;
     },
 
-    async createTeacherExam(name, description, sampleVideoUrl, teacherId, examCode) {
+    async createTeacherExam(name, description, sampleVideoUrl, teacherId, idExamCode) {
         const headers = { 'Content-Type': 'application/json' };
         const csrfToken = _getCsrfToken();
         if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
@@ -219,7 +219,7 @@ const ExamsService = {
             method: 'POST',
             headers,
             credentials: 'include',
-            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId, examCode: examCode || null }),
+            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId, idExamCode: idExamCode || 0 }),
         });
 
         if (!response.ok) {

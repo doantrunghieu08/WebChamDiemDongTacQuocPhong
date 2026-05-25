@@ -1507,7 +1507,7 @@ function saveExam(event) {
       const teacherId = currentUser?.studentId || currentUser?.id || '';
       if (teacherId && typeof ExamsService !== 'undefined') {
         try {
-          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examCode);
+          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examTypeId);
           if (created?.id) {
             serverExamId = String(created.id);
           }
