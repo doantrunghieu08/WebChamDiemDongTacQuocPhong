@@ -337,6 +337,12 @@ body {
   font-weight: 600;
 }
 
+.exam-code-chip {
+  background: #eef4ff;
+  border-color: #c0d8f5;
+  color: #1a5fa8;
+}
+
 .exam-card-actions {
   margin-top: auto;
   display: flex;

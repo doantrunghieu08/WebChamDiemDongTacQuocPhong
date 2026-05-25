@@ -663,6 +663,7 @@ async function loadExamPageFromAPI(page) {
         iconClass: 'custom-exam',
         description: exam.description || exam.content || '',
         deleted: exam.isDeleted === true,
+        examCode: exam.examCode || null,
         videos
       };
     });
@@ -828,6 +829,7 @@ function loadExamsContent() {
       <div class="exam-card-meta">
         <span class="exam-meta-chip"><i class="fas fa-film"></i> ${exam.videos.length} video mẫu</span>
         <span class="exam-meta-chip"><i class="fas fa-id-badge"></i> ${exam.id}</span>
+        ${exam.examCode ? `<span class="exam-meta-chip exam-code-chip"><i class="fas fa-tag"></i> ${exam.examCode}</span>` : ''}
       </div>
       <div class="exam-card-actions">
         ${exam.deleted
@@ -1252,6 +1254,30 @@ function removeExamVideoField(indexToRemove) {
   renderExamVideoFields(nextVideos);
 }
 
+function populateExamCodeOptions(selectedCode) {
+  const select = document.getElementById('examCodeSelect');
+  if (!select) return;
+
+  // Collect unique exam codes from catalog
+  const allCodes = new Set();
+  getExamCatalog().forEach(exam => {
+    if (exam.examCode) allCodes.add(exam.examCode);
+  });
+
+  // Always include selected code even if not in catalog yet
+  if (selectedCode) allCodes.add(selectedCode);
+
+  select.innerHTML = '<option value="">-- Không có mã --</option>';
+  Array.from(allCodes).sort().forEach(code => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = code;
+    select.appendChild(opt);
+  });
+
+  select.value = selectedCode || '';
+}
+
 function openExamModal(examId = '') {
   const modal = document.getElementById('examModal');
   const title = document.getElementById('examModalTitle');
@@ -1272,12 +1298,14 @@ function openExamModal(examId = '') {
     idInput.value = exam.id;
     nameInput.value = exam.name;
     descInput.value = exam.description;
+    populateExamCodeOptions(exam.examCode || '');
     renderExamVideoFields(exam.videos || []);
   } else {
     title.textContent = 'Thêm bài thi mới';
     idInput.value = '';
     nameInput.value = '';
     descInput.value = '';
+    populateExamCodeOptions('');
     renderExamVideoFields();
   }
 
@@ -1380,6 +1408,7 @@ function saveExam(event) {
 
   const id = document.getElementById('examEditId').value.trim();
   const targetExamId = id || `exam-${Date.now()}`;
+  const examCode = (document.getElementById('examCodeSelect')?.value || '').trim() || null;
   const name = document.getElementById('examName').value.trim();
   const description = document.getElementById('examDescription').value.trim();
   const videoDrafts = getExamVideoDrafts().filter(video => video.file || video.selectedFile);
@@ -1429,6 +1458,7 @@ function saveExam(event) {
         ...exam,
         name,
         description,
+        examCode,
         videos
       } : exam);
     } else {
@@ -1438,7 +1468,7 @@ function saveExam(event) {
       const teacherId = currentUser?.studentId || currentUser?.id || '';
       if (teacherId && typeof ExamsService !== 'undefined') {
         try {
-          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId);
+          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examCode);
           if (created?.id) {
             serverExamId = String(created.id);
           }
@@ -1454,6 +1484,7 @@ function saveExam(event) {
           description,
           icon: '📝',
           iconClass: 'custom-exam',
+          examCode,
           videos
         },
         ...exams

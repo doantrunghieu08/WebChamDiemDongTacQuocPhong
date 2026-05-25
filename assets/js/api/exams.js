@@ -183,7 +183,7 @@ const ExamsService = {
      * @param {string} teacherId - Mã giáo viên
      * @returns {Promise<object>} Bài thi vừa tạo từ server
      */
-    async createTeacherExam(name, description, sampleVideoUrl, teacherId) {
+    async createTeacherExam(name, description, sampleVideoUrl, teacherId, examCode) {
         const headers = { 'Content-Type': 'application/json' };
         const csrfToken = _getCsrfToken();
         if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
@@ -192,7 +192,7 @@ const ExamsService = {
             method: 'POST',
             headers,
             credentials: 'include',
-            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId }),
+            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId, examCode: examCode || null }),
         });
 
         if (!response.ok) {
