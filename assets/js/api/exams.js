@@ -188,6 +188,28 @@ const ExamsService = {
      * @param {string} teacherId - Mã giáo viên
      * @returns {Promise<object>} Bài thi vừa tạo từ server
      */
+    /**
+     * Cập nhật bài thi
+     * PUT http://103.75.182.246:8080/api/teacher/update-exam/{examId}
+     * @param {string|number} examId - ID bài thi cần cập nhật
+     * @param {object} payload - { idExamType, name, description, sampleVideoUrl }
+     * @returns {Promise<object>} Bài thi sau khi cập nhật
+     */
+    async updateTeacherExam(examId, { idExamType, name, description, sampleVideoUrl }) {
+        const url = API_CONFIG.ENDPOINTS.UPDATE_TEACHER_EXAM(examId);
+        const response = await ApiClient.fetchWithAuth(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idExamType: idExamType || null, name, description, sampleVideoUrl: sampleVideoUrl || null }),
+        });
+        if (!response.ok) {
+            const errJson = await response.json().catch(() => null);
+            throw new Error(errJson?.message || `Cập nhật bài thi thất bại: HTTP ${response.status}`);
+        }
+        const json = await response.json().catch(() => null);
+        return json?.data || json || null;
+    },
+
     async createTeacherExam(name, description, sampleVideoUrl, teacherId, examCode) {
         const headers = { 'Content-Type': 'application/json' };
         const csrfToken = _getCsrfToken();

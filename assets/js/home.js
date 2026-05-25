@@ -167,7 +167,8 @@ function normalizeExamItem(exam, index) {
     iconClass: 'custom-exam',
     description: exam.description || 'Mô tả đang được cập nhật',
     videos: Array.isArray(exam.videos) ? exam.videos : [],
-    deleted: exam.deleted === true
+    deleted: exam.deleted === true,
+    examCode: exam.examCode || null
   };
 }
 
@@ -1263,8 +1264,12 @@ async function populateExamCodeOptions(selectedCode) {
 
   try {
     const examTypes = await ExamsService.getExamTypes();
-    const allCodes = new Set(examTypes.map(et => et.examCode).filter(Boolean));
 
+    // Build a map: examCode → id for pre-selection and data-id storage
+    const codeToId = {};
+    examTypes.forEach(et => { if (et.examCode) codeToId[et.examCode] = et.id; });
+
+    const allCodes = new Set(examTypes.map(et => et.examCode).filter(Boolean));
     // Always include selected code even if not returned by API
     if (selectedCode) allCodes.add(selectedCode);
 
@@ -1273,6 +1278,7 @@ async function populateExamCodeOptions(selectedCode) {
       const opt = document.createElement('option');
       opt.value = code;
       opt.textContent = code;
+      if (codeToId[code] != null) opt.dataset.id = String(codeToId[code]);
       select.appendChild(opt);
     });
   } catch (err) {
@@ -1424,7 +1430,9 @@ function saveExam(event) {
 
   const id = document.getElementById('examEditId').value.trim();
   const targetExamId = id || `exam-${Date.now()}`;
-  const examCode = (document.getElementById('examCodeSelect')?.value || '').trim() || null;
+  const examCodeSelect = document.getElementById('examCodeSelect');
+  const examCode = (examCodeSelect?.value || '').trim() || null;
+  const examTypeId = parseInt(examCodeSelect?.selectedOptions?.[0]?.dataset?.id || '', 10) || null;
   const name = document.getElementById('examName').value.trim();
   const description = document.getElementById('examDescription').value.trim();
   const videoDrafts = getExamVideoDrafts().filter(video => video.file || video.selectedFile);
@@ -1469,6 +1477,21 @@ function saveExam(event) {
         .filter(storageKey => storageKey && !preservedKeys.has(storageKey));
 
       await Promise.all(removedKeys.map(removeSampleVideoBlobByKey));
+
+      // Gọi API cập nhật bài thi lên server
+      const sampleVideoUrl = videos.find(v => v.url)?.url || '';
+      if (typeof ExamsService !== 'undefined') {
+        try {
+          await ExamsService.updateTeacherExam(id, {
+            idExamType: examTypeId,
+            name,
+            description,
+            sampleVideoUrl,
+          });
+        } catch (err) {
+          console.warn('Cập nhật bài thi trên server thất bại, lưu local:', err);
+        }
+      }
 
       updatedExams = exams.map(exam => exam.id === id ? {
         ...exam,

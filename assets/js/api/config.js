@@ -45,6 +45,7 @@ const API_CONFIG = {
         CLASS_EXAMS: (classId, page = 0, size = 3) => `/public/exam/class/${encodeURIComponent(classId)}?page=${page}&size=${size}`,
         TEACHER_EXAMS: (teacherId, page = 0, size = 9) => `/api/exam/teacher/${teacherId}?page=${page}&size=${size}`,
         CREATE_TEACHER_EXAM: '/api/teacher/exam',
+        UPDATE_TEACHER_EXAM: (examId) => `http://103.75.182.246:8080/api/teacher/update-exam/${encodeURIComponent(examId)}`,
         ASSIGN_EXAM_TO_CLASS: '/api/teacher/exam/class',
         REMOVE_EXAM_FROM_CLASS: (idClass, idExam) => `/api/teacher/exam/class?idClass=${encodeURIComponent(idClass)}&idExam=${encodeURIComponent(idExam)}`,
         DELETED_CLASS_EXAMS: (idClass, page = 0, size = 100) => `/api/teacher/exam/class/deleted?idClass=${encodeURIComponent(idClass)}&page=${page}&size=${size}`,
