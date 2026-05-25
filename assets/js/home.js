@@ -1254,31 +1254,47 @@ function removeExamVideoField(indexToRemove) {
   renderExamVideoFields(nextVideos);
 }
 
-function populateExamCodeOptions(selectedCode) {
+async function populateExamCodeOptions(selectedCode) {
   const select = document.getElementById('examCodeSelect');
   if (!select) return;
 
-  // Collect unique exam codes from catalog
-  const allCodes = new Set();
-  getExamCatalog().forEach(exam => {
-    if (exam.examCode) allCodes.add(exam.examCode);
-  });
+  select.innerHTML = '<option value="">-- Đang tải... --</option>';
+  select.disabled = true;
 
-  // Always include selected code even if not in catalog yet
-  if (selectedCode) allCodes.add(selectedCode);
+  try {
+    const examTypes = await ExamsService.getExamTypes();
+    const allCodes = new Set(examTypes.map(et => et.examCode).filter(Boolean));
 
-  select.innerHTML = '<option value="">-- Không có mã --</option>';
-  Array.from(allCodes).sort().forEach(code => {
-    const opt = document.createElement('option');
-    opt.value = code;
-    opt.textContent = code;
-    select.appendChild(opt);
-  });
+    // Always include selected code even if not returned by API
+    if (selectedCode) allCodes.add(selectedCode);
 
-  select.value = selectedCode || '';
+    select.innerHTML = '<option value="">-- Không có mã --</option>';
+    Array.from(allCodes).sort().forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = code;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.warn('[populateExamCodeOptions] Không thể tải danh sách mã bài thi:', err);
+    // Fallback: dùng catalog cục bộ
+    const allCodes = new Set();
+    getExamCatalog().forEach(exam => { if (exam.examCode) allCodes.add(exam.examCode); });
+    if (selectedCode) allCodes.add(selectedCode);
+    select.innerHTML = '<option value="">-- Không có mã --</option>';
+    Array.from(allCodes).sort().forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = code;
+      select.appendChild(opt);
+    });
+  } finally {
+    select.disabled = false;
+    select.value = selectedCode || '';
+  }
 }
 
-function openExamModal(examId = '') {
+async function openExamModal(examId = '') {
   const modal = document.getElementById('examModal');
   const title = document.getElementById('examModalTitle');
   const idInput = document.getElementById('examEditId');
@@ -1298,14 +1314,14 @@ function openExamModal(examId = '') {
     idInput.value = exam.id;
     nameInput.value = exam.name;
     descInput.value = exam.description;
-    populateExamCodeOptions(exam.examCode || '');
+    await populateExamCodeOptions(exam.examCode || '');
     renderExamVideoFields(exam.videos || []);
   } else {
     title.textContent = 'Thêm bài thi mới';
     idInput.value = '';
     nameInput.value = '';
     descInput.value = '';
-    populateExamCodeOptions('');
+    await populateExamCodeOptions('');
     renderExamVideoFields();
   }
 

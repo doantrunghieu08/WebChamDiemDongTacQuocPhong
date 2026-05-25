@@ -8,7 +8,12 @@ const ExamsService = {
      * @returns {Promise<Array>} Mảng exam type objects
      */
     async getExamTypes() {
-        return ApiClient.get(API_CONFIG.ENDPOINTS.EXAM_TYPES);
+        const url = API_CONFIG.ENDPOINTS.TEACHER_EXAM_TYPES;
+        const response = await ApiClient.fetchWithAuth(url, { method: 'GET' });
+        if (!response.ok) throw new Error(`Lấy danh sách loại bài thi thất bại: HTTP ${response.status}`);
+        const json = await response.json().catch(() => null);
+        const data = json?.data ?? [];
+        return Array.isArray(data) ? data : [];
     },
 
     /**
