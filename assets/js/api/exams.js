@@ -210,7 +210,31 @@ const ExamsService = {
         return json?.data || json || null;
     },
 
-    async createTeacherExam(name, description, sampleVideoUrl, teacherId, idExamCode) {
+    /**
+     * Trích xuất standardData từ video mẫu qua AI
+     * @param {string} videoUrl - URL Cloudinary của video mẫu
+     * @returns {Promise<string>} JSON string của standardData
+     */
+    async extractTemplate(videoUrl) {
+        const response = await fetch('https://stung-ceremony-charity.ngrok-free.dev/api/ai/extract-template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoUrl }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Trích xuất dữ liệu chuẩn thất bại: HTTP ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        if (data?.status !== 'success' || !data?.standardData) {
+            throw new Error(data?.message || 'Trích xuất dữ liệu chuẩn thất bại');
+        }
+
+        return JSON.stringify(data.standardData);
+    },
+
+    async createTeacherExam(name, description, sampleVideoUrl, teacherId, idExamCode, standardData) {
         const headers = { 'Content-Type': 'application/json' };
         const csrfToken = _getCsrfToken();
         if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
@@ -219,7 +243,7 @@ const ExamsService = {
             method: 'POST',
             headers,
             credentials: 'include',
-            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId, idExamCode: idExamCode || 0 }),
+            body: JSON.stringify({ name, description, sampleVideoUrl, teacherId, idExamCode: idExamCode || 0, standardData: standardData || null }),
         });
 
         if (!response.ok) {

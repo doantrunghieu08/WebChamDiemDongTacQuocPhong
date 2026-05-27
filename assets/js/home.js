@@ -1507,7 +1507,16 @@ function saveExam(event) {
       const teacherId = currentUser?.studentId || currentUser?.id || '';
       if (teacherId && typeof ExamsService !== 'undefined') {
         try {
-          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examTypeId);
+          let standardData = null;
+          if (sampleVideoUrl) {
+            showHomeToast('Đang trích xuất dữ liệu chuẩn từ video mẫu...');
+            try {
+              standardData = await ExamsService.extractTemplate(sampleVideoUrl);
+            } catch (extractErr) {
+              console.warn('Trích xuất dữ liệu chuẩn thất bại, tiếp tục tạo bài thi:', extractErr);
+            }
+          }
+          const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examTypeId, standardData);
           if (created?.id) {
             serverExamId = String(created.id);
           }
