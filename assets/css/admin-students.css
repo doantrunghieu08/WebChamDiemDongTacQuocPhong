@@ -85,6 +85,13 @@ body {
   padding: 24px;
 }
 
+.admin-students-list-panel {
+  position: sticky;
+  top: calc(88px + 24px);
+  max-height: calc(100vh - 88px - 48px);
+  overflow-y: auto;
+}
+
 .admin-students-panel-header {
   margin-bottom: 16px;
 }
