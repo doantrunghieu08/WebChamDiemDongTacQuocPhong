@@ -1316,6 +1316,30 @@ async function callSubmissionApi(status) {
     : 'http://103.75.182.246:8080/student/submission';
 
   try {
+    let studentDataStr = null;
+    const aiVideoUrl = payload.videoUrl1 || payload.videoUrl2;
+    if (aiVideoUrl) {
+      showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
+      try {
+        const aiRes = await fetch('https://stung-ceremony-charity.ngrok-free.dev/api/ai/extract-student', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: aiVideoUrl })
+        });
+        const aiJson = await aiRes.json();
+        if (aiJson?.status === 'success' && aiJson?.studentData) {
+          studentDataStr = JSON.stringify(aiJson.studentData);
+          showToast('Trích xuất dữ liệu thành công!');
+        } else {
+          showToast('Trích xuất dữ liệu không thành công.');
+        }
+      } catch (aiErr) {
+        console.warn('Lỗi trích xuất khung xương:', aiErr);
+        showToast('Lỗi khi trích xuất dữ liệu khung xương.');
+      }
+    }
+    payload.studentData = studentDataStr;
+
     const csrfToken = (typeof _getCsrfToken === 'function') ? _getCsrfToken() : null;
     const headers = { 'Content-Type': 'application/json' };
     if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;

@@ -1473,6 +1473,30 @@ async function doConfirmSubmission() {
     : 'http://103.75.182.246:8080/teacher/submission/upload-video';
 
   try {
+    let studentDataStr = null;
+    const aiVideoUrl = body.videoUrl1 || body.videoUrl2;
+    if (aiVideoUrl) {
+      showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
+      try {
+        const aiRes = await fetch('https://stung-ceremony-charity.ngrok-free.dev/api/ai/extract-student', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: aiVideoUrl })
+        });
+        const aiJson = await aiRes.json();
+        if (aiJson?.status === 'success' && aiJson?.studentData) {
+          studentDataStr = JSON.stringify(aiJson.studentData);
+          showToast('Trích xuất dữ liệu thành công!');
+        } else {
+          showToast('Trích xuất dữ liệu không thành công.');
+        }
+      } catch (aiErr) {
+        console.warn('Lỗi trích xuất khung xương:', aiErr);
+        showToast('Lỗi khi trích xuất dữ liệu khung xương.');
+      }
+    }
+    body.studentData = studentDataStr;
+
     const headers = { 'Content-Type': 'application/json' };
     const csrfMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
     if (csrfMatch) headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfMatch.split('=')[1]);
