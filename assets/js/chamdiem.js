@@ -7,7 +7,8 @@ async function loadGradingSession() {
   const pending = JSON.parse(sessionStorage.getItem('pendingGradingSession') || 'null');
   if (!pending || !pending.idTeacher) return;
 
-  sessionStorage.removeItem('pendingGradingSession');
+  // Xóa dòng dưới đây để tránh mất dữ liệu khi F5 (reload trang)
+  // sessionStorage.removeItem('pendingGradingSession');
 
   let idSubmission = pending.idSubmission || null;
 

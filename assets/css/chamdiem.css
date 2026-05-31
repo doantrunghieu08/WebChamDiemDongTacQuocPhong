@@ -1511,7 +1511,7 @@ body {
 
   /* History table */
   .htable {
-    min-width: 420px;
+    min-width: 540px;
     font-size: 13px;
   }
 
@@ -1663,7 +1663,7 @@ body {
   }
 
   .htable {
-    min-width: 360px;
+    min-width: 500px;
     font-size: 12px;
   }
 
