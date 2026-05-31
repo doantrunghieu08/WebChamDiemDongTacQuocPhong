@@ -36,7 +36,9 @@
       <div class="header-row">
         <div class="page-title">CHẤM ĐIỂM ĐỘNG TÁC QUỐC PHÒNG</div>
         <div class="header-actions">
-          <button class="btn-ai-grade" id="btnAIGrade" onclick="callAIGrading()" title="Gợi ý chấm điểm bằng AI">🤖</button>
+          <button class="btn-compare-pose" id="btnComparePose" onclick="openComparePoseModal()" title="So sánh tư thế học sinh với chuẩn">
+            📊 SO SÁNH TƯ THẾ
+          </button>
           <button class="btn-add" onclick="openAddErrorModal()">+ THÊM LỖI MỚI</button>
         </div>
       </div>
@@ -256,7 +258,7 @@
     </div>
   </div>
 
-  <!-- Modal AI Gợi ý chấm bài -->
+  Modal AI Gợi ý chấm bài
   <div class="modal-backdrop" id="ai-grade-modal" style="display:none" onclick="closeAIGradeModal(event)">
     <div class="modal ai-grade-modal">
       <div class="modal-header">
@@ -322,6 +324,95 @@
         <button class="btn-cancel" onclick="closeUploadVideoModal()" id="btn-upload-cancel">Hủy</button>
         <button class="btn-confirm" onclick="doUploadToCloudinary()" id="btn-upload-confirm">&#128190; Tải lên</button>
         <button class="btn-confirm" onclick="doConfirmSubmission()" id="btn-upload-submit" style="display:none; background:linear-gradient(135deg,#16a34a,#15803d)">&#10003; Xác nhận nộp bài</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal So Sánh Tư Thế AI -->
+  <div class="modal-backdrop" id="compare-pose-modal" style="display:none" onclick="closeComparePoseModal(event)">
+    <div class="modal compare-pose-modal">
+      <div class="modal-header">
+        <span>📊 So Sánh Tư Thế – AI Phân Tích</span>
+        <button class="modal-close" onclick="document.getElementById('compare-pose-modal').style.display='none'">&#10005;</button>
+      </div>
+      <div class="modal-body" id="compare-pose-modal-body">
+        <!-- Trạng thái mặc định: chưa có dữ liệu -->
+        <div class="cpose-empty" id="cpose-empty-state">
+          <div class="cpose-empty-icon">📹</div>
+          <div class="cpose-empty-title">Chưa có dữ liệu tư thế</div>
+          <div class="cpose-empty-desc">Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.</div>
+          <button class="btn-confirm cpose-run-btn" id="btnRunComparePose" onclick="runComparePose()">
+            🔍 Trích Xuất &amp; So Sánh Ngay
+          </button>
+        </div>
+
+        <!-- Trạng thái: đang xử lý -->
+        <div class="cpose-loading" id="cpose-loading-state" style="display:none">
+          <div class="cpose-loading-spinner"></div>
+          <div class="cpose-loading-text" id="cpose-loading-text">Đang trích xuất dữ liệu khung xương...</div>
+          <div class="cpose-loading-sub">Quá trình này có thể mất 15–60 giây</div>
+        </div>
+
+        <!-- Trạng thái: kết quả -->
+        <div class="cpose-result" id="cpose-result-state" style="display:none">
+          <!-- Tổng quan điểm -->
+          <div class="cpose-score-banner" id="cpose-score-banner">
+            <div class="cpose-score-main">
+              <div class="cpose-score-label">Điểm Tương Đồng Tổng Thể</div>
+              <div class="cpose-score-value" id="cpose-overall-score">—</div>
+              <div class="cpose-score-sub" id="cpose-score-level">—</div>
+            </div>
+            <div class="cpose-score-stats">
+              <div class="cpose-stat-item">
+                <span class="cpose-stat-val" id="cpose-frames-count">—</span>
+                <span class="cpose-stat-label">Frames phân tích</span>
+              </div>
+              <div class="cpose-stat-item">
+                <span class="cpose-stat-val" id="cpose-avg-diff">—</span>
+                <span class="cpose-stat-label">Độ lệch TB (°)</span>
+              </div>
+              <div class="cpose-stat-item">
+                <span class="cpose-stat-val" id="cpose-max-diff">—</span>
+                <span class="cpose-stat-label">Sai lệch lớn nhất</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radar / Joint breakdown -->
+          <div class="cpose-section-title">🦴 Phân Tích Từng Khớp</div>
+          <div class="cpose-joints-grid" id="cpose-joints-grid">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Frame-by-frame details -->
+          <div class="cpose-section-title" style="margin-top:16px">📋 Chi Tiết Theo Frame</div>
+          <div class="cpose-frames-table-wrap">
+            <table class="cpose-frames-table" id="cpose-frames-table">
+              <thead>
+                <tr>
+                  <th>Frame</th>
+                  <th>Thời điểm</th>
+                  <th>Khớp sai lệch nhiều nhất</th>
+                  <th>Độ lệch (°)</th>
+                  <th>Đánh giá</th>
+                </tr>
+              </thead>
+              <tbody id="cpose-frames-tbody">
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Nhận xét tổng thể -->
+          <div class="cpose-feedback" id="cpose-feedback-box" style="display:none">
+            <div class="cpose-feedback-icon">💬</div>
+            <div class="cpose-feedback-text" id="cpose-feedback-text"></div>
+          </div>
+
+          <!-- Re-run button -->
+          <div style="text-align:center; margin-top:16px">
+            <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -235,6 +235,8 @@ const state = {
   gradingLocked: false,
   submissionId: null,        // ID bài nộp dùng cho API capture-error-frame
   capturedFrameImageUrl: null, // URL ảnh từ API sau khi chụp frame
+  studentPoseData: null,       // Dữ liệu khung xương học sinh từ /api/ai/extract-student
+  standardPoseData: null,      // Dữ liệu chuẩn từ /api/ai/compare-pose (nếu có)
 };
 
 function normalizeClassExamAssignment(assignment, index) {
@@ -1486,7 +1488,12 @@ async function doConfirmSubmission() {
         const aiJson = await aiRes.json();
         if (aiJson?.status === 'success' && aiJson?.studentData) {
           studentDataStr = JSON.stringify(aiJson.studentData);
-          showToast('Trích xuất dữ liệu thành công!');
+          // Lưu vào state để dùng cho compare-pose
+          state.studentPoseData = aiJson.studentData;
+          // Đổi màu nút compare thành xanh lá (đã có dữ liệu)
+          const btnCP = document.getElementById('btnComparePose');
+          if (btnCP) btnCP.classList.add('has-data');
+          showToast('Trích xuất dữ liệu tư thế thành công! Có thể so sánh ngay.');
         } else {
           showToast('Trích xuất dữ liệu không thành công.');
         }
@@ -1730,6 +1737,254 @@ function _showAIGradeModal({ loading = false, error = null, data = null } = {}) 
 function closeAIGradeModal(e) {
   if (e && e.target !== document.getElementById('ai-grade-modal')) return;
   document.getElementById('ai-grade-modal').style.display = 'none';
+}
+
+// ---- COMPARE POSE ----
+const AI_BASE_URL = 'https://stung-ceremony-charity.ngrok-free.dev';
+
+function openComparePoseModal() {
+  document.getElementById('compare-pose-modal').style.display = 'flex';
+  // Nếu đã có dữ liệu studentPoseData → hiển thị ready
+  if (state.studentPoseData) {
+    _setCposeState('empty');
+    // Cập nhật mô tả trong empty state để thông báo đã có data
+    const desc = document.querySelector('.cpose-empty-desc');
+    if (desc) desc.textContent = 'Dữ liệu tư thế học sinh đã sẵn sàng. Nhấn bên dưới để so sánh với chuẩn.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 So Sánh Tư Thế Ngay';
+  } else {
+    _setCposeState('empty');
+    const desc = document.querySelector('.cpose-empty-desc');
+    if (desc) desc.textContent = 'Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 Trích Xuất & So Sánh Ngay';
+  }
+}
+
+function closeComparePoseModal(e) {
+  if (e && e.target !== document.getElementById('compare-pose-modal')) return;
+  document.getElementById('compare-pose-modal').style.display = 'none';
+}
+
+function _setCposeState(stateStr) {
+  document.getElementById('cpose-empty-state').style.display   = stateStr === 'empty'   ? '' : 'none';
+  document.getElementById('cpose-loading-state').style.display = stateStr === 'loading' ? '' : 'none';
+  document.getElementById('cpose-result-state').style.display  = stateStr === 'result'  ? '' : 'none';
+}
+
+async function runComparePose() {
+  const videoUrl = state.videoUrls[state.currentVideo - 1] || state.videoUrls[0] || '';
+
+  // Bước 1: Nếu chưa có studentData → trích xuất trước
+  if (!state.studentPoseData) {
+    if (!videoUrl) {
+      showToast('Chưa có video bài thi. Vui lòng tải video lên trước.', true);
+      return;
+    }
+    _setCposeState('loading');
+    document.getElementById('cpose-loading-text').textContent = 'Đang trích xuất dữ liệu khung xương...';
+    try {
+      const res = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl })
+      });
+      const json = await res.json().catch(() => null);
+      if (json?.status === 'success' && json?.studentData) {
+        state.studentPoseData = json.studentData;
+        const btnCP = document.getElementById('btnComparePose');
+        if (btnCP) btnCP.classList.add('has-data');
+      } else {
+        const msg = json?.message || 'Trích xuất dữ liệu thất bại';
+        _setCposeState('empty');
+        showToast(msg, true);
+        return;
+      }
+    } catch (err) {
+      _setCposeState('empty');
+      showToast('Lỗi kết nối khi trích xuất: ' + err.message, true);
+      return;
+    }
+  }
+
+  // Bước 2: Gọi compare-pose
+  _setCposeState('loading');
+  document.getElementById('cpose-loading-text').textContent = 'Đang so sánh tư thế với chuẩn...';
+
+  try {
+    const payload = { studentData: state.studentPoseData };
+    if (state.standardPoseData) payload.standardData = state.standardPoseData;
+
+    const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json) {
+      _setCposeState('empty');
+      showToast('So sánh tư thế thất bại: HTTP ' + res.status, true);
+      return;
+    }
+    _renderComparePoseResult(json);
+  } catch (err) {
+    _setCposeState('empty');
+    showToast('Lỗi kết nối khi so sánh: ' + err.message, true);
+  }
+}
+
+const JOINT_NAMES_VI = {
+  left_shoulder:  'Vai trái',
+  right_shoulder: 'Vai phải',
+  left_elbow:     'Khuỷu trái',
+  right_elbow:    'Khuỷu phải',
+  left_hip:       'Hông trái',
+  right_hip:      'Hông phải',
+  left_knee:      'Gối trái',
+  right_knee:     'Gối phải',
+};
+
+function _diffClass(deg) {
+  if (deg <= 10) return 'good';
+  if (deg <= 25) return 'medium';
+  return 'bad';
+}
+
+function _diffLabel(deg) {
+  if (deg <= 10) return '✅ Tốt';
+  if (deg <= 25) return '⚠️ Cần cải thiện';
+  return '❌ Lệch nhiều';
+}
+
+function _renderComparePoseResult(data) {
+  _setCposeState('result');
+
+  // ---- Phân tích dữ liệu ----
+  const frames = Array.isArray(data?.frames) ? data.frames
+    : Array.isArray(data?.comparison_frames) ? data.comparison_frames
+    : [];
+
+  // Tính trung bình độ lệch theo từng khớp
+  const jointSums = {};
+  const jointCounts = {};
+  let totalDiffSum = 0;
+  let totalDiffCount = 0;
+  let maxDiff = 0;
+  let maxDiffJoint = '';
+
+  const JOINTS = Object.keys(JOINT_NAMES_VI);
+
+  frames.forEach(frame => {
+    const angles = frame.angle_differences || frame.angleDifferences || frame.differences || {};
+    JOINTS.forEach(joint => {
+      const val = Math.abs(Number(angles[joint] ?? angles[joint.replace('_', '')] ?? NaN));
+      if (!isNaN(val)) {
+        jointSums[joint] = (jointSums[joint] || 0) + val;
+        jointCounts[joint] = (jointCounts[joint] || 0) + 1;
+        totalDiffSum += val;
+        totalDiffCount++;
+        if (val > maxDiff) { maxDiff = val; maxDiffJoint = joint; }
+      }
+    });
+  });
+
+  const avgDiff = totalDiffCount > 0 ? totalDiffSum / totalDiffCount : 0;
+  // Điểm tương đồng: score = max(0, 100 - avgDiff * 2)
+  const score = data?.similarity_score ?? data?.similarityScore ?? Math.max(0, 100 - avgDiff * 2);
+  const scoreRounded = Math.round(score * 10) / 10;
+  const scoreClass = scoreRounded >= 75 ? 'good' : scoreRounded >= 50 ? 'medium' : 'bad';
+  const scoreLabel = scoreRounded >= 75 ? '✅ Tư thế tốt' : scoreRounded >= 50 ? '⚠️ Cần cải thiện' : '❌ Tư thế lệch nhiều';
+
+  // ---- Cập nhật banner ----
+  const scoreEl = document.getElementById('cpose-overall-score');
+  scoreEl.textContent = scoreRounded + '%';
+  scoreEl.className = 'cpose-score-value ' + scoreClass;
+  document.getElementById('cpose-score-level').textContent = scoreLabel;
+  document.getElementById('cpose-frames-count').textContent = frames.length;
+  document.getElementById('cpose-avg-diff').textContent = avgDiff.toFixed(1) + '°';
+  document.getElementById('cpose-max-diff').textContent = maxDiff.toFixed(1) + '°';
+
+  // ---- Khớp cards ----
+  const grid = document.getElementById('cpose-joints-grid');
+  grid.innerHTML = '';
+  JOINTS.forEach(joint => {
+    const avg = jointCounts[joint] ? jointSums[joint] / jointCounts[joint] : 0;
+    const cls = _diffClass(avg);
+    // Bar width: 0° = 100% bar (tốt), 45°+ = 0%
+    const barPct = Math.max(0, Math.min(100, ((45 - avg) / 45) * 100));
+    const card = document.createElement('div');
+    card.className = 'cpose-joint-card';
+    card.innerHTML =
+      '<div class="cpose-joint-name">' + (JOINT_NAMES_VI[joint] || joint) + '</div>' +
+      '<div class="cpose-joint-diff ' + cls + '">' + avg.toFixed(1) + '°</div>' +
+      '<div class="cpose-joint-bar-wrap"><div class="cpose-joint-bar ' + cls + '" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
+      '<div class="cpose-joint-label">Độ lệch TB</div>';
+    grid.appendChild(card);
+  });
+
+  // ---- Frame table ----
+  const tbody = document.getElementById('cpose-frames-tbody');
+  tbody.innerHTML = '';
+  if (frames.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:16px">Không có dữ liệu frame.</td></tr>';
+  } else {
+    frames.forEach((frame, idx) => {
+      const angles = frame.angle_differences || frame.angleDifferences || frame.differences || {};
+      // Tìm khớp sai lệch nhất
+      let worstJoint = '';
+      let worstVal = -1;
+      JOINTS.forEach(j => {
+        const v = Math.abs(Number(angles[j] ?? NaN));
+        if (!isNaN(v) && v > worstVal) { worstVal = v; worstJoint = j; }
+      });
+      const ts = frame.timestamp != null ? frame.timestamp.toFixed(1) + 's' : (frame.frame_index ?? idx);
+      const cls = _diffClass(worstVal >= 0 ? worstVal : 0);
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td style="color:var(--txt3)">' + (frame.frame_index ?? idx + 1) + '</td>' +
+        '<td>' + ts + '</td>' +
+        '<td>' + (JOINT_NAMES_VI[worstJoint] || worstJoint || '—') + '</td>' +
+        '<td style="font-weight:700;color:var(--txt)">' + (worstVal >= 0 ? worstVal.toFixed(1) + '°' : '—') + '</td>' +
+        '<td><span class="cpose-badge ' + cls + '">' + _diffLabel(worstVal >= 0 ? worstVal : 0) + '</span></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---- Feedback box ----
+  const feedbackEl = document.getElementById('cpose-feedback-text');
+  const feedbackBox = document.getElementById('cpose-feedback-box');
+  const feedback = data?.feedback || data?.recommendation || data?.comment;
+  if (feedback) {
+    feedbackEl.textContent = feedback;
+    feedbackBox.style.display = 'flex';
+  } else {
+    // Tự sinh nhận xét dựa trên điểm
+    let autoFeedback = '';
+    if (scoreRounded >= 80) {
+      autoFeedback = 'Học sinh thực hiện động tác khá chuẩn, độ lệch góc khớp trung bình thấp. Tiếp tục duy trì và luyện tập để hoàn thiện hơn.';
+    } else if (scoreRounded >= 60) {
+      autoFeedback = 'Tư thế học sinh cơ bản đúng nhưng một số khớp còn lệch đáng kể. Hãy chú ý các khớp có màu vàng/đỏ và luyện tập thêm.';
+    } else {
+      autoFeedback = 'Học sinh cần cải thiện nhiều về tư thế. Độ lệch góc khớp còn cao, đặc biệt ở các khớp có màu đỏ. Cần xem lại video mẫu và luyện tập kỹ hơn.';
+    }
+    if (maxDiffJoint) autoFeedback += ' Khớp sai lệch nhiều nhất: ' + (JOINT_NAMES_VI[maxDiffJoint] || maxDiffJoint) + ' (' + maxDiff.toFixed(1) + '°).';
+    feedbackEl.textContent = autoFeedback;
+    feedbackBox.style.display = 'flex';
+  }
+}
+
+function resetComparePoseResult() {
+  _setCposeState('empty');
+  const desc = document.querySelector('.cpose-empty-desc');
+  if (state.studentPoseData) {
+    if (desc) desc.textContent = 'Dữ liệu tư thế học sinh đã sẵn sàng. Nhấn bên dưới để so sánh với chuẩn.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 So Sánh Tư Thế Ngay';
+  } else {
+    if (desc) desc.textContent = 'Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 Trích Xuất & So Sánh Ngay';
+  }
 }
 
 // ---- TOAST ----
