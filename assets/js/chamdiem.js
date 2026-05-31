@@ -1503,7 +1503,10 @@ async function doConfirmSubmission() {
       try {
         const aiRes = await fetch('https://stung-ceremony-charity.ngrok-free.dev/api/ai/extract-student', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
           body: JSON.stringify({ videoUrl: aiVideoUrl })
         });
         const aiJson = await aiRes.json();
@@ -1813,7 +1816,10 @@ async function runComparePose() {
     try {
       const res = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
         body: JSON.stringify({ videoUrl })
       });
       const json = await res.json().catch(() => null);
@@ -1844,16 +1850,44 @@ async function runComparePose() {
 
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
       body: JSON.stringify(payload)
     });
     const json = await res.json().catch(() => null);
-    if (!res.ok || !json) {
+    if (!res.ok || !json || !json.scores) {
       _setCposeState('empty');
       showToast('So sánh tư thế thất bại: HTTP ' + res.status, true);
       return;
     }
-    _renderComparePoseResult(json);
+
+    // Bước 3: Gọi evaluate để lấy nhận xét
+    document.getElementById('cpose-loading-text').textContent = 'Đang phân tích chuyên sâu bằng AI...';
+    const evalPayload = {
+      standardData: state.standardPoseData || {},
+      studentData: state.studentPoseData,
+      scores: json.scores
+    };
+
+    const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
+      body: JSON.stringify(evalPayload)
+    });
+    const evalJson = await evalRes.json().catch(() => null);
+
+    const combinedData = {
+      scores: json.scores,
+      evaluation: evalJson?.evaluation,
+      charts: evalJson?.charts
+    };
+
+    _renderComparePoseResult(combinedData);
   } catch (err) {
     _setCposeState('empty');
     showToast('Lỗi kết nối khi so sánh: ' + err.message, true);
@@ -1886,48 +1920,39 @@ function _diffLabel(deg) {
 function _renderComparePoseResult(data) {
   _setCposeState('result');
 
-  // ---- Phân tích dữ liệu ----
-  const frames = Array.isArray(data?.frames) ? data.frames
-    : Array.isArray(data?.comparison_frames) ? data.comparison_frames
-    : [];
+  const scores = data?.scores || {};
+  const evaluation = data?.evaluation || {};
 
-  // Tính trung bình độ lệch theo từng khớp
-  const jointSums = {};
-  const jointCounts = {};
-  let totalDiffSum = 0;
-  let totalDiffCount = 0;
-  let maxDiff = 0;
-  let maxDiffJoint = '';
-
-  const JOINTS = Object.keys(JOINT_NAMES_VI);
-
-  frames.forEach(frame => {
-    const angles = frame.angle_differences || frame.angleDifferences || frame.differences || {};
-    JOINTS.forEach(joint => {
-      const val = Math.abs(Number(angles[joint] ?? angles[joint.replace('_', '')] ?? NaN));
-      if (!isNaN(val)) {
-        jointSums[joint] = (jointSums[joint] || 0) + val;
-        jointCounts[joint] = (jointCounts[joint] || 0) + 1;
-        totalDiffSum += val;
-        totalDiffCount++;
-        if (val > maxDiff) { maxDiff = val; maxDiffJoint = joint; }
-      }
-    });
-  });
-
-  const avgDiff = totalDiffCount > 0 ? totalDiffSum / totalDiffCount : 0;
-  // Điểm tương đồng: score = max(0, 100 - avgDiff * 2)
-  const score = data?.similarity_score ?? data?.similarityScore ?? Math.max(0, 100 - avgDiff * 2);
-  const scoreRounded = Math.round(score * 10) / 10;
+  const scoreRounded = Math.round(scores.overall || 0);
   const scoreClass = scoreRounded >= 75 ? 'good' : scoreRounded >= 50 ? 'medium' : 'bad';
   const scoreLabel = scoreRounded >= 75 ? '✅ Tư thế tốt' : scoreRounded >= 50 ? '⚠️ Cần cải thiện' : '❌ Tư thế lệch nhiều';
+
+  let maxDiff = 0;
+  let maxDiffJoint = '';
+  let totalDiff = 0;
+  let count = 0;
+  
+  const JOINTS = Object.keys(JOINT_NAMES_VI);
+  
+  JOINTS.forEach(joint => {
+     const s = scores[joint] ?? 100;
+     const diff = 45 * (1 - s / 100);
+     totalDiff += diff;
+     count++;
+     if (diff > maxDiff) {
+       maxDiff = diff;
+       maxDiffJoint = joint;
+     }
+  });
+  
+  const avgDiff = count > 0 ? totalDiff / count : 0;
 
   // ---- Cập nhật banner ----
   const scoreEl = document.getElementById('cpose-overall-score');
   scoreEl.textContent = scoreRounded + '%';
   scoreEl.className = 'cpose-score-value ' + scoreClass;
   document.getElementById('cpose-score-level').textContent = scoreLabel;
-  document.getElementById('cpose-frames-count').textContent = frames.length;
+  document.getElementById('cpose-frames-count').textContent = state.studentPoseData?.total_frames || state.studentPoseData?.frames?.length || '—';
   document.getElementById('cpose-avg-diff').textContent = avgDiff.toFixed(1) + '°';
   document.getElementById('cpose-max-diff').textContent = maxDiff.toFixed(1) + '°';
 
@@ -1935,10 +1960,10 @@ function _renderComparePoseResult(data) {
   const grid = document.getElementById('cpose-joints-grid');
   grid.innerHTML = '';
   JOINTS.forEach(joint => {
-    const avg = jointCounts[joint] ? jointSums[joint] / jointCounts[joint] : 0;
+    const s = scores[joint] ?? 100;
+    const avg = 45 * (1 - s / 100);
     const cls = _diffClass(avg);
-    // Bar width: 0° = 100% bar (tốt), 45°+ = 0%
-    const barPct = Math.max(0, Math.min(100, ((45 - avg) / 45) * 100));
+    const barPct = s; // score từ 0-100 chính là %
     const card = document.createElement('div');
     card.className = 'cpose-joint-card';
     card.innerHTML =
@@ -1949,40 +1974,38 @@ function _renderComparePoseResult(data) {
     grid.appendChild(card);
   });
 
-  // ---- Frame table ----
-  const tbody = document.getElementById('cpose-frames-tbody');
-  tbody.innerHTML = '';
-  if (frames.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:16px">Không có dữ liệu frame.</td></tr>';
-  } else {
-    frames.forEach((frame, idx) => {
-      const angles = frame.angle_differences || frame.angleDifferences || frame.differences || {};
-      // Tìm khớp sai lệch nhất
-      let worstJoint = '';
-      let worstVal = -1;
-      JOINTS.forEach(j => {
-        const v = Math.abs(Number(angles[j] ?? NaN));
-        if (!isNaN(v) && v > worstVal) { worstVal = v; worstJoint = j; }
-      });
-      const ts = frame.timestamp != null ? frame.timestamp.toFixed(1) + 's' : (frame.frame_index ?? idx);
-      const cls = _diffClass(worstVal >= 0 ? worstVal : 0);
-      const tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td style="color:var(--txt3)">' + (frame.frame_index ?? idx + 1) + '</td>' +
-        '<td>' + ts + '</td>' +
-        '<td>' + (JOINT_NAMES_VI[worstJoint] || worstJoint || '—') + '</td>' +
-        '<td style="font-weight:700;color:var(--txt)">' + (worstVal >= 0 ? worstVal.toFixed(1) + '°' : '—') + '</td>' +
-        '<td><span class="cpose-badge ' + cls + '">' + _diffLabel(worstVal >= 0 ? worstVal : 0) + '</span></td>';
-      tbody.appendChild(tr);
-    });
+  // ---- Ẩn bảng chi tiết frame vì API mới không trả về ----
+  const frameTableWrap = document.querySelector('.cpose-frames-table-wrap');
+  if (frameTableWrap) {
+    frameTableWrap.style.display = 'none';
+    const titleNode = frameTableWrap.previousElementSibling;
+    if (titleNode && titleNode.classList.contains('cpose-section-title')) {
+      titleNode.style.display = 'none';
+    }
   }
 
-  // ---- Feedback box ----
-  const feedbackEl = document.getElementById('cpose-feedback-text');
+  // ---- Nhận xét tổng thể bằng AI ----
   const feedbackBox = document.getElementById('cpose-feedback-box');
-  const feedback = data?.feedback || data?.recommendation || data?.comment;
-  if (feedback) {
-    feedbackEl.textContent = feedback;
+  const feedbackEl = document.getElementById('cpose-feedback-text');
+  
+  if (evaluation && (evaluation.comment || evaluation.suggestions?.length > 0)) {
+    let html = '';
+    if (evaluation.comment) {
+      html += '<div style="margin-bottom:8px"><strong>Nhận xét:</strong> ' + evaluation.comment + '</div>';
+    }
+    if (evaluation.strengths?.length > 0) {
+      html += '<div style="margin-bottom:8px; color:var(--green)"><strong>Điểm mạnh:</strong><ul style="margin:4px 0 0 20px">';
+      evaluation.strengths.forEach(s => html += '<li>' + s + '</li>');
+      html += '</ul></div>';
+    }
+    if (evaluation.suggestions?.length > 0) {
+      html += '<div style="color:var(--orange)"><strong>Cần cải thiện:</strong><ul style="margin:4px 0 0 20px">';
+      evaluation.suggestions.forEach(s => {
+        html += '<li style="margin-bottom:4px"><b>' + s.joint + '</b>: ' + s.issue + '<br/><i style="color:#666">→ Khắc phục: ' + s.fix + '</i></li>';
+      });
+      html += '</ul></div>';
+    }
+    feedbackEl.innerHTML = html;
     feedbackBox.style.display = 'flex';
   } else {
     // Tự sinh nhận xét dựa trên điểm
