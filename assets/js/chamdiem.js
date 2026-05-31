@@ -1574,6 +1574,17 @@ async function doConfirmSubmission() {
             const session = await ExamsService.startGradingSession(String(newSubmissionId), idTeacher, gradingMode);
             sessionStorage.setItem('gradingSession', JSON.stringify(session));
             state.gradingSessionId = session?.id ?? null;
+            
+            // Khôi phục dữ liệu chuẩn (standardData) vào state để Compare Pose hoạt động
+            const sub = session?.studentSubmissionResponse;
+            if (sub && sub.standardData) {
+              try {
+                state.standardPoseData = JSON.parse(sub.standardData);
+              } catch (e) {
+                console.warn('Lỗi parse standardData:', e);
+              }
+            }
+
             console.log('[doConfirmSubmission] Đã khởi tạo phiên chấm:', state.gradingSessionId);
           } catch (err) {
             console.warn('[doConfirmSubmission] Khởi tạo phiên chấm thất bại:', err);
@@ -1845,9 +1856,17 @@ async function runComparePose() {
   _setCposeState('loading');
   document.getElementById('cpose-loading-text').textContent = 'Đang so sánh tư thế với chuẩn...';
 
+  if (!state.standardPoseData) {
+    _setCposeState('empty');
+    showToast('Chưa có dữ liệu tư thế chuẩn (standardData) của bài thi này. Vui lòng nộp video bài mẫu trước.', true);
+    return;
+  }
+
   try {
-    const payload = { studentData: state.studentPoseData };
-    if (state.standardPoseData) payload.standardData = state.standardPoseData;
+    const payload = { 
+      studentData: state.studentPoseData,
+      standardData: state.standardPoseData
+    };
 
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
       method: 'POST',
