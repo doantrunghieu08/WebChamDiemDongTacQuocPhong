@@ -1438,7 +1438,12 @@ function saveExam(event) {
   const videoDrafts = getExamVideoDrafts().filter(video => video.file || video.selectedFile);
 
   if (!name || !description) {
-    alert('Vui lòng nhập đầy đủ thông tin bài thi.');
+    alert('Vui lòng nhập đầy đủ tên và mô tả bài thi.');
+    return;
+  }
+
+  if (!examTypeId) {
+    alert('Vui lòng chọn Loại/Mã bài thi hợp lệ.');
     return;
   }
 
@@ -1504,7 +1509,7 @@ function saveExam(event) {
       // Tạo bài thi mới — gọi API server trước, dùng ID trả về
       let serverExamId = targetExamId;
       const sampleVideoUrl = videos.find(v => v.url)?.url || '';
-      const teacherId = currentUser?.studentId || currentUser?.id || '';
+      const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
       if (teacherId && typeof ExamsService !== 'undefined') {
         try {
           let standardData = null;

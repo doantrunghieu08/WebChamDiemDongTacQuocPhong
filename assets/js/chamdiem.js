@@ -68,6 +68,27 @@ async function loadGradingSession() {
 
     const sub = session?.studentSubmissionResponse;
     if (sub) {
+      if (sub.studentData) {
+        try {
+          state.studentPoseData = JSON.parse(sub.studentData);
+        } catch (e) {
+          console.warn('Lỗi parse studentData:', e);
+        }
+      }
+      if (sub.standardData) {
+        try {
+          state.standardPoseData = JSON.parse(sub.standardData);
+        } catch (e) {
+          console.warn('Lỗi parse standardData:', e);
+        }
+      }
+
+      // Đổi màu nút compare nếu đã có dữ liệu
+      if (state.studentPoseData) {
+        const btnCP = document.getElementById('btnComparePose');
+        if (btnCP) btnCP.classList.add('has-data');
+      }
+
       const urls = [];
       if (sub.videoUrl1) urls.push(sub.videoUrl1);
       if (sub.videoUrl2) urls.push(sub.videoUrl2);
@@ -1745,7 +1766,13 @@ const AI_BASE_URL = 'https://stung-ceremony-charity.ngrok-free.dev';
 function openComparePoseModal() {
   document.getElementById('compare-pose-modal').style.display = 'flex';
   // Nếu đã có dữ liệu studentPoseData → hiển thị ready
-  if (state.studentPoseData) {
+  if (state.studentPoseData && state.standardPoseData) {
+    _setCposeState('empty');
+    const desc = document.querySelector('.cpose-empty-desc');
+    if (desc) desc.textContent = 'Dữ liệu tư thế của học sinh và dữ liệu chuẩn đã sẵn sàng. Nhấn bên dưới để bắt đầu so sánh.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 Bắt Đầu So Sánh Ngay';
+  } else if (state.studentPoseData) {
     _setCposeState('empty');
     // Cập nhật mô tả trong empty state để thông báo đã có data
     const desc = document.querySelector('.cpose-empty-desc');
@@ -1976,7 +2003,11 @@ function _renderComparePoseResult(data) {
 function resetComparePoseResult() {
   _setCposeState('empty');
   const desc = document.querySelector('.cpose-empty-desc');
-  if (state.studentPoseData) {
+  if (state.studentPoseData && state.standardPoseData) {
+    if (desc) desc.textContent = 'Dữ liệu tư thế của học sinh và dữ liệu chuẩn đã sẵn sàng. Nhấn bên dưới để bắt đầu so sánh.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 Bắt Đầu So Sánh Ngay';
+  } else if (state.studentPoseData) {
     if (desc) desc.textContent = 'Dữ liệu tư thế học sinh đã sẵn sàng. Nhấn bên dưới để so sánh với chuẩn.';
     const runBtn = document.getElementById('btnRunComparePose');
     if (runBtn) runBtn.textContent = '🔍 So Sánh Tư Thế Ngay';
