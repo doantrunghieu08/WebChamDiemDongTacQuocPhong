@@ -1387,9 +1387,345 @@ body {
 .toast.error { border-left-color: var(--red); }
 
 /* ===== RESPONSIVE ===== */
+
+/* ---- 1024px: Tablet landscape ---- */
+@media (max-width: 1024px) {
+  .wrap {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .video-area {
+    width: 85%;
+  }
+
+  .controls,
+  .thumbs {
+    width: 85%;
+  }
+}
+
+/* ---- 768px: Tablet portrait / Mobile landscape ---- */
 @media (max-width: 768px) {
-  .wrap { grid-template-columns: 1fr; }
-  .header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  /* Topbar */
+  .topbar {
+    padding: 8px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    margin-left: 0;
+  }
+
+  .topbar-title {
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .btn-back {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Header row */
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    padding: 6px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  /* Main layout: stack video on top, panel below */
+  .wrap {
+    grid-template-columns: 1fr;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .left-col {
+    order: 1;
+  }
+
+  .right-col {
+    order: 2;
+  }
+
+  /* Video: full width */
+  .video-area {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  .controls {
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+    padding: 8px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .thumbs {
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+    overflow-x: auto;
+    padding: 8px 10px;
+  }
+
+  .thumb-img {
+    width: 60px;
+    height: 38px;
+  }
+
+  /* Page title */
+  .page-title {
+    font-size: 16px;
+  }
+
+  /* Grading deadline notice */
+  .grading-deadline-notice {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  /* Drop list */
+  .drop-list {
+    max-height: 160px;
+  }
+
+  /* History table */
+  .htable {
+    min-width: 420px;
+    font-size: 13px;
+  }
+
+  .htable th,
+  .htable td {
+    padding: 8px 8px;
+  }
+
+  /* Modal */
+  .modal {
+    width: calc(100vw - 24px);
+    border-radius: 10px;
+  }
+
+  .modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Compare pose modal */
+  .compare-pose-modal {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .cpose-score-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .cpose-score-main {
+    min-width: 0;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cpose-score-value {
+    font-size: 36px;
+  }
+
+  .cpose-score-stats {
+    gap: 14px;
+  }
+
+  .cpose-joints-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Toast position */
+  .toast {
+    bottom: 12px;
+    right: 12px;
+    left: 12px;
+    right: auto;
+    width: calc(100% - 24px);
+  }
+
+  /* AI modal */
+  .ai-grade-modal {
+    max-height: 90vh;
+  }
+
+  /* Upload video modal */
+  .upload-video-modal {
+    width: calc(100vw - 24px);
+    max-width: none;
+  }
+}
+
+/* ---- 480px: Phone portrait ---- */
+@media (max-width: 480px) {
+  /* Topbar: icon only for back btn */
+  .topbar {
+    padding: 7px 10px;
+    gap: 8px;
+  }
+
+  .btn-back span {
+    display: none;
+  }
+
+  .btn-back {
+    padding: 6px 10px;
+    min-width: 36px;
+    justify-content: center;
+  }
+
+  .topbar-title {
+    font-size: 13px;
+  }
+
+  .breadcrumb {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  /* Wrap padding */
+  .wrap {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* Video controls */
+  .ctrl {
+    font-size: 16px;
+  }
+
+  /* Card padding */
+  .dropdown-body {
+    padding: 8px 10px;
+  }
+
+  .errors-assigned {
+    padding: 8px 10px;
+  }
+
+  .panel-title {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .tag-section-title {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  /* Finish button */
+  .btn-finish {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* Add button */
+  .btn-add {
+    padding: 7px 12px;
+    font-size: 14px;
+  }
+
+  /* Page title */
+  .page-title {
+    font-size: 14px;
+  }
+
+  /* History table scroll */
+  .table-wrap {
+    border-radius: 8px;
+  }
+
+  .htable {
+    min-width: 360px;
+    font-size: 12px;
+  }
+
+  .htable th,
+  .htable td {
+    padding: 7px 6px;
+  }
+
+  /* AI grade button */
+  .btn-ai-grade {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+
+  /* Compare pose: 2 col joints grid */
+  .cpose-joints-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cpose-score-value {
+    font-size: 30px;
+  }
+
+  .cpose-stat-val {
+    font-size: 18px;
+  }
+
+  /* Success modal */
+  .success-modal {
+    width: calc(100vw - 32px);
+    padding: 24px 16px 18px;
+  }
+
+  .success-info {
+    padding: 12px;
+  }
+
+  .success-score {
+    font-size: 18px;
+  }
+
+  /* Exit confirm modal */
+  .exit-confirm-modal {
+    padding: 22px 16px 16px;
+  }
+
+  .exit-confirm-title {
+    font-size: 18px;
+  }
+
+  /* Modal footer buttons stack vertically */
+  .exit-confirm-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .exit-confirm-actions .btn-cancel,
+  .exit-confirm-actions .btn-confirm {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ===== COMPARE POSE BUTTON ===== */

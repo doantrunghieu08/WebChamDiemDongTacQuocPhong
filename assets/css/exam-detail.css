@@ -1278,31 +1278,279 @@ body {
 }
 
 /* ===== RESPONSIVE ===== */
+
+/* --- 768px: Tablet / Mobile --- */
 @media (max-width: 768px) {
-  .ed-main {
-    padding: 20px 16px;
+  /* Topbar */
+  .ed-topbar-content {
+    padding: 0 16px;
   }
 
+  .ed-topbar-title {
+    font-size: 15px;
+  }
+
+  .ed-logo {
+    font-size: 18px;
+  }
+
+  .ed-btn-back {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  /* Main */
+  .ed-main {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  /* Exam info card */
   .ed-exam-info-card {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .ed-exam-icon-large {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+  }
+
+  .ed-exam-title {
+    font-size: 20px;
   }
 
   .ed-exam-meta-row {
-    justify-content: center;
+    gap: 12px;
   }
 
+  /* Reference section */
+  .ed-reference-section {
+    padding: 20px;
+  }
+
+  .ed-reference-video-card {
+    flex-direction: column;
+  }
+
+  .ed-reference-preview {
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Scores card */
+  .ed-scores-card {
+    padding: 20px;
+  }
+
+  .ed-scores-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Grading detail card */
+  .ed-grading-detail-card {
+    padding: 20px;
+  }
+
+  /* Grading record header */
+  .ed-grading-record-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .ed-grading-record-summary {
+    align-items: flex-start;
+  }
+
+  /* Grading frame layout: stack vertically */
+  .ed-grading-frame-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ed-grading-frame-preview {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Upload section */
+  .ed-upload-section {
+    padding: 20px;
+  }
+
+  /* Video item */
   .ed-video-item {
     flex-direction: column;
     align-items: flex-start;
+    padding: 14px;
   }
 
   .ed-video-thumb {
     width: 100%;
     aspect-ratio: 3 / 4;
+    max-width: 200px;
   }
 
+  .ed-video-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Upload dropzone */
   .ed-upload-dropzone {
     padding: 32px 16px;
+  }
+
+  /* Deadline notice */
+  .ed-deadline-notice {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
+/* --- 480px: Phone portrait --- */
+@media (max-width: 480px) {
+  /* Topbar */
+  .ed-topbar-content {
+    padding: 0 12px;
+  }
+
+  .ed-topbar-title {
+    font-size: 13px;
+  }
+
+  .ed-logo {
+    display: none;
+  }
+
+  .ed-btn-back {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* Main */
+  .ed-main {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  /* Exam info card */
+  .ed-exam-info-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .ed-exam-icon-large {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .ed-exam-title {
+    font-size: 18px;
+  }
+
+  .ed-exam-description {
+    font-size: 13px;
+  }
+
+  /* Scores grid: single column on small phones */
+  .ed-scores-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ed-score-number {
+    font-size: 28px;
+  }
+
+  /* Reference section */
+  .ed-reference-section {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .ed-reference-title {
+    font-size: 13px;
+  }
+
+  /* Grading cards */
+  .ed-grading-detail-card,
+  .ed-scores-card,
+  .ed-upload-section {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .ed-grading-record-header {
+    padding: 14px 16px;
+  }
+
+  .ed-grading-record-title {
+    font-size: 15px;
+  }
+
+  .ed-grading-record-summary strong {
+    font-size: 18px;
+  }
+
+  .ed-grading-frame-list {
+    padding: 14px 16px;
+  }
+
+  .ed-grading-frame-item {
+    padding: 12px;
+  }
+
+  /* Error list */
+  .ed-grading-error-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ed-grading-error-score {
+    align-self: flex-start;
+  }
+
+  /* Video item */
+  .ed-video-item {
+    padding: 12px;
+  }
+
+  .ed-video-name {
+    font-size: 13px;
+  }
+
+  .ed-video-thumb {
+    max-width: 160px;
+  }
+
+  /* Section title */
+  .ed-section-title {
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* Deadline panel */
+  .ed-deadline-panel {
+    padding: 10px 12px;
+  }
+
+  .ed-deadline-status {
+    font-size: 12px;
+  }
+
+  .ed-deadline-list {
+    font-size: 11px;
+  }
+
+  /* Draft badge */
+  .ed-draft-badge .ed-badge-content {
+    font-size: 13px;
+    padding: 10px 18px;
   }
 }

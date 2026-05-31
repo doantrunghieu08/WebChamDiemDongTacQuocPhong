@@ -1620,3 +1620,295 @@ body {
   }
   .cd-exam-nav { width: 28px; height: 28px; font-size: 11px; }
 }
+
+/* ===== RESPONSIVE MOBILE ===== */
+
+/* --- 1024px: Tablet landscape --- */
+@media (max-width: 1024px) {
+  .cd-header-content {
+    padding: 12px 16px;
+  }
+
+  .cd-breadcrumb {
+    padding: 10px 16px;
+  }
+
+  .cd-container {
+    padding: 0 16px 32px;
+  }
+
+  .cd-class-banner {
+    top: 52px;
+    padding: 18px 20px;
+  }
+
+  .cd-section-header {
+    top: 148px;
+  }
+}
+
+/* --- 768px: Tablet portrait / mobile --- */
+@media (max-width: 768px) {
+  /* Header */
+  .cd-header-content {
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .cd-logo {
+    font-size: 18px;
+  }
+
+  .cd-user {
+    display: none;
+  }
+
+  /* Breadcrumb: scrollable */
+  .cd-breadcrumb {
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  /* Container */
+  .cd-container {
+    padding: 0 12px 24px;
+  }
+
+  /* Class banner */
+  .cd-class-banner {
+    position: static;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .banner-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  .banner-info h1 {
+    font-size: 18px;
+  }
+
+  .banner-info p {
+    font-size: 13px;
+  }
+
+  .banner-stats {
+    width: 100%;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .banner-stat {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+  }
+
+  .banner-stat .val {
+    font-size: 16px;
+  }
+
+  .banner-stat .lbl {
+    font-size: 10px;
+  }
+
+  /* Section header */
+  .cd-section-header {
+    position: static;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .cd-section-header h2 {
+    font-size: 16px;
+  }
+
+  .cd-section-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Search input */
+  .cd-search input {
+    width: 100%;
+  }
+
+  .cd-search {
+    flex: 1;
+  }
+
+  /* Exam grid: 1 column */
+  .cd-exam-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Student list padding */
+  .cd-student-list {
+    padding: 12px 14px;
+  }
+
+  /* Exam panel indent reduce */
+  .cd-exam-panel {
+    padding: 0 0 10px 36px;
+  }
+
+  /* Modal */
+  .cd-confirm-modal-content,
+  .cd-deadline-modal-content,
+  .cd-grading-exam-modal-content {
+    width: calc(100vw - 24px);
+    max-width: none;
+    margin: 12px;
+  }
+
+  /* Toast */
+  .cd-toast {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    right: auto;
+    width: calc(100% - 24px);
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  /* Assigned exams: deadline wrap */
+  .cd-assigned-exam-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Grading history layout in class detail */
+  .grading-history-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Grading exam avatar */
+  .grading-exam-avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* --- 480px: Phone portrait --- */
+@media (max-width: 480px) {
+  /* Header */
+  .cd-header-content {
+    padding: 8px 12px;
+  }
+
+  .cd-logo {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .btn-back {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Banner */
+  .cd-class-banner {
+    padding: 14px;
+  }
+
+  .banner-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .banner-info h1 {
+    font-size: 16px;
+  }
+
+  .banner-stats {
+    gap: 8px;
+  }
+
+  .banner-stat {
+    padding: 6px 8px;
+  }
+
+  /* Section header */
+  .cd-section-header {
+    padding: 12px;
+  }
+
+  .cd-section-header h2 {
+    font-size: 14px;
+  }
+
+  .cd-section-actions button,
+  .cd-section-actions .cd-btn-add,
+  .cd-section-actions .cd-btn-import {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  /* Student row */
+  .cd-student-header {
+    padding: 12px 6px;
+    gap: 10px;
+  }
+
+  .cd-student-name {
+    font-size: 14px;
+  }
+
+  .cd-student-meta {
+    font-size: 11px;
+  }
+
+  .cd-student-number {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  /* Exam panel */
+  .cd-exam-panel {
+    padding: 0 0 10px 20px;
+  }
+
+  /* Exam card */
+  .cd-exam-card {
+    padding: 12px;
+  }
+
+  .cd-exam-title {
+    font-size: 13px;
+  }
+
+  .cd-exam-btn {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  /* Modal body padding */
+  .cd-confirm-modal-body,
+  .cd-grading-exam-modal-body {
+    padding: 14px;
+  }
+
+  /* Confirm form actions */
+  .cd-form-actions {
+    flex-direction: column;
+  }
+
+  .cd-btn-cancel,
+  .cd-btn-submit {
+    width: 100%;
+  }
+}
