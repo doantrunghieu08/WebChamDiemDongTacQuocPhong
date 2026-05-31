@@ -2022,6 +2022,76 @@ function _renderComparePoseResult(data) {
     feedbackEl.textContent = autoFeedback;
     feedbackBox.style.display = 'flex';
   }
+
+  // ---- Biểu đồ góc khớp ----
+  const chartsGrid = document.getElementById('cpose-charts-grid');
+  const chartsTitle = document.getElementById('cpose-charts-title');
+  if (chartsGrid && chartsTitle) {
+    chartsGrid.innerHTML = '';
+    if (window._cposeChartInstances) {
+      window._cposeChartInstances.forEach(c => c.destroy());
+    }
+    window._cposeChartInstances = [];
+
+    if (data.charts && Object.keys(data.charts).length > 0) {
+      chartsTitle.style.display = 'block';
+      Object.keys(data.charts).forEach(jointKey => {
+        const chartData = data.charts[jointKey];
+        if (!chartData || !chartData.standard || !chartData.student) return;
+
+        const chartWrapper = document.createElement('div');
+        chartWrapper.className = 'cpose-chart-card';
+        chartWrapper.innerHTML = '<div class="cpose-chart-title">' + (chartData.label || JOINT_NAMES_VI[jointKey]) + '</div>' +
+                                 '<div style="position: relative; height: 200px; width: 100%;">' +
+                                   '<canvas id="chart-' + jointKey + '"></canvas>' +
+                                 '</div>';
+        chartsGrid.appendChild(chartWrapper);
+
+        const ctx = document.getElementById('chart-' + jointKey).getContext('2d');
+        const chart = new Chart(ctx, {
+          type: 'scatter',
+          data: {
+            datasets: [
+              {
+                label: 'Chuẩn',
+                data: chartData.standard.labels.map((l, i) => ({ x: l, y: chartData.standard.values[i] })),
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                borderWidth: 2,
+                showLine: true,
+                pointRadius: 0,
+                pointHitRadius: 10
+              },
+              {
+                label: 'Học sinh',
+                data: chartData.student.labels.map((l, i) => ({ x: l, y: chartData.student.values[i] })),
+                borderColor: '#DC143C',
+                backgroundColor: 'rgba(220, 20, 60, 0.1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                showLine: true,
+                pointRadius: 3,
+                pointHitRadius: 10
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: { type: 'linear', title: { display: true, text: 'Thời gian (s)' } },
+              y: { title: { display: true, text: 'Góc (°)' }, suggestedMin: 0, suggestedMax: 180 }
+            },
+            plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } }
+          }
+        });
+        window._cposeChartInstances.push(chart);
+      });
+    } else {
+      chartsTitle.style.display = 'none';
+    }
+  }
 }
 
 function resetComparePoseResult() {
