@@ -2060,6 +2060,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let adminExams = [];
 let examUsageCounts = {};
+let currentExamSubTab = 'active';
+
+function switchExamSubTab(tab) {
+  currentExamSubTab = tab;
+  const tabActive = document.getElementById('tabExamActive');
+  const tabDeleted = document.getElementById('tabExamDeleted');
+  
+  if (tabActive && tabDeleted) {
+    if (tab === 'active') {
+      tabActive.style.color = '#b42318';
+      tabActive.style.borderBottom = '2px solid #b42318';
+      tabDeleted.style.color = '#64748b';
+      tabDeleted.style.borderBottom = '2px solid transparent';
+    } else {
+      tabDeleted.style.color = '#b42318';
+      tabDeleted.style.borderBottom = '2px solid #b42318';
+      tabActive.style.color = '#64748b';
+      tabActive.style.borderBottom = '2px solid transparent';
+    }
+  }
+  
+  renderExams();
+}
 
 function getAdminExams() {
   return adminExams;
@@ -2102,7 +2125,7 @@ function renderExams() {
   if (!container) return;
   const search = (document.getElementById('examSearchInput')?.value || '').toLowerCase().trim();
 
-  let filtered = adminExams;
+  let filtered = adminExams.filter(e => currentExamSubTab === 'active' ? !e.isDeleted : e.isDeleted);
   if (search) {
     filtered = filtered.filter(e => e.name.toLowerCase().includes(search));
   }
