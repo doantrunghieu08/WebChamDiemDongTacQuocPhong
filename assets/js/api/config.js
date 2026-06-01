@@ -41,6 +41,8 @@ const API_CONFIG = {
 
         // Exams
         EXAM_TYPES: '/exams/types',
+        ADMIN_CREATE_EXAM_TYPE: 'http://103.75.182.246:8080/api/admin/exam-type',
+        ADMIN_EXAM_USAGE_COUNTS: 'http://103.75.182.246:8080/api/admin/exam-type/exam',
         TEACHER_EXAM_TYPES: 'http://103.75.182.246:8080/api/teacher/exam-type',
         CLASS_EXAMS: (classId, page = 0, size = 3) => `/public/exam/class/${encodeURIComponent(classId)}?page=${page}&size=${size}`,
         TEACHER_EXAMS: (teacherId, page = 0, size = 9) => `/api/exam/teacher/${teacherId}?page=${page}&size=${size}`,

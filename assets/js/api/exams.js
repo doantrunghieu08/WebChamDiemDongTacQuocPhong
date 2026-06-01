@@ -17,6 +17,37 @@ const ExamsService = {
     },
 
     /**
+     * Tạo loại bài thi mới (Admin)
+     * @param {string} examCode - Tên tag bài thi (VD: DI_DEU)
+     */
+    async createAdminExamType(examCode) {
+        const url = API_CONFIG.ENDPOINTS.ADMIN_CREATE_EXAM_TYPE;
+        const response = await ApiClient.fetchWithAuth(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ examCode })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => null);
+            throw new Error(err?.message || `Thêm tag thất bại: HTTP ${response.status}`);
+        }
+        const data = await response.json().catch(() => null);
+        return data?.data || data;
+    },
+
+    /**
+     * Lấy số lượng bài thi cho từng tag (Admin)
+     * @returns {Promise<object>} Map { "DI_DEU": 2, "VO_THUAT": 1, ... }
+     */
+    async getAdminExamUsageCounts() {
+        const url = API_CONFIG.ENDPOINTS.ADMIN_EXAM_USAGE_COUNTS;
+        const response = await ApiClient.fetchWithAuth(url, { method: 'GET' });
+        if (!response.ok) throw new Error(`Lấy số lượng bài thi thất bại: HTTP ${response.status}`);
+        const json = await response.json().catch(() => null);
+        return json?.data || {};
+    },
+
+    /**
      * Lấy danh sách bài thi của một lớp học
      * @param {string} classId - Mã lớp (ví dụ: QS_D07)
      * @returns {Promise<Array>} Mảng exam objects đã được chuẩn hoá

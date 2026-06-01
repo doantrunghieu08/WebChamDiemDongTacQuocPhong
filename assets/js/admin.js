@@ -751,7 +751,7 @@ function switchAdminTab(tabName) {
   if (tabName === 'accounts') renderAccounts();
   if (tabName === 'classes') renderClasses();
   if (tabName === 'assignments') renderAssignments();
-  if (tabName === 'exams') renderExams();
+  if (tabName === 'exams') loadExams();
 }
 
 function renderAccounts() {
@@ -2010,7 +2010,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const examForm = document.getElementById('adminExamForm');
   if (examForm) {
-    examForm.addEventListener('submit', (e) => {
+    examForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawName = document.getElementById('adminExamName').value.trim();
       const tagName = rawName.toUpperCase().replace(/\s+/g, '_');
@@ -2029,16 +2029,39 @@ document.addEventListener('DOMContentLoaded', () => {
           adminExams[idx].id = tagName;
           adminExams[idx].name = tagName;
         }
+        saveAdminExams(adminExams);
+        closeAdminExamModal();
+        renderExams();
+        showAdminNotice('Thành công', 'Đã cập nhật tag bài thi', 'success');
       } else {
         if (adminExams.some(ex => ex.id === tagName)) {
           showAdminNotice('Lỗi', 'Tag bài thi đã tồn tại.', 'warning');
           return;
         }
-        adminExams.push({ id: tagName, name: tagName, description: '', icon: '📝', videos: [], deleted: false });
+        try {
+          const submitBtn = examForm.querySelector('button[type="submit"]');
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+          submitBtn.disabled = true;
+
+          // Call Backend API
+          await ExamsService.createAdminExamType(tagName);
+
+          adminExams.push({ id: tagName, name: tagName, description: '', icon: '📝', videos: [], deleted: false });
+          saveAdminExams(adminExams);
+          closeAdminExamModal();
+          renderExams();
+          showAdminNotice('Thành công', 'Đã thêm tag bài thi mới', 'success');
+
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        } catch (error) {
+          const submitBtn = examForm.querySelector('button[type="submit"]');
+          submitBtn.innerHTML = 'Lưu tag';
+          submitBtn.disabled = false;
+          showAdminNotice('Lỗi API', error.message, 'warning');
+        }
       }
-      saveAdminExams(adminExams);
-      closeAdminExamModal();
-      renderExams();
     });
   }
   
@@ -2049,6 +2072,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let adminExams = [];
+let examUsageCounts = {};
 
 function getAdminExams() {
   const stored = JSON.parse(sessionStorage.getItem('examCatalog') || 'null');
@@ -2067,16 +2091,24 @@ function saveAdminExams(exams) {
   sessionStorage.setItem('examCatalog', JSON.stringify(adminExams));
 }
 
-function getExamUsageCount(tagId) {
-  const allClassExams = JSON.parse(sessionStorage.getItem('classExams') || '{}');
-  let count = 0;
-  for (const classId in allClassExams) {
-    const assignments = allClassExams[classId];
-    if (Array.isArray(assignments)) {
-      count += assignments.filter(item => item.id === tagId || item.classExamId === tagId).length;
-    }
+async function loadExams() {
+  const container = document.getElementById('examsContent');
+  if (container) {
+    container.innerHTML = '<div style="padding: 24px; text-align: center; color: #64748b;"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</div>';
   }
-  return count;
+  
+  try {
+    examUsageCounts = await ExamsService.getAdminExamUsageCounts();
+  } catch (error) {
+    console.error('Lỗi khi lấy số lượng bài thi:', error);
+    examUsageCounts = {};
+  }
+  
+  renderExams();
+}
+
+function getExamUsageCount(tagId) {
+  return examUsageCounts[tagId] || 0;
 }
 
 function renderExams() {
