@@ -42,6 +42,10 @@ const API_CONFIG = {
         // Exams
         EXAM_TYPES: '/exams/types',
         ADMIN_CREATE_EXAM_TYPE: 'http://103.75.182.246:8080/api/admin/exam-type',
+        ADMIN_UPDATE_EXAM_TYPE: (id) => `http://103.75.182.246:8080/api/admin/exam-type/${id}`,
+        ADMIN_DELETE_EXAM_TYPE: (id) => `http://103.75.182.246:8080/api/admin/exam-type/${id}`,
+        ADMIN_RESTORE_EXAM_TYPE: (id) => `http://103.75.182.246:8080/api/admin/exam-type/${id}/restore`,
+        ADMIN_EXAM_TYPES_DELETED: 'http://103.75.182.246:8080/api/admin/exam-type/delete',
         ADMIN_EXAM_USAGE_COUNTS: 'http://103.75.182.246:8080/api/admin/exam-type/exam',
         TEACHER_EXAM_TYPES: 'http://103.75.182.246:8080/api/teacher/exam-type',
         CLASS_EXAMS: (classId, page = 0, size = 3) => `/public/exam/class/${encodeURIComponent(classId)}?page=${page}&size=${size}`,

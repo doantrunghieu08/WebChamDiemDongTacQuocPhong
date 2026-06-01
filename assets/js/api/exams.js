@@ -36,6 +36,65 @@ const ExamsService = {
     },
 
     /**
+     * Lấy danh sách loại bài thi đã xóa mềm (Admin)
+     * @returns {Promise<Array>} Mảng các tag đã xóa
+     */
+    async getDeletedAdminExamTypes() {
+        const url = API_CONFIG.ENDPOINTS.ADMIN_EXAM_TYPES_DELETED;
+        const response = await ApiClient.fetchWithAuth(url, { method: 'GET' });
+        if (!response.ok) throw new Error(`Lấy danh sách đã xóa thất bại: HTTP ${response.status}`);
+        const json = await response.json().catch(() => null);
+        const data = json?.data ?? [];
+        return Array.isArray(data) ? data : [];
+    },
+
+    /**
+     * Cập nhật Tên tag (Admin)
+     */
+    async updateAdminExamType(id, examCode) {
+        const url = API_CONFIG.ENDPOINTS.ADMIN_UPDATE_EXAM_TYPE(id);
+        const response = await ApiClient.fetchWithAuth(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ examCode })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => null);
+            throw new Error(err?.message || `Cập nhật tag thất bại: HTTP ${response.status}`);
+        }
+        const data = await response.json().catch(() => null);
+        return data?.data || data;
+    },
+
+    /**
+     * Khôi phục tag đã xóa (Admin)
+     */
+    async restoreAdminExamType(id) {
+        const url = API_CONFIG.ENDPOINTS.ADMIN_RESTORE_EXAM_TYPE(id);
+        const response = await ApiClient.fetchWithAuth(url, { method: 'PUT' });
+        if (!response.ok) {
+            const err = await response.json().catch(() => null);
+            throw new Error(err?.message || `Khôi phục tag thất bại: HTTP ${response.status}`);
+        }
+        const data = await response.json().catch(() => null);
+        return data?.data || data;
+    },
+
+    /**
+     * Xóa tag (Admin)
+     */
+    async deleteAdminExamType(id) {
+        const url = API_CONFIG.ENDPOINTS.ADMIN_DELETE_EXAM_TYPE(id);
+        const response = await ApiClient.fetchWithAuth(url, { method: 'DELETE' });
+        if (!response.ok) {
+            const err = await response.json().catch(() => null);
+            throw new Error(err?.message || `Xóa tag thất bại: HTTP ${response.status}`);
+        }
+        const data = await response.json().catch(() => null);
+        return data?.data || data;
+    },
+
+    /**
      * Lấy số lượng bài thi cho từng tag (Admin)
      * @returns {Promise<object>} Map { "DI_DEU": 2, "VO_THUAT": 1, ... }
      */

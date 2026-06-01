@@ -2018,49 +2018,36 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!tagName) return;
 
       const editId = examForm.dataset.editId;
-      if (editId) {
-        // If changing name, ensure new name doesn't exist
-        if (tagName !== editId && adminExams.some(ex => ex.id === tagName)) {
-          showAdminNotice('Lỗi', 'Tag bài thi này đã tồn tại.', 'warning');
-          return;
-        }
-        const idx = adminExams.findIndex(ex => ex.id === editId);
-        if (idx !== -1) {
-          adminExams[idx].id = tagName;
-          adminExams[idx].name = tagName;
-        }
-        saveAdminExams(adminExams);
-        closeAdminExamModal();
-        renderExams();
-        showAdminNotice('Thành công', 'Đã cập nhật tag bài thi', 'success');
-      } else {
-        if (adminExams.some(ex => ex.id === tagName)) {
-          showAdminNotice('Lỗi', 'Tag bài thi đã tồn tại.', 'warning');
-          return;
-        }
-        try {
-          const submitBtn = examForm.querySelector('button[type="submit"]');
-          const originalText = submitBtn.innerHTML;
-          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-          submitBtn.disabled = true;
+      
+      if (adminExams.some(ex => ex.name === tagName && ex.id !== editId)) {
+        showAdminNotice('Lỗi', 'Tag bài thi này đã tồn tại.', 'warning');
+        return;
+      }
+      
+      try {
+        const submitBtn = examForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+        submitBtn.disabled = true;
 
-          // Call Backend API
+        if (editId) {
+          await ExamsService.updateAdminExamType(editId, tagName);
+          showAdminNotice('Thành công', 'Đã cập nhật tag bài thi', 'success');
+        } else {
           await ExamsService.createAdminExamType(tagName);
-
-          adminExams.push({ id: tagName, name: tagName, description: '', icon: '📝', videos: [], deleted: false });
-          saveAdminExams(adminExams);
-          closeAdminExamModal();
-          renderExams();
           showAdminNotice('Thành công', 'Đã thêm tag bài thi mới', 'success');
-
-          submitBtn.innerHTML = originalText;
-          submitBtn.disabled = false;
-        } catch (error) {
-          const submitBtn = examForm.querySelector('button[type="submit"]');
-          submitBtn.innerHTML = 'Lưu tag';
-          submitBtn.disabled = false;
-          showAdminNotice('Lỗi API', error.message, 'warning');
         }
+
+        closeAdminExamModal();
+        loadExams();
+
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      } catch (error) {
+        const submitBtn = examForm.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = 'Lưu tag';
+        submitBtn.disabled = false;
+        showAdminNotice('Lỗi API', error.message, 'warning');
       }
     });
   }
@@ -2075,20 +2062,7 @@ let adminExams = [];
 let examUsageCounts = {};
 
 function getAdminExams() {
-  const stored = JSON.parse(sessionStorage.getItem('examCatalog') || 'null');
-  if (Array.isArray(stored)) {
-    return stored;
-  }
-  return [
-    { id: 'DI_DEU', name: 'DI_DEU', icon: '📝', description: '', videos: [], deleted: false },
-    { id: 'BAN_SUNG', name: 'BAN_SUNG', icon: '📝', description: '', videos: [], deleted: false },
-    { id: 'VO_THUAT', name: 'VO_THUAT', icon: '📝', description: '', videos: [], deleted: false }
-  ];
-}
-
-function saveAdminExams(exams) {
-  adminExams = exams;
-  sessionStorage.setItem('examCatalog', JSON.stringify(adminExams));
+  return adminExams;
 }
 
 async function loadExams() {
@@ -2098,10 +2072,22 @@ async function loadExams() {
   }
   
   try {
-    examUsageCounts = await ExamsService.getAdminExamUsageCounts();
+    const [active, deleted, counts] = await Promise.all([
+      ExamsService.getExamTypes(),
+      ExamsService.getDeletedAdminExamTypes(),
+      ExamsService.getAdminExamUsageCounts()
+    ]);
+    
+    adminExams = [
+      ...active.map(e => ({ id: String(e.id), name: e.examCode || e.name || 'N/A', isDeleted: false })),
+      ...deleted.map(e => ({ id: String(e.id), name: e.examCode || e.name || 'N/A', isDeleted: true }))
+    ];
+    examUsageCounts = counts || {};
   } catch (error) {
-    console.error('Lỗi khi lấy số lượng bài thi:', error);
+    console.error('Lỗi khi lấy dữ liệu bài thi:', error);
+    adminExams = [];
     examUsageCounts = {};
+    showAdminNotice('Lỗi', 'Không thể tải danh sách tag bài thi', 'error');
   }
   
   renderExams();
@@ -2112,12 +2098,11 @@ function getExamUsageCount(tagId) {
 }
 
 function renderExams() {
-  adminExams = getAdminExams();
   const container = document.getElementById('examsContent');
   if (!container) return;
   const search = (document.getElementById('examSearchInput')?.value || '').toLowerCase().trim();
 
-  let filtered = adminExams.filter(e => !e.deleted);
+  let filtered = adminExams;
   if (search) {
     filtered = filtered.filter(e => e.name.toLowerCase().includes(search));
   }
@@ -2135,17 +2120,24 @@ function renderExams() {
         <tbody>
           ${filtered.length === 0 ? '<tr><td colspan="3" style="text-align:center;padding:24px;color:#94a3b8">Không có tag nào</td></tr>' : ''}
           ${filtered.map(e => {
-            const usageCount = getExamUsageCount(e.id);
+            const usageCount = getExamUsageCount(e.name);
             return `
             <tr>
-              <td><span class="admin-role-badge admin" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-size:13px; font-family:monospace; padding:6px 14px;"><i class="fas fa-tag"></i> ${e.name}</span></td>
+              <td>
+                <span class="admin-role-badge admin" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-size:13px; font-family:monospace; padding:6px 14px; ${e.isDeleted ? 'opacity: 0.6; text-decoration: line-through;' : ''}"><i class="fas fa-tag"></i> ${e.name}</span>
+                ${e.isDeleted ? '<span style="font-size: 11px; color: #b42318; margin-left: 8px; font-weight: 600;"><i class="fas fa-trash-alt"></i> Đã xóa</span>' : ''}
+              </td>
               <td style="text-align: center;">
-                <span class="admin-status-badge ${usageCount > 0 ? 'active' : 'locked'}" style="font-size: 13px; padding: 5px 14px;">${usageCount} bài thi</span>
+                <span class="admin-status-badge ${usageCount > 0 ? 'active' : 'locked'}" style="font-size: 13px; padding: 5px 14px; ${e.isDeleted ? 'opacity: 0.5;' : ''}">${usageCount} bài thi</span>
               </td>
               <td style="text-align: right; padding-right: 20px;">
                 <div class="admin-action-group" style="justify-content: flex-end; flex-wrap: nowrap;">
-                  <button class="admin-update-btn" onclick="openAdminExamModal('${e.id}')"><i class="fas fa-pen-to-square"></i> Cập nhật</button>
-                  <button class="admin-delete-btn" style="padding: 7px 14px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #f7c8c3; background: #fff2f0; color: #b42318; cursor: ${usageCount > 0 ? 'not-allowed' : 'pointer'}; opacity: ${usageCount > 0 ? '0.5' : '1'}; display: inline-flex; align-items: center; gap: 5px; transition: all 0.18s;" onclick="deleteAdminExam('${e.id}')" ${usageCount > 0 ? 'title="Không thể xóa do đang có bài thi sử dụng"' : ''} onmouseover="if(${usageCount === 0}) this.style.background='#fee4e2'" onmouseout="if(${usageCount === 0}) this.style.background='#fff2f0'"><i class="fas fa-trash"></i> Xóa</button>
+                  ${e.isDeleted ? `
+                    <button class="admin-primary-btn" style="padding: 7px 14px; font-size: 12px;" onclick="restoreAdminExam('${e.id}')"><i class="fas fa-undo"></i> Khôi phục</button>
+                  ` : `
+                    <button class="admin-update-btn" onclick="openAdminExamModal('${e.id}')"><i class="fas fa-pen-to-square"></i> Cập nhật</button>
+                    <button class="admin-delete-btn" style="padding: 7px 14px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #f7c8c3; background: #fff2f0; color: #b42318; cursor: ${usageCount > 0 ? 'not-allowed' : 'pointer'}; opacity: ${usageCount > 0 ? '0.5' : '1'}; display: inline-flex; align-items: center; gap: 5px; transition: all 0.18s;" onclick="deleteAdminExam('${e.id}')" ${usageCount > 0 ? 'title="Không thể xóa do đang có bài thi sử dụng"' : ''} onmouseover="if(${usageCount === 0}) this.style.background='#fee4e2'" onmouseout="if(${usageCount === 0}) this.style.background='#fff2f0'"><i class="fas fa-trash"></i> Xóa</button>
+                  `}
                 </div>
               </td>
             </tr>
@@ -2179,15 +2171,33 @@ function closeAdminExamModal() {
 }
 
 function deleteAdminExam(examId) {
-  const usageCount = getExamUsageCount(examId);
+  const exam = adminExams.find(e => e.id === examId);
+  if (!exam) return;
+  const usageCount = getExamUsageCount(exam.name);
   if (usageCount > 0) {
-    showAdminNotice('Không thể xóa', `Tag ${examId} đang được gán cho ${usageCount} bài thi. Vui lòng gỡ bài thi trước khi xóa.`, 'warning');
+    showAdminNotice('Không thể xóa', `Tag ${exam.name} đang được gán cho ${usageCount} bài thi. Vui lòng gỡ bài thi trước khi xóa.`, 'warning');
     return;
   }
   
-  showAdminConfirm('Xác nhận xóa', `Bạn có chắc chắn muốn xóa tag ${examId} không?`, () => {
-    adminExams = adminExams.filter(e => e.id !== examId);
-    saveAdminExams(adminExams);
-    renderExams();
+  showAdminConfirm('Xác nhận xóa', `Bạn có chắc chắn muốn xóa tag ${exam.name} không?`, async () => {
+    try {
+      await ExamsService.deleteAdminExamType(examId);
+      loadExams();
+    } catch(e) {
+      showAdminNotice('Lỗi', e.message, 'error');
+    }
+  });
+}
+
+function restoreAdminExam(examId) {
+  const exam = adminExams.find(e => e.id === examId);
+  if (!exam) return;
+  showAdminConfirm('Khôi phục', `Bạn muốn khôi phục tag ${exam.name}?`, async () => {
+    try {
+      await ExamsService.restoreAdminExamType(examId);
+      loadExams();
+    } catch(e) {
+      showAdminNotice('Lỗi', e.message, 'error');
+    }
   });
 }
