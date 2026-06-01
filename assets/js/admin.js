@@ -751,6 +751,7 @@ function switchAdminTab(tabName) {
   if (tabName === 'accounts') renderAccounts();
   if (tabName === 'classes') renderClasses();
   if (tabName === 'assignments') renderAssignments();
+  if (tabName === 'exams') renderExams();
 }
 
 function renderAccounts() {
@@ -2006,4 +2007,155 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeAdminPage();
   syncSidebarTop();
   window.addEventListener('resize', syncSidebarTop);
+
+  const examForm = document.getElementById('adminExamForm');
+  if (examForm) {
+    examForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const rawName = document.getElementById('adminExamName').value.trim();
+      const tagName = rawName.toUpperCase().replace(/\s+/g, '_');
+      
+      if (!tagName) return;
+
+      const editId = examForm.dataset.editId;
+      if (editId) {
+        // If changing name, ensure new name doesn't exist
+        if (tagName !== editId && adminExams.some(ex => ex.id === tagName)) {
+          showAdminNotice('Lỗi', 'Tag bài thi này đã tồn tại.', 'warning');
+          return;
+        }
+        const idx = adminExams.findIndex(ex => ex.id === editId);
+        if (idx !== -1) {
+          adminExams[idx].id = tagName;
+          adminExams[idx].name = tagName;
+        }
+      } else {
+        if (adminExams.some(ex => ex.id === tagName)) {
+          showAdminNotice('Lỗi', 'Tag bài thi đã tồn tại.', 'warning');
+          return;
+        }
+        adminExams.push({ id: tagName, name: tagName, description: '', icon: '📝', videos: [], deleted: false });
+      }
+      saveAdminExams(adminExams);
+      closeAdminExamModal();
+      renderExams();
+    });
+  }
+  
+  const searchInput = document.getElementById('examSearchInput');
+  if(searchInput) {
+    searchInput.addEventListener('input', () => renderExams());
+  }
 });
+
+let adminExams = [];
+
+function getAdminExams() {
+  const stored = JSON.parse(sessionStorage.getItem('examCatalog') || 'null');
+  if (Array.isArray(stored)) {
+    return stored;
+  }
+  return [
+    { id: 'DI_DEU', name: 'DI_DEU', icon: '📝', description: '', videos: [], deleted: false },
+    { id: 'BAN_SUNG', name: 'BAN_SUNG', icon: '📝', description: '', videos: [], deleted: false },
+    { id: 'VO_THUAT', name: 'VO_THUAT', icon: '📝', description: '', videos: [], deleted: false }
+  ];
+}
+
+function saveAdminExams(exams) {
+  adminExams = exams;
+  sessionStorage.setItem('examCatalog', JSON.stringify(adminExams));
+}
+
+function getExamUsageCount(tagId) {
+  const allClassExams = JSON.parse(sessionStorage.getItem('classExams') || '{}');
+  let count = 0;
+  for (const classId in allClassExams) {
+    const assignments = allClassExams[classId];
+    if (Array.isArray(assignments)) {
+      count += assignments.filter(item => item.id === tagId || item.classExamId === tagId).length;
+    }
+  }
+  return count;
+}
+
+function renderExams() {
+  adminExams = getAdminExams();
+  const container = document.getElementById('examsContent');
+  if (!container) return;
+  const search = (document.getElementById('examSearchInput')?.value || '').toLowerCase().trim();
+
+  let filtered = adminExams.filter(e => !e.deleted);
+  if (search) {
+    filtered = filtered.filter(e => e.name.toLowerCase().includes(search));
+  }
+
+  container.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Tên tag</th>
+            <th style="width: 200px; text-align: center;">Số lượng bài thi</th>
+            <th style="width: 200px;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.length === 0 ? '<tr><td colspan="3" style="text-align:center;padding:24px;">Không có tag nào</td></tr>' : ''}
+          ${filtered.map(e => {
+            const usageCount = getExamUsageCount(e.id);
+            return `
+            <tr>
+              <td><strong>${e.name}</strong></td>
+              <td style="text-align: center;">
+                <span style="display:inline-block; padding: 4px 12px; background: #e2e8f0; border-radius: 12px; font-weight: bold; font-size: 13px;">${usageCount}</span>
+              </td>
+              <td>
+                <div class="admin-action-group">
+                  <button class="admin-update-btn" onclick="openAdminExamModal('${e.id}')"><i class="fas fa-pen-to-square"></i> Cập nhật</button>
+                  <button class="admin-lock-btn lock" onclick="deleteAdminExam('${e.id}')" ${usageCount > 0 ? 'style="opacity:0.5;cursor:not-allowed;" title="Không thể xóa do đang có bài thi sử dụng"' : ''}><i class="fas fa-trash"></i> Xóa</button>
+                </div>
+              </td>
+            </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openAdminExamModal(examId = null) {
+  document.getElementById('adminExamModal').style.display = 'flex';
+  const form = document.getElementById('adminExamForm');
+  form.reset();
+  form.dataset.editId = '';
+  document.getElementById('adminExamModalTitle').textContent = 'Thêm Tag Bài Thi';
+
+  if (examId && typeof examId === 'string') {
+    const exam = adminExams.find(e => e.id === examId);
+    if (exam) {
+      document.getElementById('adminExamModalTitle').textContent = 'Cập nhật Tag Bài Thi';
+      document.getElementById('adminExamName').value = exam.name;
+      form.dataset.editId = exam.id;
+    }
+  }
+}
+
+function closeAdminExamModal() {
+  document.getElementById('adminExamModal').style.display = 'none';
+}
+
+function deleteAdminExam(examId) {
+  const usageCount = getExamUsageCount(examId);
+  if (usageCount > 0) {
+    showAdminNotice('Không thể xóa', \`Tag \${examId} đang được gán cho \${usageCount} bài thi. Vui lòng gỡ bài thi trước khi xóa.\`, 'warning');
+    return;
+  }
+  
+  showAdminConfirm('Xác nhận xóa', \`Bạn có chắc chắn muốn xóa tag \${examId} không?\`, () => {
+    adminExams = adminExams.filter(e => e.id !== examId);
+    saveAdminExams(adminExams);
+    renderExams();
+  });
+}

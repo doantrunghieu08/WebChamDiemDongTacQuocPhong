@@ -44,6 +44,12 @@
                 <span>Phân công giảng dạy</span>
               </button>
             </li>
+            <li class="admin-menu-item">
+              <button class="admin-nav-link" data-tab="exams" onclick="switchAdminTab('exams')">
+                <i class="fas fa-file-alt"></i>
+                <span>Quản lý bài thi</span>
+              </button>
+            </li>
           </ul>
         </nav>
       </aside>
@@ -110,6 +116,22 @@
             </select>
           </div>
           <div id="assignmentsContent"></div>
+        </section>
+
+        <section class="admin-tab" id="exams-tab">
+          <div class="admin-section-header">
+            <div>
+              <h1>Quản lý bài thi</h1>
+              <p>Quản lý các thẻ bài thi, cấu hình loại bài thi trong hệ thống.</p>
+            </div>
+            <div class="admin-action-btns">
+              <button class="admin-primary-btn" onclick="openAdminExamModal()"><i class="fas fa-plus"></i> Thêm bài thi</button>
+            </div>
+          </div>
+          <div class="admin-search-row" style="gap:8px;">
+            <input id="examSearchInput" type="text" placeholder="Tìm kiếm tên bài thi..." class="admin-search-input" />
+          </div>
+          <div id="examsContent"></div>
         </section>
       </main>
     </div>
@@ -258,6 +280,25 @@
           <button type="button" class="admin-secondary-btn" id="adminFeedbackCancel">Hủy</button>
           <button type="button" class="admin-primary-btn" id="adminFeedbackConfirm">Đồng ý</button>
         </div>
+      </div>
+    </div>
+
+    <div class="admin-modal" id="adminExamModal" style="display:none">
+      <div class="admin-modal-content" style="max-width: 400px;">
+        <div class="admin-modal-header">
+          <h3 id="adminExamModalTitle">Thêm Tag Bài Thi</h3>
+          <button class="admin-modal-close" onclick="closeAdminExamModal()">&times;</button>
+        </div>
+        <form class="admin-modal-body" id="adminExamForm">
+          <div class="admin-form-row">
+            <label for="adminExamName">Tên tag</label>
+            <input id="adminExamName" type="text" placeholder="Ví dụ: DI_DEU, VO_THUAT" required style="text-transform: uppercase;">
+          </div>
+          <div class="admin-form-actions">
+            <button type="button" class="admin-secondary-btn" onclick="closeAdminExamModal()">Hủy</button>
+            <button type="submit" class="admin-primary-btn">Lưu tag</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
