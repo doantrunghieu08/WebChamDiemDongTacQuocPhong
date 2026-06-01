@@ -2095,25 +2095,25 @@ function renderExams() {
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Tên tag</th>
-            <th style="width: 200px; text-align: center;">Số lượng bài thi</th>
-            <th style="width: 200px;">Thao tác</th>
+            <th style="width: 40%;">Tên tag</th>
+            <th style="width: 30%; text-align: center;">Số lượng bài thi</th>
+            <th style="width: 30%; text-align: right; padding-right: 32px;">Thao tác</th>
           </tr>
         </thead>
         <tbody>
-          ${filtered.length === 0 ? '<tr><td colspan="3" style="text-align:center;padding:24px;">Không có tag nào</td></tr>' : ''}
+          ${filtered.length === 0 ? '<tr><td colspan="3" style="text-align:center;padding:24px;color:#94a3b8">Không có tag nào</td></tr>' : ''}
           ${filtered.map(e => {
             const usageCount = getExamUsageCount(e.id);
             return `
             <tr>
-              <td><strong>${e.name}</strong></td>
+              <td><span class="admin-role-badge admin" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-size:13px; font-family:monospace; padding:6px 14px;"><i class="fas fa-tag"></i> ${e.name}</span></td>
               <td style="text-align: center;">
-                <span style="display:inline-block; padding: 4px 12px; background: #e2e8f0; border-radius: 12px; font-weight: bold; font-size: 13px;">${usageCount}</span>
+                <span class="admin-status-badge ${usageCount > 0 ? 'active' : 'locked'}" style="font-size: 13px; padding: 5px 14px;">${usageCount} bài thi</span>
               </td>
-              <td>
-                <div class="admin-action-group">
+              <td style="text-align: right; padding-right: 20px;">
+                <div class="admin-action-group" style="justify-content: flex-end; flex-wrap: nowrap;">
                   <button class="admin-update-btn" onclick="openAdminExamModal('${e.id}')"><i class="fas fa-pen-to-square"></i> Cập nhật</button>
-                  <button class="admin-lock-btn lock" onclick="deleteAdminExam('${e.id}')" ${usageCount > 0 ? 'style="opacity:0.5;cursor:not-allowed;" title="Không thể xóa do đang có bài thi sử dụng"' : ''}><i class="fas fa-trash"></i> Xóa</button>
+                  <button class="admin-delete-btn" style="padding: 7px 14px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #f7c8c3; background: #fff2f0; color: #b42318; cursor: ${usageCount > 0 ? 'not-allowed' : 'pointer'}; opacity: ${usageCount > 0 ? '0.5' : '1'}; display: inline-flex; align-items: center; gap: 5px; transition: all 0.18s;" onclick="deleteAdminExam('${e.id}')" ${usageCount > 0 ? 'title="Không thể xóa do đang có bài thi sử dụng"' : ''} onmouseover="if(${usageCount === 0}) this.style.background='#fee4e2'" onmouseout="if(${usageCount === 0}) this.style.background='#fff2f0'"><i class="fas fa-trash"></i> Xóa</button>
                 </div>
               </td>
             </tr>
