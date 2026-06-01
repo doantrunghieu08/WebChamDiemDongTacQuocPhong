@@ -59,6 +59,11 @@
                 <i class="fas fa-clock-rotate-left"></i>
                 <span>Lịch Sử Chấm</span>
               </button>
+            </li>            <li class="menu-item">
+              <button class="menu-link" data-tab="report" onclick="switchTab('report')">
+                <i class="fas fa-chart-pie"></i>
+                <span>Báo Cáo</span>
+              </button>
             </li>
 
           </ul>
@@ -198,6 +203,17 @@
             <div id="historySummary"></div>
             <div id="historyContent"><!-- Grading history loaded by JS --></div>
             <div id="historyPagination"></div>
+          </div>
+        </section>
+
+        <!-- Report Tab -->
+        <section id="report-tab" class="tab-content">
+          <div class="section-header">
+            <h1>Báo Cáo & Thống Kê</h1>
+            <p>Tổng quan về tình hình học tập và kết quả của sinh viên</p>
+          </div>
+          <div class="report-section" id="reportContent" style="padding: 20px;">
+            <!-- Report content will be loaded here -->
           </div>
         </section>
 
