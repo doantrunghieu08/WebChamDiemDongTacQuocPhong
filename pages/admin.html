@@ -24,18 +24,28 @@
 
     <div class="admin-shell">
       <aside class="admin-sidebar">
-        <button class="admin-nav-link active" data-tab="accounts" onclick="switchAdminTab('accounts')">
-          <i class="fas fa-users-cog"></i>
-          <span>Quản lý tài khoản</span>
-        </button>
-        <button class="admin-nav-link" data-tab="classes" onclick="switchAdminTab('classes')">
-          <i class="fas fa-school"></i>
-          <span>Quản lý lớp</span>
-        </button>
-        <button class="admin-nav-link" data-tab="assignments" onclick="switchAdminTab('assignments')">
-          <i class="fas fa-diagram-project"></i>
-          <span>Phân công giảng dạy</span>
-        </button>
+        <nav class="admin-nav-menu">
+          <ul class="admin-menu-list">
+            <li class="admin-menu-item">
+              <button class="admin-nav-link active" data-tab="accounts" onclick="switchAdminTab('accounts')">
+                <i class="fas fa-users-cog"></i>
+                <span>Quản lý tài khoản</span>
+              </button>
+            </li>
+            <li class="admin-menu-item">
+              <button class="admin-nav-link" data-tab="classes" onclick="switchAdminTab('classes')">
+                <i class="fas fa-school"></i>
+                <span>Quản lý lớp</span>
+              </button>
+            </li>
+            <li class="admin-menu-item">
+              <button class="admin-nav-link" data-tab="assignments" onclick="switchAdminTab('assignments')">
+                <i class="fas fa-diagram-project"></i>
+                <span>Phân công giảng dạy</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
       </aside>
 
       <main class="admin-main">

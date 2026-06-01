@@ -1,3 +1,23 @@
+// Disable Bootstrap modal plugin for custom modals
+document.addEventListener('DOMContentLoaded', function() {
+  // Remove Bootstrap modal classes from custom modals to prevent Bootstrap plugin interference
+  const customModals = [
+    'logoutModal',
+    'deleteConfirmModal',
+    'saveExamConfirmModal',
+    'examVideoNoticeModal'
+  ];
+  
+  customModals.forEach(modalId => {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('modal', 'fade');
+      modal.removeAttribute('data-bs-toggle');
+      modal.removeAttribute('data-bs-target');
+    }
+  });
+});
+
 let currentUser = null;
 let currentClasses = [];
 let isStudentView = false;
@@ -2110,11 +2130,11 @@ async function loadApiGradingHistory(page = 0) {
     const json = await res.json().catch(() => null);
 
     // Spring Page<> format: { data: { content, totalPages, totalElements, number } }
-    if (json?.data?.content != null && json?.data?.totalPages != null) {
+    if (Array.isArray(json?.data?.content)) {
       _apiHistoryCache = json.data.content.map(_mapApiHistoryRecord);
       historyPage         = json.data.number ?? page;
-      historyTotalPages   = json.data.totalPages;
-      historyTotalElements = json.data.totalElements;
+      historyTotalPages   = json.data.totalPages ?? 1;
+      historyTotalElements = json.data.totalElements ?? json.data.content.length;
     } else if (Array.isArray(json?.data)) {
       // Fallback: flat array (no pagination from server)
       _apiHistoryCache = json.data.map(_mapApiHistoryRecord);
@@ -2412,11 +2432,11 @@ async function _fetchHistoryDetailApi(record) {
     apiFrames = Array.from(frameMap.values());
   }
 
-  // Parse grade board entry
   let gradeBoardEntry = null;
   const gbJson = gradeBoardResult.status === 'fulfilled' ? gradeBoardResult.value : null;
-  if (Array.isArray(gbJson?.data) && gbJson.data.length > 0) {
-    gradeBoardEntry = gbJson.data[0];
+  const list = Array.isArray(gbJson?.data?.content) ? gbJson.data.content : (Array.isArray(gbJson?.data) ? gbJson.data : []);
+  if (list.length > 0) {
+    gradeBoardEntry = list[0];
   }
 
   _historyDetailCache[recordId] = { apiFrames, gradeBoardEntry };
@@ -3038,7 +3058,7 @@ async function fetchStudentSubmissions(studentId) {
     const response = await ApiClient.fetchWithAuth(url);
     if (!response.ok) return {};
     const json = await response.json().catch(() => null);
-    const list = Array.isArray(json?.data) ? json.data : [];
+    const list = Array.isArray(json?.data?.content) ? json.data.content : (Array.isArray(json?.data) ? json.data : (Array.isArray(json?.content) ? json.content : (Array.isArray(json) ? json : [])));
     // Map theo idClassExam để tra nhanh
     const map = {};
     list.forEach(item => { map[String(item.idClassExam)] = item; });
