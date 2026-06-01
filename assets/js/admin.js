@@ -2149,11 +2149,11 @@ function closeAdminExamModal() {
 function deleteAdminExam(examId) {
   const usageCount = getExamUsageCount(examId);
   if (usageCount > 0) {
-    showAdminNotice('Không thể xóa', \`Tag \${examId} đang được gán cho \${usageCount} bài thi. Vui lòng gỡ bài thi trước khi xóa.\`, 'warning');
+    showAdminNotice('Không thể xóa', `Tag ${examId} đang được gán cho ${usageCount} bài thi. Vui lòng gỡ bài thi trước khi xóa.`, 'warning');
     return;
   }
   
-  showAdminConfirm('Xác nhận xóa', \`Bạn có chắc chắn muốn xóa tag \${examId} không?\`, () => {
+  showAdminConfirm('Xác nhận xóa', `Bạn có chắc chắn muốn xóa tag ${examId} không?`, () => {
     adminExams = adminExams.filter(e => e.id !== examId);
     saveAdminExams(adminExams);
     renderExams();
