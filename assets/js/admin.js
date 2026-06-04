@@ -247,12 +247,6 @@ async function refreshUserList(page = 0) {
 function _updateSummaryCards() {
   const el = id => document.getElementById(id);
 
-  // Hiển thị tạm từ local trong khi chờ API
-  if (el('summaryTotal'))   el('summaryTotal').textContent   = userTotalElements || adminAccounts.length;
-  if (el('summaryTeacher')) el('summaryTeacher').textContent = adminAccounts.filter(a => a.role === 'teacher').length;
-  if (el('summaryStudent')) el('summaryStudent').textContent = adminAccounts.filter(a => a.role === 'student').length;
-  if (el('summaryLocked'))  el('summaryLocked').textContent  = adminAccounts.filter(a => a.status === 'locked').length;
-
   // Lấy thống kê chính xác từ API
   fetchWithAuth('http://103.75.182.246:8080/public/statistics', { headers: {} })
     .then(r => r.json())
@@ -771,34 +765,6 @@ function renderAccounts() {
 
 function _renderAccountsSkeleton(container) {
   container.innerHTML = `
-    <div class="admin-summary-grid" id="accountSummaryGrid">
-      <div class="admin-summary-card">
-        <div class="admin-summary-icon"><i class="fas fa-users"></i></div>
-        <div class="admin-summary-value" id="summaryTotal">0</div>
-        <div class="admin-summary-label">Tổng tài khoản</div>
-      </div>
-      <div class="admin-summary-card">
-        <div class="admin-summary-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-        <div class="admin-summary-value" id="summaryTeacher">0</div>
-        <div class="admin-summary-label">Giảng viên</div>
-      </div>
-      <div class="admin-summary-card">
-        <div class="admin-summary-icon"><i class="fas fa-user-graduate"></i></div>
-        <div class="admin-summary-value" id="summaryStudent">0</div>
-        <div class="admin-summary-label">Sinh viên</div>
-      </div>
-      <div class="admin-summary-card">
-        <div class="admin-summary-icon"><i class="fas fa-lock"></i></div>
-        <div class="admin-summary-value" id="summaryLocked">0</div>
-        <div class="admin-summary-label">Tài khoản khóa</div>
-      </div>
-    </div>
-    <div class="admin-account-subtabs" style="display: flex; gap: 16px; border-bottom: 2px solid #e2e8f0; margin: 24px 0 16px 0; padding-top: 8px;">
-      <button id="tabRoleAll" class="admin-subtab active" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #b42318; border-bottom: 2px solid #b42318; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('')">Tất cả</button>
-      <button id="tabRoleAdmin" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('admin')">Quản trị</button>
-      <button id="tabRoleTeacher" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('teacher')">Giảng viên</button>
-      <button id="tabRoleStudent" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('student')">Sinh viên</button>
-    </div>
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
@@ -818,7 +784,6 @@ function _renderAccountsSkeleton(container) {
         <i class="fas fa-spinner fa-spin"></i>&nbsp; Đang tải thêm…
       </div>
     </div>
-
   `;
 }
 

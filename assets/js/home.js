@@ -1657,25 +1657,25 @@ function switchHomeExamFilterTab(status) {
   
   if (status === 'active') {
     if (tabActive) {
-      tabActive.style.background = '#fdf2f2';
-      tabActive.style.fontWeight = '600';
+      tabActive.style.borderBottomColor = '#b42318';
       tabActive.style.color = '#b42318';
+      tabActive.classList.add('active');
     }
     if (tabDeleted) {
-      tabDeleted.style.background = '#fff';
-      tabDeleted.style.fontWeight = '500';
+      tabDeleted.style.borderBottomColor = 'transparent';
       tabDeleted.style.color = '#64748b';
+      tabDeleted.classList.remove('active');
     }
   } else {
     if (tabDeleted) {
-      tabDeleted.style.background = '#f8fafc';
-      tabDeleted.style.fontWeight = '600';
-      tabDeleted.style.color = '#334155';
+      tabDeleted.style.borderBottomColor = '#b42318';
+      tabDeleted.style.color = '#b42318';
+      tabDeleted.classList.add('active');
     }
     if (tabActive) {
-      tabActive.style.background = '#fff';
-      tabActive.style.fontWeight = '500';
+      tabActive.style.borderBottomColor = 'transparent';
       tabActive.style.color = '#64748b';
+      tabActive.classList.remove('active');
     }
   }
   
@@ -1892,25 +1892,25 @@ function switchHomeErrorFilterTab(status) {
   
   if (status === 'active') {
     if (tabActive) {
-      tabActive.style.background = '#fdf2f2';
-      tabActive.style.fontWeight = '600';
+      tabActive.style.borderBottomColor = '#b42318';
       tabActive.style.color = '#b42318';
+      tabActive.classList.add('active');
     }
     if (tabDeleted) {
-      tabDeleted.style.background = '#fff';
-      tabDeleted.style.fontWeight = '500';
+      tabDeleted.style.borderBottomColor = 'transparent';
       tabDeleted.style.color = '#64748b';
+      tabDeleted.classList.remove('active');
     }
   } else {
     if (tabDeleted) {
-      tabDeleted.style.background = '#f8fafc';
-      tabDeleted.style.fontWeight = '600';
-      tabDeleted.style.color = '#334155';
+      tabDeleted.style.borderBottomColor = '#b42318';
+      tabDeleted.style.color = '#b42318';
+      tabDeleted.classList.add('active');
     }
     if (tabActive) {
-      tabActive.style.background = '#fff';
-      tabActive.style.fontWeight = '500';
+      tabActive.style.borderBottomColor = 'transparent';
       tabActive.style.color = '#64748b';
+      tabActive.classList.remove('active');
     }
   }
   

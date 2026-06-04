@@ -76,6 +76,34 @@
           <div class="admin-search-row" style="gap:8px;">
             <input id="accountSearchInput" type="text" placeholder="Tìm kiếm tài khoản theo tên, mã, username..." class="admin-search-input" />
           </div>
+          <div class="admin-summary-grid" id="accountSummaryGrid">
+            <div class="admin-summary-card">
+              <div class="admin-summary-icon"><i class="fas fa-users"></i></div>
+              <div class="admin-summary-value" id="summaryTotal">0</div>
+              <div class="admin-summary-label">Tổng tài khoản</div>
+            </div>
+            <div class="admin-summary-card">
+              <div class="admin-summary-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+              <div class="admin-summary-value" id="summaryTeacher">0</div>
+              <div class="admin-summary-label">Giảng viên</div>
+            </div>
+            <div class="admin-summary-card">
+              <div class="admin-summary-icon"><i class="fas fa-user-graduate"></i></div>
+              <div class="admin-summary-value" id="summaryStudent">0</div>
+              <div class="admin-summary-label">Sinh viên</div>
+            </div>
+            <div class="admin-summary-card">
+              <div class="admin-summary-icon"><i class="fas fa-lock"></i></div>
+              <div class="admin-summary-value" id="summaryLocked">0</div>
+              <div class="admin-summary-label">Tài khoản khóa</div>
+            </div>
+          </div>
+          <div class="admin-account-subtabs" style="display: flex; gap: 16px; border-bottom: 2px solid #e2e8f0; margin: 24px 0 16px 0; padding-top: 8px;">
+            <button id="tabRoleAll" class="admin-subtab active" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #b42318; border-bottom: 2px solid #b42318; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('')">Tất cả</button>
+            <button id="tabRoleAdmin" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('admin')">Quản trị</button>
+            <button id="tabRoleTeacher" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('teacher')">Giảng viên</button>
+            <button id="tabRoleStudent" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('student')">Sinh viên</button>
+          </div>
           <div id="accountsContent"></div>
         </section>
 
