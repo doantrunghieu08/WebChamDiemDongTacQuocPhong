@@ -49,15 +49,15 @@ const API_CONFIG = {
         ADMIN_EXAM_USAGE_COUNTS: 'http://103.75.182.246:8080/api/admin/exam-type/exam',
         TEACHER_EXAM_TYPES: 'http://103.75.182.246:8080/api/teacher/exam-type',
         CLASS_EXAMS: (classId, page = 0, size = 3) => `/public/exam/class/${encodeURIComponent(classId)}?page=${page}&size=${size}`,
-        TEACHER_EXAMS: (teacherId, page = 0, size = 9) => `/api/exam/teacher/${teacherId}?page=${page}&size=${size}`,
-        CREATE_TEACHER_EXAM: '/api/teacher/exam',
+        TEACHER_EXAMS: (teacherId, page = 0, size = 9) => `/public/exam/class/${encodeURIComponent(teacherId)}?page=${page}&size=${size}`,
+        CREATE_TEACHER_EXAM: 'http://103.75.182.246:8080/api/teacher/exam',
         UPDATE_TEACHER_EXAM: (examId) => `http://103.75.182.246:8080/api/teacher/update-exam/${encodeURIComponent(examId)}`,
-        ASSIGN_EXAM_TO_CLASS: '/api/teacher/exam/class',
-        REMOVE_EXAM_FROM_CLASS: (idClass, idExam) => `/api/teacher/exam/class?idClass=${encodeURIComponent(idClass)}&idExam=${encodeURIComponent(idExam)}`,
-        DELETED_CLASS_EXAMS: (idClass, page = 0, size = 100) => `/api/teacher/exam/class/deleted?idClass=${encodeURIComponent(idClass)}&page=${page}&size=${size}`,
-        RESTORE_EXAM_TO_CLASS: (idClass, idExam) => `/api/teacher/restore?idClass=${encodeURIComponent(idClass)}&idExam=${encodeURIComponent(idExam)}`,
-        DELETE_TEACHER_EXAM: (examId) => `/api/teacher/exam/${encodeURIComponent(examId)}`,
-        RESTORE_TEACHER_EXAM: (examId) => `/api/teacher/exam/${encodeURIComponent(examId)}`,
+        ASSIGN_EXAM_TO_CLASS: 'http://103.75.182.246:8080/api/teacher/exam/class',
+        REMOVE_EXAM_FROM_CLASS: (idClass, idExam) => `http://103.75.182.246:8080/api/teacher/exam/class?idClass=${encodeURIComponent(idClass)}&idExam=${encodeURIComponent(idExam)}`,
+        DELETED_CLASS_EXAMS: (idClass, page = 0, size = 100) => `http://103.75.182.246:8080/api/teacher/exam/class/deleted?idClass=${encodeURIComponent(idClass)}&page=${page}&size=${size}`,
+        RESTORE_EXAM_TO_CLASS: (idClass, idExam) => `http://103.75.182.246:8080/api/teacher/restore?idClass=${encodeURIComponent(idClass)}&idExam=${encodeURIComponent(idExam)}`,
+        DELETE_TEACHER_EXAM: (examId) => `http://103.75.182.246:8080/api/teacher/exam/${encodeURIComponent(examId)}`,
+        RESTORE_TEACHER_EXAM: (examId) => `http://103.75.182.246:8080/api/teacher/exam/${encodeURIComponent(examId)}`,
         STUDENT_EXAMS: (classId, studentCode) => `/classes/${classId}/students/${studentCode}/exams`,
         ASSIGN_EXAMS: (classId, studentCode) => `/classes/${classId}/students/${studentCode}/exams`,
 
@@ -67,10 +67,10 @@ const API_CONFIG = {
 
         // Errors
         ERRORS: '/errors',
-        CREATE_TEACHER_ERROR: '/api/teacher/error',
-        TEACHER_ERRORS: (teacherId, page = 0, size = 10) => `/api/teacher/error/${encodeURIComponent(teacherId)}?page=${page}&size=${size}`,
-        DELETE_TEACHER_ERROR: (errorId) => `/api/teacher/error/${encodeURIComponent(errorId)}`,
-        RESTORE_TEACHER_ERROR: (errorId) => `/api/teacher/error/${encodeURIComponent(errorId)}`,
+        CREATE_TEACHER_ERROR: 'http://103.75.182.246:8080/api/teacher/error',
+        TEACHER_ERRORS: (teacherId, page = 0, size = 10) => `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(teacherId)}?page=${page}&size=${size}`,
+        DELETE_TEACHER_ERROR: (errorId) => `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(errorId)}`,
+        RESTORE_TEACHER_ERROR: (errorId) => `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(errorId)}`,
         ME: '/auth/me',
 
         // Sample Video Upload (public endpoint — Cloudinary)
