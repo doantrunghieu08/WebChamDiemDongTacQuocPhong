@@ -1984,6 +1984,11 @@ async function initializeAdminPage() {
   const assignmentSearchInput = document.getElementById('assignmentSearchInput');
   if (assignmentSearchInput) assignmentSearchInput.addEventListener('input', renderAssignments);
 
+  const initialTab = new URLSearchParams(window.location.search).get('tab') || 'accounts';
+  switchAdminTab(initialTab);
+  attachAdminEvents();
+}
+
 function switchAccountRoleFilter(role) {
   activeRoleFilter = role;
   
@@ -2010,11 +2015,6 @@ function switchAccountRoleFilter(role) {
 
   userIsLoading = false;
   refreshUserList(0);
-}
-
-  const initialTab = new URLSearchParams(window.location.search).get('tab') || 'accounts';
-  switchAdminTab(initialTab);
-  attachAdminEvents();
 }
 
 function syncSidebarTop() {
