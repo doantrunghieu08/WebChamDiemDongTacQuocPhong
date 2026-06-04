@@ -3,21 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đăng Nhập – Chấm Điểm Đi Đều</title>
+  <title>Đăng Nhập – Hệ Thống Quản Lý Học Viên Quân Sự</title>
+  <link rel="stylesheet" href="assets/css/globals.css" />
   <link rel="stylesheet" href="assets/css/login.css" />
 </head>
-<body>
+<body class="login-body">
   <div class="login-container">
+    <!-- Military Insignia Background -->
+    <div class="login-background">
+      <div class="background-pattern"></div>
+    </div>
+
+    <!-- Login Card -->
     <div class="login-card">
+      <!-- Header with Military Shield -->
       <div class="login-header">
-        <div class="login-logo">HACTECH</div>
-        
-        <p class="login-subtitle">Trường Cao đẳng Nghề Bách Khoa Hà Nội</p>
+        <div class="login-insignia">
+          <svg viewBox="0 0 100 100" class="insignia-svg">
+            <polygon points="50,5 95,30 95,70 50,95 5,70 5,30" fill="none" stroke="#556B2F" stroke-width="2"/>
+            <text x="50" y="55" text-anchor="middle" font-size="28" font-weight="bold" fill="#556B2F">⚔</text>
+          </svg>
+        </div>
+        <h1 class="login-title">HACTECH</h1>
+        <p class="login-subtitle">Cao đẳng Nghề Bách Khoa Hà Nội</p>
+        <p class="login-system">Hệ Thống Quản Lý Học Viên</p>
       </div>
 
+      <!-- Login Form -->
       <form class="login-form" onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label class="form-label">Tên đăng nhập</label>
+          <label class="form-label" for="student-id">Tên Đăng Nhập</label>
           <input 
             type="text" 
             id="student-id" 
@@ -28,7 +43,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Mật Khẩu</label>
+          <label class="form-label" for="password">Mật Khẩu</label>
           <input 
             type="password" 
             id="password" 
@@ -38,11 +53,16 @@
           />
         </div>
 
-        <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
+        <button type="submit" class="btn btn-primary btn-login w-full">
+          <span class="btn-text">ĐĂNG NHẬP</span>
+        </button>
       </form>
 
+      <!-- Footer with Links -->
       <div class="login-footer">
-        <a href="/pages/forgot-password.html" class="forgot-password-link">Quên mật khẩu?</a>
+        <a href="/pages/forgot-password.html" class="footer-link">Quên mật khẩu?</a>
+        <span class="footer-divider">•</span>
+        <span class="footer-text">v1.0 © 2026</span>
       </div>
     </div>
   </div>

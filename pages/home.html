@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang Chủ - HACTECH</title>
+  <title>Dashboard - Hệ Thống Quản Lý Học Viên</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/globals.css">
   <link rel="stylesheet" href="../assets/css/home.css">
 </head>
 <body>
@@ -13,12 +14,18 @@
     <header class="home-header">
       <div class="header-content">
         <div class="logo-section">
-          <div class="logo">HACTECH</div>
-          <div class="school-name">Cao đẳng Nghề Bách Khoa Hà Nội</div>
+          <div class="logo-mark">⚔</div>
+          <div class="logo-text">
+            <div class="logo">HACTECH</div>
+            <div class="school-name">Cao đẳng Nghề Bách Khoa</div>
+          </div>
         </div>
         <div class="user-section">
           <span class="user-name" id="userName">Giảng viên</span>
-          <button class="btn-logout" id="btnLogout">Đăng xuất</button>
+          <button class="btn-logout" id="btnLogout">
+            <i class="fas fa-sign-out-alt"></i>
+            Đăng xuất
+          </button>
         </div>
       </div>
     </header>
@@ -56,16 +63,16 @@
             </li>
             <li class="menu-item">
               <button class="menu-link" data-tab="history" onclick="switchTab('history')">
-                <i class="fas fa-clock-rotate-left"></i>
+                <i class="fas fa-history"></i>
                 <span>Lịch Sử Chấm</span>
               </button>
-            </li>            <li class="menu-item">
+            </li>
+            <li class="menu-item">
               <button class="menu-link" data-tab="report" onclick="switchTab('report')">
                 <i class="fas fa-chart-pie"></i>
                 <span>Báo Cáo</span>
               </button>
             </li>
-
           </ul>
 
           <!-- Student Menu -->
