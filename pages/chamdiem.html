@@ -40,9 +40,9 @@
         <div class="page-title">CHẤM ĐIỂM ĐỘNG TÁC QUỐC PHÒNG</div>
         <div class="header-actions">
           <button class="btn-compare-pose" id="btnComparePose" onclick="openComparePoseModal()" title="So sánh tư thế học sinh với chuẩn">
-            📊 SO SÁNH TƯ THẾ
+            📊
           </button>
-          <button class="btn-add" onclick="openAddErrorModal()">+ THÊM LỖI MỚI</button>
+          <button class="btn-add" onclick="openAddErrorModal()" title="Thêm lỗi mới">➕</button>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
               <span id="vid-total">02</span>
               &nbsp; Thời điểm: <span id="current-time" class="time-accent">00:00</span>
             </div>
-            <button class="btn-snap" onclick="captureFrame()">&#128247; CHỤP LỖI</button>
+            <button class="btn-snap" onclick="captureFrame()" title="Chụp ảnh khung hình hiện tại">📸</button>
           </div>
 
           <div class="video-area" id="video-area">
@@ -84,7 +84,7 @@
               <div class="prog-fill" id="prog-fill"></div>
               <div class="prog-dot" id="prog-dot"></div>
             </div>
-            <button class="btn-snap" onclick="captureFrame()">CHỤP LỖI</button>
+            <button class="btn-snap" id="btnSnap" title="Chụp ảnh khung hình hiện tại">📸</button>
           </div>
 
           <!-- Thumbnails -->

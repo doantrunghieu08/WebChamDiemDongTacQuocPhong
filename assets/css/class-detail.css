@@ -157,9 +157,6 @@ body {
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
-  position: sticky;
-  top: 58px;
-  z-index: 100;
 }
 
 .banner-icon {
@@ -235,7 +232,7 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   position: sticky;
-  top: 170px;
+  top: 80px;
   z-index: 100;
   border-radius: 12px 12px 0 0;
 }
