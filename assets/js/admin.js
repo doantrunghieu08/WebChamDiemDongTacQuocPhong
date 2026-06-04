@@ -793,6 +793,12 @@ function _renderAccountsSkeleton(container) {
         <div class="admin-summary-label">Tài khoản khóa</div>
       </div>
     </div>
+    <div class="admin-account-subtabs" style="display: flex; gap: 16px; border-bottom: 2px solid #e2e8f0; margin: 24px 0 16px 0; padding-top: 8px;">
+      <button id="tabRoleAll" class="admin-subtab active" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #b42318; border-bottom: 2px solid #b42318; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('')">Tất cả</button>
+      <button id="tabRoleAdmin" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('admin')">Quản trị</button>
+      <button id="tabRoleTeacher" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('teacher')">Giảng viên</button>
+      <button id="tabRoleStudent" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchAccountRoleFilter('student')">Sinh viên</button>
+    </div>
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
@@ -1978,15 +1984,33 @@ async function initializeAdminPage() {
   const assignmentSearchInput = document.getElementById('assignmentSearchInput');
   if (assignmentSearchInput) assignmentSearchInput.addEventListener('input', renderAssignments);
 
-  // Gắn sự kiện lọc vai trò — reload từ server trang 0
-  const roleFilterSelect = document.getElementById('accountRoleFilter');
-  if (roleFilterSelect) {
-    roleFilterSelect.addEventListener('change', () => {
-      activeRoleFilter = roleFilterSelect.value;
-      userIsLoading = false; // reset nếu đang load dở
-      refreshUserList(0);
-    });
-  }
+function switchAccountRoleFilter(role) {
+  activeRoleFilter = role;
+  
+  const tabs = [
+    { el: document.getElementById('tabRoleAll'), roleVal: '' },
+    { el: document.getElementById('tabRoleAdmin'), roleVal: 'admin' },
+    { el: document.getElementById('tabRoleTeacher'), roleVal: 'teacher' },
+    { el: document.getElementById('tabRoleStudent'), roleVal: 'student' }
+  ];
+  
+  tabs.forEach(tab => {
+    if (tab.el) {
+      if (tab.roleVal === role) {
+        tab.el.style.color = '#b42318';
+        tab.el.style.borderBottomColor = '#b42318';
+        tab.el.classList.add('active');
+      } else {
+        tab.el.style.color = '#64748b';
+        tab.el.style.borderBottomColor = 'transparent';
+        tab.el.classList.remove('active');
+      }
+    }
+  });
+
+  userIsLoading = false;
+  refreshUserList(0);
+}
 
   const initialTab = new URLSearchParams(window.location.search).get('tab') || 'accounts';
   switchAdminTab(initialTab);

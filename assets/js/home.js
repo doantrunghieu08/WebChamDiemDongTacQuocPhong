@@ -1649,9 +1649,36 @@ let errorTotalPages   = 1;
 let errorTotalElements = 0;
 let errorTeacherId    = '';
 
-function changeExamFilter() {
-  const sel = document.getElementById('examFilterStatus');
-  if (sel) examFilterStatus = sel.value;
+function switchHomeExamFilterTab(status) {
+  examFilterStatus = status;
+  
+  const tabActive = document.getElementById('tabHomeExamActive');
+  const tabDeleted = document.getElementById('tabHomeExamDeleted');
+  
+  if (status === 'active') {
+    if (tabActive) {
+      tabActive.style.background = '#fdf2f2';
+      tabActive.style.fontWeight = '600';
+      tabActive.style.color = '#b42318';
+    }
+    if (tabDeleted) {
+      tabDeleted.style.background = '#fff';
+      tabDeleted.style.fontWeight = '500';
+      tabDeleted.style.color = '#64748b';
+    }
+  } else {
+    if (tabDeleted) {
+      tabDeleted.style.background = '#f8fafc';
+      tabDeleted.style.fontWeight = '600';
+      tabDeleted.style.color = '#334155';
+    }
+    if (tabActive) {
+      tabActive.style.background = '#fff';
+      tabActive.style.fontWeight = '500';
+      tabActive.style.color = '#64748b';
+    }
+  }
+  
   examPage = 0;
   loadExamsContent();
 }
@@ -1857,9 +1884,36 @@ function goToErrorPage(page) {
   renderErrors();
 }
 
-function changeErrorFilter() {
-  const select = document.getElementById('errorFilterStatus');
-  if (select) errorFilterStatus = select.value;
+function switchHomeErrorFilterTab(status) {
+  errorFilterStatus = status;
+  
+  const tabActive = document.getElementById('tabHomeErrorActive');
+  const tabDeleted = document.getElementById('tabHomeErrorDeleted');
+  
+  if (status === 'active') {
+    if (tabActive) {
+      tabActive.style.background = '#fdf2f2';
+      tabActive.style.fontWeight = '600';
+      tabActive.style.color = '#b42318';
+    }
+    if (tabDeleted) {
+      tabDeleted.style.background = '#fff';
+      tabDeleted.style.fontWeight = '500';
+      tabDeleted.style.color = '#64748b';
+    }
+  } else {
+    if (tabDeleted) {
+      tabDeleted.style.background = '#f8fafc';
+      tabDeleted.style.fontWeight = '600';
+      tabDeleted.style.color = '#334155';
+    }
+    if (tabActive) {
+      tabActive.style.background = '#fff';
+      tabActive.style.fontWeight = '500';
+      tabActive.style.color = '#64748b';
+    }
+  }
+  
   errorPage = 0;
   renderErrors();
 }

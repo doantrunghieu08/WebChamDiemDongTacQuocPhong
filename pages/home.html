@@ -142,10 +142,10 @@
                 <input type="text" id="searchExamCatalog" class="search-input" placeholder="Tìm kiếm bài thi..." oninput="searchExams()">
               </div>
               <div class="errors-toolbar-actions">
-                <select id="examFilterStatus" class="error-filter-select" onchange="changeExamFilter()">
-                  <option value="active">Bài thi đang dùng</option>
-                  <option value="deleted">Đã xóa</option>
-                </select>
+                <div class="exam-filter-tabs" style="display: flex; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                  <button id="tabHomeExamActive" type="button" style="padding: 8px 16px; border: none; background: #fdf2f2; font-weight: 600; font-size: 14px; cursor: pointer; color: #b42318; border-right: 1px solid #e2e8f0; transition: all 0.2s;" onclick="switchHomeExamFilterTab('active')">Tất cả bài thi</button>
+                  <button id="tabHomeExamDeleted" type="button" style="padding: 8px 16px; border: none; background: #fff; font-weight: 500; font-size: 14px; cursor: pointer; color: #64748b; transition: all 0.2s;" onclick="switchHomeExamFilterTab('deleted')">Đã xóa</button>
+                </div>
                 <button class="btn-add-class" id="btnAddExamCatalog">
                   <i class="fas fa-plus"></i>
                   Thêm bài thi
@@ -174,10 +174,10 @@
               <input type="text" id="searchError" class="search-input" placeholder="Tìm kiếm lỗi..." oninput="searchErrors()">
             </div>
             <div class="errors-toolbar-actions">
-              <select id="errorFilterStatus" class="error-filter-select" onchange="changeErrorFilter()">
-                <option value="active">Tất cả lỗi</option>
-                <option value="deleted">Đã xóa</option>
-              </select>
+                <div class="error-filter-tabs" style="display: flex; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                  <button id="tabHomeErrorActive" type="button" style="padding: 8px 16px; border: none; background: #fdf2f2; font-weight: 600; font-size: 14px; cursor: pointer; color: #b42318; border-right: 1px solid #e2e8f0; transition: all 0.2s;" onclick="switchHomeErrorFilterTab('active')">Tất cả lỗi</button>
+                  <button id="tabHomeErrorDeleted" type="button" style="padding: 8px 16px; border: none; background: #fff; font-weight: 500; font-size: 14px; cursor: pointer; color: #64748b; transition: all 0.2s;" onclick="switchHomeErrorFilterTab('deleted')">Đã xóa</button>
+                </div>
               <button class="btn-add-class" id="btnAddErrorCatalog">
                 <i class="fas fa-plus"></i>
                 Thêm lỗi
