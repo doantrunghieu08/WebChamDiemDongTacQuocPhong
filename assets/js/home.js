@@ -1201,7 +1201,7 @@ function renderExamVideoFields(videos = []) {
 
   cleanupExamVideoPreviewUrls(container);
 
-  const rows = videos.length > 0 ? videos : [{ name: '', file: '' }];
+  const rows = videos.length > 0 ? videos.slice(0, 1) : [{ name: '', file: '' }];
   container.innerHTML = rows.map((video, index) => `
     <div class="exam-video-row ${video.file ? 'has-file' : ''}" data-existing-file="${video.file || ''}" data-existing-name="${video.name || ''}" data-existing-storage-key="${video.storageKey || ''}" data-existing-source="${video.url || video.src || video.blobUrl || ''}">
       <div class="form-row exam-upload-row">
@@ -1221,7 +1221,6 @@ function renderExamVideoFields(videos = []) {
         </div>
         <div class="exam-video-preview-empty" style="display:none">Video này hiện chỉ có tên file. Hãy chọn lại file để xem trực tiếp.</div>
       </div>
-      <button type="button" class="btn-remove-video-row" onclick="removeExamVideoField(${index})" aria-label="Xóa video mẫu">&times;</button>
     </div>
   `).join('');
 

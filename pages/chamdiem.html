@@ -279,29 +279,20 @@
 
         <!-- PHASE 1: Chọn file -->
         <div id="upload-phase-1">
-          <p class="upload-video-desc">Chọn tối đa 2 video bài thi của sinh viên. Nhấn <strong>Tải lên</strong> để upload lên hệ thống, sau đó xác nhận để lưu vào bài nộp.</p>
+          <p class="upload-video-desc">Chọn 1 video bài thi của sinh viên. Nhấn <strong>Tải lên</strong> để upload lên hệ thống, sau đó xác nhận để lưu vào bài nộp.</p>
 
           <div class="upload-slot" id="upload-slot-1">
             <label class="upload-slot-label">Video 01</label>
             <div class="upload-drop-zone" id="drop-zone-1" onclick="document.getElementById('video-file-1').click()">
               <div class="upload-drop-icon">&#127909;</div>
               <div class="upload-drop-text">Nhấn để chọn hoặc kéo thả video vào đây</div>
-              <div class="upload-drop-sub">MP4, AVI, MOV, MKV — tối đa 500MB</div>
+              <div class="upload-drop-sub">MP4, AVI, MOV, MKV — tối đa 100MB</div>
               <div class="upload-file-name" id="file-name-1" style="display:none"></div>
             </div>
             <input type="file" id="video-file-1" accept="video/*" style="display:none" onchange="handleVideoFileSelect(1, this)" />
           </div>
 
-          <div class="upload-slot" id="upload-slot-2">
-            <label class="upload-slot-label">Video 02 <span class="optional-tag">(tuỳ chọn)</span></label>
-            <div class="upload-drop-zone" id="drop-zone-2" onclick="document.getElementById('video-file-2').click()">
-              <div class="upload-drop-icon">&#127909;</div>
-              <div class="upload-drop-text">Nhấn để chọn hoặc kéo thả video vào đây</div>
-              <div class="upload-drop-sub">MP4, AVI, MOV, MKV — tối đa 500MB</div>
-              <div class="upload-file-name" id="file-name-2" style="display:none"></div>
-            </div>
-            <input type="file" id="video-file-2" accept="video/*" style="display:none" onchange="handleVideoFileSelect(2, this)" />
-          </div>
+
 
           <div class="upload-progress-wrap" id="upload-progress-wrap" style="display:none">
             <div class="upload-progress-label" id="upload-progress-label">Đang tải lên…</div>
