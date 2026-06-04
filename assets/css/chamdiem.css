@@ -1076,26 +1076,27 @@ body {
 }
 
 .btn-upload-video {
-  background: linear-gradient(135deg, #4B5320, #6B8E23);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #fff;
   border: none;
-  border-radius: 20px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 600;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 16px;
   cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 3px 8px rgba(75, 83, 32, 0.2);
+  padding: 0;
+  line-height: 1;
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.35);
+  transition: opacity .2s, transform .1s, box-shadow 0.2s;
 }
 
 .btn-upload-video:hover {
   opacity: 0.95;
   transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(75, 83, 32, 0.35);
+  box-shadow: 0 5px 12px rgba(245, 158, 11, 0.45);
 }
 
 /* ===== UPLOAD VIDEO MODAL ===== */
