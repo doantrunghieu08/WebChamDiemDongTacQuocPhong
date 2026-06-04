@@ -21,7 +21,7 @@ body {
 
 /* ===== HEADER ===== */
 .mode-header {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   padding: 16px 0;
   box-shadow: 0 4px 12px rgba(220, 20, 60, 0.2);
   position: sticky;
@@ -123,7 +123,7 @@ body {
 }
 
 .grading-mode:hover {
-  border-color: #DC143C;
+  border-color: #4B5320;
 }
 
 .mode-icon {
@@ -185,7 +185,7 @@ body {
 }
 
 .grading-mode .btn-select {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
 }
 
@@ -206,7 +206,7 @@ body {
 .info-section h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #DC143C;
+  color: #4B5320;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -232,7 +232,7 @@ body {
   content: '•';
   position: absolute;
   left: 0;
-  color: #DC143C;
+  color: #4B5320;
   font-weight: 700;
 }
 
@@ -416,7 +416,7 @@ body {
   width: 64px;
   height: 64px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -470,7 +470,7 @@ body {
 }
 
 .logout-btn-confirm {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
   display: flex;
   align-items: center;

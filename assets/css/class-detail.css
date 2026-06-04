@@ -48,7 +48,7 @@ body {
 
 /* ===== HEADER ===== */
 .cd-header {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   box-shadow: 0 6px 18px rgba(220, 20, 60, 0.18);
   position: sticky;
   top: 0;
@@ -124,7 +124,7 @@ body {
 }
 
 .cd-breadcrumb a {
-  color: #DC143C;
+  color: #4B5320;
   text-decoration: none;
   font-weight: 500;
 }
@@ -165,7 +165,7 @@ body {
 .banner-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -206,7 +206,7 @@ body {
 .banner-stat .val {
   font-size: 20px;
   font-weight: 700;
-  color: #DC143C;
+  color: #4B5320;
 }
 
 .banner-stat .lbl {
@@ -250,7 +250,7 @@ body {
 }
 
 .cd-section-header h2 i {
-  color: #DC143C;
+  color: #4B5320;
 }
 
 .cd-section-actions {
@@ -262,7 +262,7 @@ body {
 
 .cd-btn-add {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -340,7 +340,7 @@ body {
 }
 
 .cd-student-delete:hover {
-  color: #DC143C;
+  color: #4B5320;
   background: rgba(220, 20, 60, 0.08);
 }
 
@@ -371,7 +371,7 @@ body {
 
 .cd-form-group input:focus,
 .cd-form-group select:focus {
-  border-color: #DC143C;
+  border-color: #4B5320;
 }
 
 .cd-form-actions {
@@ -395,7 +395,7 @@ body {
 
 .cd-btn-submit {
   padding: 9px 20px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -419,7 +419,7 @@ body {
 }
 
 .cd-search:focus-within {
-  border-color: #DC143C;
+  border-color: #4B5320;
   background: #fff;
 }
 
@@ -467,7 +467,7 @@ body {
 .cd-student-number {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -517,7 +517,7 @@ body {
 
 .cd-student-arrow {
   font-size: 12px;
-  color: #DC143C;
+  color: #4B5320;
   transition: transform 0.25s ease;
 }
 
@@ -560,7 +560,7 @@ body {
 }
 
 .cd-exam-card:hover {
-  border-color: #DC143C;
+  border-color: #4B5320;
   box-shadow: 0 4px 14px rgba(220,20,60,0.12);
   transform: translateY(-3px);
 }
@@ -616,7 +616,7 @@ body {
 }
 
 .cd-exam-deadline i {
-  color: #DC143C;
+  color: #4B5320;
   width: 14px;
   text-align: center;
 }
@@ -692,12 +692,12 @@ body {
   font-weight: 600;
 }
 
-.cd-video-tag i { color: #DC143C; font-size: 10px; }
+.cd-video-tag i { color: #4B5320; font-size: 10px; }
 
 .cd-exam-btn {
   margin-top: 4px;
   padding: 8px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -823,7 +823,7 @@ body {
   border: 1px solid rgba(220, 20, 60, 0.2);
   border-radius: 8px;
   background: #fff;
-  color: #DC143C;
+  color: #4B5320;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -880,12 +880,12 @@ body {
 }
 
 .cd-modal-tab:hover {
-  color: #DC143C;
+  color: #4B5320;
 }
 
 .cd-modal-tab--active {
-  color: #DC143C;
-  border-bottom-color: #DC143C;
+  color: #4B5320;
+  border-bottom-color: #4B5320;
 }
 
 .cd-assigned-empty {
@@ -1036,7 +1036,7 @@ body {
 
 .cd-btn-add-exam {
   padding: 8px 18px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1065,8 +1065,8 @@ body {
 
 .cd-btn-add-exam-more:hover {
   background: #eee;
-  border-color: #DC143C;
-  color: #DC143C;
+  border-color: #4B5320;
+  color: #4B5320;
   filter: none;
 }
 
@@ -1090,14 +1090,14 @@ body {
 }
 
 .cd-exam-checkbox:hover {
-  border-color: #DC143C;
+  border-color: #4B5320;
   background: #fff7f4;
 }
 
 .cd-exam-checkbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #DC143C;
+  accent-color: #4B5320;
 }
 
 .cd-exam-check-body {
@@ -1229,7 +1229,7 @@ body {
 }
 
 .grading-mode-card:hover {
-  border-color: #DC143C;
+  border-color: #4B5320;
   box-shadow: 0 4px 14px rgba(220,20,60,0.12);
   transform: translateY(-2px);
 }
@@ -1301,14 +1301,14 @@ body {
 }
 
 .cd-page-btn:hover:not(:disabled) {
-  border-color: #DC143C;
-  color: #DC143C;
+  border-color: #4B5320;
+  color: #4B5320;
   background: #fff5f5;
 }
 
 .cd-page-btn.active {
-  background: #DC143C;
-  border-color: #DC143C;
+  background: #4B5320;
+  border-color: #4B5320;
   color: #fff;
   font-weight: 700;
 }
@@ -1369,7 +1369,7 @@ body {
   width: 64px;
   height: 64px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1423,7 +1423,7 @@ body {
 }
 
 .cd-delete-btn-confirm {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1541,7 +1541,7 @@ body {
   border-radius: 50%;
   border: 1.5px solid #e0e0e0;
   background: #fff;
-  color: #DC143C;
+  color: #4B5320;
   font-size: 13px;
   cursor: pointer;
   display: flex;
@@ -1553,9 +1553,9 @@ body {
 }
 
 .cd-exam-nav:hover:not(.disabled) {
-  background: #DC143C;
+  background: #4B5320;
   color: #fff;
-  border-color: #DC143C;
+  border-color: #4B5320;
   transform: translateY(-50%) scale(1.08);
   box-shadow: 0 4px 12px rgba(220,20,60,0.22);
 }
@@ -1589,7 +1589,7 @@ body {
 }
 
 .cd-exam-dot.active {
-  background: #DC143C;
+  background: #4B5320;
   width: 20px;
   border-radius: 4px;
 }

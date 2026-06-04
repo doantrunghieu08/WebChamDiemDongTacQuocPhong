@@ -29,7 +29,7 @@ body {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #DC143C;
+  color: #4B5320;
   margin-bottom: 10px;
 }
 
@@ -181,7 +181,7 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
   font-size: 20px;
   display: flex;
@@ -197,7 +197,7 @@ body {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #fff2eb, #ffe1d3);
-  color: #DC143C;
+  color: #4B5320;
   font-weight: 800;
   flex-shrink: 0;
 }

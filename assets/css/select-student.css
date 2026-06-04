@@ -21,7 +21,7 @@ body {
 
 /* ===== HEADER ===== */
 .select-header {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   padding: 16px 0;
   box-shadow: 0 4px 12px rgba(220, 20, 60, 0.2);
   position: sticky;
@@ -122,7 +122,7 @@ body {
 }
 
 .class-subject {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
   padding: 6px 14px;
   border-radius: 20px;
@@ -154,7 +154,7 @@ body {
 
 .stat-value {
   font-size: 18px;
-  color: #DC143C;
+  color: #4B5320;
   font-weight: 700;
 }
 
@@ -176,7 +176,7 @@ body {
 }
 
 .search-input:focus {
-  border-color: #DC143C;
+  border-color: #4B5320;
   box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
   background: #ffffff;
 }
@@ -213,7 +213,7 @@ body {
 
 .student-item:hover {
   background: #fafafa;
-  border-color: #DC143C;
+  border-color: #4B5320;
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(220, 20, 60, 0.12);
 }
@@ -222,7 +222,7 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,7 +251,7 @@ body {
 
 .student-action {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -340,12 +340,12 @@ body {
 
 .pagination-btn:hover:not(:disabled) {
   background: #fff0f3;
-  border-color: #DC143C;
-  color: #DC143C;
+  border-color: #4B5320;
+  color: #4B5320;
 }
 
 .pagination-btn.pagination-active {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   border-color: transparent;
   color: #ffffff;
   pointer-events: none;
@@ -590,7 +590,7 @@ body {
 }
 
 .grading-mode:hover {
-  border-color: #DC143C;
+  border-color: #4B5320;
   background: rgba(220, 20, 60, 0.05);
 }
 
@@ -691,7 +691,7 @@ body {
   width: 64px;
   height: 64px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -745,7 +745,7 @@ body {
 }
 
 .logout-btn-confirm {
-  background: linear-gradient(135deg, #DC143C, #FF6B35);
+  background: linear-gradient(135deg, #4B5320, #6B8E23);
   color: #ffffff;
   display: flex;
   align-items: center;
