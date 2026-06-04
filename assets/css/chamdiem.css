@@ -717,6 +717,8 @@ body {
 
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
 }
@@ -1424,7 +1426,7 @@ body {
 /* ---- 1024px: Tablet landscape ---- */
 @media (max-width: 1024px) {
   .wrap {
-    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-columns: 1fr;
     padding: 12px 14px;
     gap: 12px;
   }

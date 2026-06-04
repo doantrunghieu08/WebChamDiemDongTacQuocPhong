@@ -1355,15 +1355,17 @@ body {
 /* --- 1024px: Collapse sidebar to top bar --- */
 @media (max-width: 1024px) {
   .admin-shell {
-    grid-template-columns: 1fr;
-    padding: 20px 0;
-    width: min(100% - 32px, 1520px);
+    flex-direction: column;
+    padding: 0;
+    width: 100%;
   }
 
   .admin-sidebar {
     position: static;
+    width: 100%;
     max-height: none;
     overflow: visible;
+    display: flex;
     flex-direction: row;
     overflow-x: auto;
     padding: 12px 16px;
@@ -1418,7 +1420,11 @@ body {
 
   /* Shell */
   .admin-shell {
-    padding: 16px 0;
+    padding: 0;
+  }
+
+  .admin-main {
+    padding: 16px 12px;
   }
 
   /* Sidebar: compact */
@@ -1480,6 +1486,8 @@ body {
   .admin-table-wrap {
     overflow-x: auto;
     max-height: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
 
   .admin-table th,

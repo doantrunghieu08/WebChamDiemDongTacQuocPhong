@@ -2204,7 +2204,8 @@ body {
 .report-table {
   background: #ffffff;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   border: 1px solid #FFD4B4;
 }
@@ -2347,7 +2348,7 @@ body {
   }
 
   .search-bar {
-    max-width: none;
+    max-width: 100%;
     flex: 1 1 100%;
   }
 
