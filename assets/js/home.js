@@ -792,7 +792,7 @@ function addClass(event) {
   const roomNumber = document.getElementById('newClassRoom').value.trim();
 
   if (!className || !semester || !year || !roomNumber) {
-    alert('Vui lòng nhập đầy đủ thông tin lớp học.');
+    alert('Vui lòng nhập đầy đủ thông tin đơn vị.');
     return;
   }
 
@@ -2565,7 +2565,7 @@ function loadReportContent() {
       <div class="report-card">
         <div class="report-icon"><i class="fas fa-school" style="color:#DC143C"></i></div>
         <div class="report-value">${classes.length}</div>
-        <div class="report-label">Lớp học</div>
+        <div class="report-label">Đơn vị</div>
       </div>
       <div class="report-card">
         <div class="report-icon"><i class="fas fa-users" style="color:#FF6B35"></i></div>

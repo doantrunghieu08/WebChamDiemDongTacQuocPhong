@@ -15,7 +15,7 @@
           <img src="../assets/images/logo.svg" alt="Quốc huy Việt Nam" style="height: 52px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
           <div style="display: flex; flex-direction: column; justify-content: center;">
             <div class="admin-logo" style="background: none; padding: 0; border: none; font-size: 22px; letter-spacing: 1.5px; margin-bottom: 4px; line-height: 1;">HACTECH ADMIN</div>
-            <div class="admin-subtitle" style="font-size: 13px; opacity: 0.95; margin-top: 0;">Quản trị hệ thống đào tạo và phân công giảng dạy</div>
+            <div class="admin-subtitle" style="font-size: 13px; opacity: 0.95; margin-top: 0;">Quản trị hệ thống đào tạo và phân công chỉ huy</div>
           </div>
         </div>
         <div class="admin-user-box">
@@ -38,13 +38,13 @@
             <li class="admin-menu-item">
               <button class="admin-nav-link" data-tab="classes" onclick="switchAdminTab('classes')">
                 <i class="fas fa-school"></i>
-                <span>Quản lý lớp</span>
+                <span>Quản lý đơn vị</span>
               </button>
             </li>
             <li class="admin-menu-item">
               <button class="admin-nav-link" data-tab="assignments" onclick="switchAdminTab('assignments')">
                 <i class="fas fa-diagram-project"></i>
-                <span>Phân công giảng dạy</span>
+                <span>Phân công chỉ huy</span>
               </button>
             </li>
             <li class="admin-menu-item">
@@ -88,11 +88,11 @@
         <section class="admin-tab" id="classes-tab">
           <div class="admin-section-header">
             <div>
-              <h1>Quản lý lớp</h1>
-              <p>Tạo lớp học, quản lý danh sách sinh viên và kiểm soát số lượng trong từng lớp.</p>
+              <h1>Quản lý đơn vị</h1>
+              <p>Tạo đơn vị, quản lý danh sách sinh viên và kiểm soát số lượng trong từng đơn vị.</p>
             </div>
             <div class="admin-action-btns" style="display: flex; gap: 8px; align-items: center;">
-              <button class="admin-primary-btn" onclick="openClassModal()"><i class="fas fa-plus"></i> Thêm lớp</button>
+              <button class="admin-primary-btn" onclick="openClassModal()"><i class="fas fa-plus"></i> Thêm đơn vị</button>
               <div class="admin-btn-group">
                 <button class="admin-icon-btn" id="importClassExcelBtn" type="button" title="Nhập từ Excel"><i class="fas fa-file-excel"></i></button>
                 <button class="admin-icon-btn" id="downloadClassTemplateBtn" type="button" title="Tải mẫu"><i class="fas fa-download"></i></button>
@@ -101,7 +101,7 @@
             </div>
           </div>
           <div class="admin-search-row" style="gap:8px;">
-            <input id="classSearchInput" type="text" placeholder="Tìm kiếm lớp theo tên, mã..." class="admin-search-input" />
+            <input id="classSearchInput" type="text" placeholder="Tìm kiếm đơn vị theo tên, mã..." class="admin-search-input" />
             <select id="classSemesterFilter" class="admin-search-input" style="max-width:160px;">
               <option value="">Tất cả kỳ</option>
             </select>
@@ -112,12 +112,12 @@
         <section class="admin-tab" id="assignments-tab">
           <div class="admin-section-header">
             <div>
-              <h1>Phân công giảng dạy</h1>
-              <p>Gán lớp cho giảng viên và đồng bộ danh sách lớp sang tài khoản giảng viên.</p>
+              <h1>Phân công chỉ huy</h1>
+              <p>Gán đơn vị cho giảng viên và đồng bộ danh sách đơn vị sang tài khoản giảng viên.</p>
             </div>
           </div>
           <div class="admin-search-row" style="gap:8px;">
-            <input id="assignmentSearchInput" type="text" placeholder="Tìm kiếm lớp hoặc giảng viên..." class="admin-search-input" />
+            <input id="assignmentSearchInput" type="text" placeholder="Tìm kiếm đơn vị hoặc giảng viên..." class="admin-search-input" />
             <select id="assignmentSemesterFilter" class="admin-search-input" style="max-width:160px;">
               <option value="">Tất cả kỳ</option>
             </select>
@@ -239,18 +239,18 @@
     <div class="admin-modal" id="classModal" style="display:none">
       <div class="admin-modal-content">
         <div class="admin-modal-header">
-          <h3>Thêm lớp học</h3>
+          <h3>Thêm đơn vị</h3>
           <button class="admin-modal-close" onclick="closeClassModal()">&times;</button>
         </div>
         <form class="admin-modal-body" id="classForm">
           <div class="admin-form-grid">
             <div class="admin-form-row">
-              <label for="adminClassId">Mã lớp</label>
+              <label for="adminClassId">Mã đơn vị</label>
               <input id="adminClassId" type="text" placeholder="Ví dụ: QS04" required>
             </div>
             <div class="admin-form-row">
-              <label for="adminClassName">Tên lớp</label>
-              <input id="adminClassName" type="text" placeholder="Ví dụ: Lớp Quân sự 4" required>
+              <label for="adminClassName">Tên đơn vị</label>
+              <input id="adminClassName" type="text" placeholder="Ví dụ: Đại đội 4" required>
             </div>
           </div>
           <div class="admin-form-grid">
@@ -274,7 +274,7 @@
           </div>
           <div class="admin-form-actions">
             <button type="button" class="admin-secondary-btn" onclick="closeClassModal()">Hủy</button>
-            <button type="submit" class="admin-primary-btn">Lưu lớp</button>
+            <button type="submit" class="admin-primary-btn">Lưu đơn vị</button>
           </div>
         </form>
       </div>

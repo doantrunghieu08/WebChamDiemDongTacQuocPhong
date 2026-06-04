@@ -42,7 +42,7 @@
             <li class="menu-item">
               <button class="menu-link" data-tab="classes" onclick="switchTab('classes')">
                 <i class="fas fa-book"></i>
-                <span>Lớp Học</span>
+                <span>Đơn Vị</span>
               </button>
             </li>
             <li class="menu-item">
@@ -105,14 +105,14 @@
         <!-- Classes Tab -->
         <section id="classes-tab" class="tab-content">
           <div class="section-header">
-            <h1>Lớp Học</h1>
-            <p>Các lớp học được phân công cho bạn</p>
+            <h1>Đơn Vị</h1>
+            <p>Các đơn vị được phân công cho bạn</p>
           </div>
           <div class="classes-section">
             <div class="classes-toolbar">
               <div class="search-bar">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchClass" class="search-input" placeholder="Tìm kiếm lớp học..." oninput="searchClasses()">
+                <input type="text" id="searchClass" class="search-input" placeholder="Tìm kiếm đơn vị..." oninput="searchClasses()">
               </div>
             </div>
             <div class="class-grid" id="classGrid">
@@ -123,8 +123,8 @@
             <!-- Empty State -->
             <div class="empty-state" id="emptyState" style="display: none;">
               <div class="empty-icon">📚</div>
-              <h2>Chưa có lớp học nào</h2>
-              <p>Bạn hiện không được gán dạy lớp nào</p>
+              <h2>Chưa có đơn vị nào</h2>
+              <p>Bạn hiện không được gán dạy đơn vị nào</p>
             </div>
           </div>
         </section>
@@ -133,7 +133,7 @@
         <section id="exams-tab" class="tab-content">
           <div class="section-header">
             <h1>Bài Thi</h1>
-            <p>Quản lý danh mục bài thi dùng chung cho các lớp học</p>
+            <p>Quản lý danh mục bài thi dùng chung cho các đơn vị</p>
           </div>
           <div class="classes-section exams-section">
             <div class="classes-toolbar">
@@ -157,7 +157,7 @@
             <div class="empty-state" id="examEmptyState" style="display: none;">
               <div class="empty-icon">📝</div>
               <h2>Chưa có bài thi nào</h2>
-              <p>Hãy tạo bài thi để phân công cho các lớp học</p>
+              <p>Hãy tạo bài thi để phân công cho các đơn vị</p>
             </div>
           </div>
         </section>
@@ -319,7 +319,7 @@
   <div class="class-modal" id="classDetailsModal" style="display: none;">
     <div class="class-modal-content">
       <div class="class-modal-header">
-        <h3>Chi tiết lớp học</h3>
+        <h3>Chi tiết đơn vị</h3>
         <button class="class-modal-close" id="btnCloseDetails">&times;</button>
       </div>
       <div class="class-modal-body" id="classDetailsContent"></div>
@@ -329,13 +329,13 @@
   <div class="class-modal" id="addClassModal" style="display: none;">
     <div class="class-modal-content">
       <div class="class-modal-header">
-        <h3>Thêm lớp học mới</h3>
+        <h3>Thêm đơn vị mới</h3>
         <button class="class-modal-close" id="btnCloseAddClass">&times;</button>
       </div>
       <form class="class-modal-body" id="addClassForm">
         <div class="form-row">
-          <label for="newClassName">Tên lớp</label>
-          <input id="newClassName" type="text" required placeholder="Ví dụ: Lớp Quân sự 6">
+          <label for="newClassName">Tên đơn vị</label>
+          <input id="newClassName" type="text" required placeholder="Ví dụ: Đại đội 1">
         </div>
         <div class="form-grid">
           <div class="form-row">
@@ -358,7 +358,7 @@
         </div>
         <div class="form-actions">
           <button type="button" class="btn-class-action btn-details" id="btnCancelAddClass">Hủy</button>
-          <button type="submit" class="btn-class-action btn-grade">Lưu lớp</button>
+          <button type="submit" class="btn-class-action btn-grade">Lưu đơn vị</button>
         </div>
       </form>
     </div>

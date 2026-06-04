@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chi Tiết Lớp Học - HACTECH</title>
+  <title>Chi Tiết Đơn Vị - HACTECH</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/class-detail.css">
 </head>
@@ -30,9 +30,9 @@
   <div class="cd-breadcrumb">
     <a href="/pages/home.html"><i class="fas fa-home"></i> Trang chủ</a>
     <span class="sep">›</span>
-    <a href="/pages/home.html" onclick="localStorage.setItem('autoTab','classes')">Lớp Học</a>
+    <a href="/pages/home.html" onclick="localStorage.setItem('autoTab','classes')">Đơn Vị</a>
     <span class="sep">›</span>
-    <span class="current" id="breadcrumbClass">Chi tiết lớp</span>
+    <span class="current" id="breadcrumbClass">Chi tiết đơn vị</span>
   </div>
 
   <!-- Main -->
@@ -66,7 +66,7 @@
   <div class="cd-modal" id="addExamModal" style="display:none;">
     <div class="cd-modal-content">
       <div class="cd-modal-header">
-        <h3>Thêm bài thi cho lớp</h3>
+        <h3>Thêm bài thi cho đơn vị</h3>
         <button class="cd-modal-close" onclick="closeAddExamModal()">&times;</button>
       </div>
       <div class="cd-modal-body">
@@ -82,7 +82,7 @@
 
         <!-- Tab: Đang áp dụng -->
         <div id="examTabActive">
-          <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong lớp</p>
+          <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong đơn vị</p>
           <div class="cd-assigned-exams-section">
             <div class="cd-assigned-exams-title">Bài thi đã thêm</div>
             <div id="assignedExamList" class="cd-assigned-exam-list"></div>
@@ -166,7 +166,7 @@
         <i class="fas fa-undo"></i>
       </div>
       <h3 class="cd-delete-modal-title">Khôi phục bài thi</h3>
-      <p class="cd-delete-modal-text" id="restoreExamMessage">Khôi phục bài thi này vào lớp?</p>
+      <p class="cd-delete-modal-text" id="restoreExamMessage">Khôi phục bài thi này vào đơn vị?</p>
       <div class="cd-delete-modal-actions">
         <button class="cd-delete-btn-cancel" onclick="closeRestoreExamModal()">Hủy</button>
         <button class="cd-restore-btn-confirm" onclick="confirmRestoreExam()"><i class="fas fa-undo"></i> Khôi phục</button>

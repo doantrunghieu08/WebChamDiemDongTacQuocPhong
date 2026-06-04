@@ -1120,7 +1120,7 @@ function openClassModal() {
     delete modal.dataset.editing;
     modal.style.display = 'flex';
     const header = modal.querySelector('.admin-modal-header h3');
-    if (header) header.textContent = 'Thêm lớp học';
+    if (header) header.textContent = 'Thêm đơn vị';
     const submit = modal.querySelector('#classForm .admin-primary-btn');
     if (submit) submit.textContent = 'Lưu lớp';
     const idInput = document.getElementById('adminClassId');
@@ -1134,7 +1134,7 @@ function closeClassModal() {
   modal.style.display = 'none';
   delete modal.dataset.editing;
   const header = modal.querySelector('.admin-modal-header h3');
-  if (header) header.textContent = 'Thêm lớp học';
+  if (header) header.textContent = 'Thêm đơn vị';
   const submit = modal.querySelector('#classForm .admin-primary-btn');
   if (submit) submit.textContent = 'Lưu lớp';
   const idInput = document.getElementById('adminClassId');
@@ -1156,7 +1156,7 @@ function openEditClassModal(classId) {
   document.getElementById('adminClassSemester').value = cls.semester || 'I';
   document.getElementById('adminClassYear').value = cls.year || '';
   const header = modal.querySelector('.admin-modal-header h3');
-  if (header) header.textContent = 'Cập nhật lớp học';
+  if (header) header.textContent = 'Cập nhật đơn vị';
   const submit = modal.querySelector('#classForm .admin-primary-btn');
   if (submit) submit.textContent = 'Cập nhật lớp';
   const idInput = document.getElementById('adminClassId');
@@ -1292,7 +1292,7 @@ async function addClass(event) {
   if (!roomNumber) { roomNumberEl && roomNumberEl.classList.add('invalid'); hasInvalid = true; }
   if (!year) { yearEl && yearEl.classList.add('invalid'); hasInvalid = true; }
   if (hasInvalid) {
-    showAdminNotice('Thiếu thông tin', 'Vui lòng nhập đầy đủ thông tin lớp học.', 'warning');
+    showAdminNotice('Thiếu thông tin', 'Vui lòng nhập đầy đủ thông tin đơn vị.', 'warning');
     return;
   }
 
@@ -1631,7 +1631,7 @@ function attachAdminEvents() {
         XLSX.writeFile(wb, 'mau_import_taikhoan.xlsx');
       });
 
-      // Tải mẫu Excel lớp học
+      // Tải mẫu Excel đơn vị
       document.getElementById('downloadClassTemplateBtn')?.addEventListener('click', () => {
         const headers = ['Mã lớp', 'Tên lớp', 'Học kỳ (I/II)', 'Năm học', 'Phòng học'];
         const sample = ['QS01', 'Lớp Quân sự 1', 'I', '2024-2025', '101'];
