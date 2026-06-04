@@ -37,7 +37,7 @@ body {
 
 /* ===== TOPBAR ===== */
 .topbar {
-  background: linear-gradient(90deg, #4B5320 0%, #6B8E23 70%);
+  background: linear-gradient(90deg, #4B5320 0%, #6B8E23 100%);
   padding: 10px 20px;
   display: flex;
   align-items: center;
@@ -1463,6 +1463,7 @@ body {
   .topbar-title {
     font-size: 14px;
     flex: 1;
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1645,6 +1646,7 @@ body {
   .topbar-title {
     font-size: 13px;
     flex: 1;
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

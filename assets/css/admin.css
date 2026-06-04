@@ -1363,18 +1363,31 @@ body {
   .admin-sidebar {
     position: static;
     width: 100%;
+    height: auto;
     max-height: none;
-    overflow: visible;
-    display: flex;
-    flex-direction: row;
     overflow-x: auto;
+    overflow-y: hidden;
     padding: 12px 16px;
     border-radius: 14px;
-    gap: 8px;
+    border-right: none;
+    border-bottom: 2px solid #FFD4B4;
+    display: block;
     /* Scrollbar styling */
     scrollbar-width: thin;
     scrollbar-color: #FFD4B4 transparent;
   }
+
+  .admin-nav-menu {
+    display: block;
+  }
+
+  .admin-menu-list {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    width: max-content;
+  }
+
 
   .admin-sidebar::-webkit-scrollbar {
     height: 4px;
@@ -1386,9 +1399,15 @@ body {
   }
 
   .admin-nav-link {
-    min-width: 160px;
+    min-width: 130px;
     white-space: nowrap;
     flex-shrink: 0;
+    margin: 0;
+  }
+  
+  .admin-menu-item {
+    margin: 0;
+    padding: 0;
   }
 
   .admin-header-inner {
@@ -1430,7 +1449,6 @@ body {
   /* Sidebar: compact */
   .admin-sidebar {
     padding: 8px 12px;
-    gap: 6px;
   }
 
   .admin-nav-link {
