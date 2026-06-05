@@ -1546,6 +1546,12 @@ async function addExamsToClass() {
     return;
   }
 
+  const now = new Date().getTime();
+  if (new Date(submissionDeadline).getTime() <= now) {
+    alert('Hạn nộp bài phải là thời gian trong tương lai.');
+    return;
+  }
+
   if (new Date(gradingDeadline).getTime() <= new Date(submissionDeadline).getTime()) {
     alert('Hạn chấm bài phải lớn hơn hạn nộp bài.');
     return;
