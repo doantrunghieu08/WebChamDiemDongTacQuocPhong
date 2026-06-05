@@ -72,21 +72,31 @@
       <div class="cd-modal-body">
         <!-- Tab bar -->
         <div class="cd-modal-tab-bar">
-          <button class="cd-modal-tab cd-modal-tab--active" id="examTabBtnActive" onclick="switchExamTab('active')">
-            <i class="fas fa-check-circle"></i> Đang áp dụng
+          <button class="cd-modal-tab cd-modal-tab--active" id="examTabBtnApplied" onclick="switchExamTab('applied')">
+            <i class="fas fa-check-circle"></i> Đã áp dụng
+          </button>
+          <button class="cd-modal-tab" id="examTabBtnAdd" onclick="switchExamTab('add')">
+            <i class="fas fa-plus-circle"></i> Thêm bài thi
           </button>
           <button class="cd-modal-tab" id="examTabBtnDeleted" onclick="switchExamTab('deleted')">
             <i class="fas fa-trash-restore-alt"></i> Đã xóa
           </button>
         </div>
 
-        <!-- Tab: Đang áp dụng -->
-        <div id="examTabActive">
-          <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong đơn vị</p>
-          <div class="cd-assigned-exams-section">
-            <div class="cd-assigned-exams-title">Bài thi đã thêm</div>
+        <!-- Tab: Đã áp dụng -->
+        <div id="examTabApplied">
+          <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi đang được áp dụng cho sinh viên trong đơn vị</p>
+          <div class="cd-assigned-exams-section" style="margin-top:0;">
             <div id="assignedExamList" class="cd-assigned-exam-list"></div>
           </div>
+          <div class="cd-form-actions">
+            <button type="button" class="cd-btn-cancel" onclick="closeAddExamModal()">Đóng</button>
+          </div>
+        </div>
+
+        <!-- Tab: Thêm bài thi -->
+        <div id="examTabAdd" style="display:none">
+          <p style="font-size:13px;color:#888;margin-bottom:12px;">Bài thi sẽ được áp dụng cho tất cả sinh viên trong đơn vị</p>
           <div class="cd-deadline-grid">
             <div class="cd-form-group">
               <label>Hạn nộp bài</label>

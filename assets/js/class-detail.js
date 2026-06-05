@@ -1249,8 +1249,8 @@ async function openAddExamModal() {
     refreshExamCatalogFromServer(),
   ]);
 
-  // Reset về tab "Đang áp dụng"
-  switchExamTab('active');
+  // Reset về tab "Đã áp dụng"
+  switchExamTab('applied');
 
   const assignedExams = getClassExams();
   const assignedIds = assignedExams.map(e => e.id);
@@ -1331,21 +1331,32 @@ function showClassDetailToast(message, type = 'success') {
 }
 
 function switchExamTab(tab) {
-  const activePane = document.getElementById('examTabActive');
+  const appliedPane = document.getElementById('examTabApplied');
+  const addPane = document.getElementById('examTabAdd');
   const deletedPane = document.getElementById('examTabDeleted');
-  const btnActive = document.getElementById('examTabBtnActive');
+  
+  const btnApplied = document.getElementById('examTabBtnApplied');
+  const btnAdd = document.getElementById('examTabBtnAdd');
   const btnDeleted = document.getElementById('examTabBtnDeleted');
-  if (tab === 'deleted') {
-    activePane.style.display = 'none';
+
+  if (appliedPane) appliedPane.style.display = 'none';
+  if (addPane) addPane.style.display = 'none';
+  if (deletedPane) deletedPane.style.display = 'none';
+  
+  if (btnApplied) btnApplied.classList.remove('cd-modal-tab--active');
+  if (btnAdd) btnAdd.classList.remove('cd-modal-tab--active');
+  if (btnDeleted) btnDeleted.classList.remove('cd-modal-tab--active');
+
+  if (tab === 'applied' && appliedPane && btnApplied) {
+    appliedPane.style.display = '';
+    btnApplied.classList.add('cd-modal-tab--active');
+  } else if (tab === 'add' && addPane && btnAdd) {
+    addPane.style.display = '';
+    btnAdd.classList.add('cd-modal-tab--active');
+  } else if (tab === 'deleted' && deletedPane && btnDeleted) {
     deletedPane.style.display = '';
-    btnActive.classList.remove('cd-modal-tab--active');
     btnDeleted.classList.add('cd-modal-tab--active');
     renderDeletedExamTab();
-  } else {
-    activePane.style.display = '';
-    deletedPane.style.display = 'none';
-    btnActive.classList.add('cd-modal-tab--active');
-    btnDeleted.classList.remove('cd-modal-tab--active');
   }
 }
 
