@@ -2233,407 +2233,6 @@ body {
   background: #f9f9f9;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .sidebar-menu {
-    width: 240px;
-  }
-
-  .home-main {
-    padding: 30px;
-  }
-
-  .section-header h1 {
-    font-size: 28px;
-  }
-
-  .grading-history-layout {
-    grid-template-columns: 280px minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .home-wrapper {
-    flex-direction: column;
-  }
-
-  .sidebar-menu {
-    width: 100%;
-    height: auto;
-    max-height: 150px;
-    border-right: none;
-    border-bottom: 2px solid #FFD4B4;
-    padding: 0;
-    position: relative;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .menu-list {
-    display: flex;
-    gap: 0;
-    padding: 0;
-    margin: 0;
-    overflow-x: auto;
-    border-radius: 0;
-  }
-
-  .menu-item {
-    margin: 0;
-    padding: 0;
-    min-width: 100px;
-    flex-shrink: 0;
-  }
-
-  .menu-link {
-    border-radius: 0;
-    border-left: none;
-    border-bottom: 4px solid transparent;
-    padding: 12px 10px;
-    justify-content: center;
-    flex-direction: column;
-    font-size: 11px;
-    gap: 6px;
-  }
-
-  .menu-link:hover {
-    padding-left: 10px;
-  }
-
-  .menu-link.active {
-    border-left: none;
-    border-bottom: 4px solid #4B5320;
-  }
-
-  .menu-link.active::before {
-    display: none;
-  }
-
-  .header-content {
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 16px;
-  }
-
-  .user-section {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .home-main {
-    padding: 16px;
-    height: auto;
-  }
-
-  .section-header {
-    margin-bottom: 20px;
-  }
-
-  .section-header h1 {
-    font-size: 22px;
-  }
-
-  .section-header p {
-    font-size: 14px;
-  }
-
-  .profile-card {
-    padding: 20px;
-  }
-
-  /* Classes toolbar: wrap for mobile */
-  .classes-toolbar {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .search-bar {
-    max-width: 100%;
-    flex: 1 1 100%;
-  }
-
-  .errors-toolbar-actions {
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
-  .errors-toolbar-actions .error-filter-select {
-    flex: 1;
-  }
-
-  .errors-toolbar-actions .btn-add-class {
-    flex: 1;
-    justify-content: center;
-  }
-
-  /* Errors search */
-  .search-bar-errors {
-    max-width: none;
-    width: 100%;
-  }
-
-  .report-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .grading-history-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .history-detail-meta-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-row {
-    grid-template-columns: 1fr;
-  }
-
-  .class-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .exam-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .class-card {
-    padding: 16px;
-  }
-
-  .exam-card {
-    padding: 16px;
-  }
-
-  .class-title {
-    font-size: 18px;
-  }
-
-  .history-detail-header {
-    flex-direction: column;
-  }
-
-  /* History summary */
-  .history-summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .history-summary-card {
-    padding: 16px;
-  }
-
-  .history-summary-value {
-    font-size: 24px;
-  }
-
-  /* Student exam summary */
-  .st-exam-summary {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .st-summary-card {
-    padding: 14px 10px;
-  }
-
-  .st-summary-card .st-summary-value {
-    font-size: 22px;
-  }
-
-  /* Student exam card */
-  .st-exam-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .st-exam-scores {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .st-error-header {
-    flex-wrap: wrap;
-  }
-
-  /* Profile field wrap */
-  .profile-field {
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-  }
-
-  /* Error type header */
-  .error-type-header {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  /* Class modal full screen on mobile */
-  .class-modal-content {
-    max-width: 100%;
-    max-height: 90vh;
-    margin: 8px;
-    overflow-y: auto;
-  }
-
-  /* Toast full width on mobile */
-  .home-toast {
-    left: 12px;
-    right: 12px;
-    top: 12px;
-    min-width: unset;
-    max-width: unset;
-    width: calc(100% - 24px);
-  }
-}
-
-@media (max-width: 480px) {
-  .logo {
-    font-size: 24px;
-  }
-
-  .school-name {
-    font-size: 11px;
-  }
-
-  .user-name {
-    font-size: 13px;
-  }
-
-  .btn-logout {
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-
-  .section-header h1 {
-    font-size: 19px;
-  }
-
-  .home-main {
-    padding: 12px;
-  }
-
-  .profile-card {
-    padding: 14px;
-  }
-
-  .class-info {
-    grid-template-columns: 1fr;
-  }
-
-  .class-action {
-    flex-direction: column;
-  }
-
-  .menu-item {
-    min-width: 80px;
-  }
-
-  .menu-link {
-    padding: 10px 8px;
-  }
-
-  .menu-link i {
-    font-size: 15px;
-  }
-
-  .menu-link span {
-    font-size: 10px;
-  }
-
-  .report-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .report-table-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  /* Student exam summary: 2 cols on phone */
-  .st-exam-summary {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .st-summary-card {
-    padding: 12px 8px;
-  }
-
-  .st-summary-card .st-summary-icon {
-    font-size: 22px;
-  }
-
-  .st-summary-card .st-summary-value {
-    font-size: 18px;
-  }
-
-  .st-summary-card .st-summary-label {
-    font-size: 11px;
-  }
-
-  /* Exam tabs scroll */
-  .st-exam-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-  }
-
-  .st-exam-tab-btn {
-    white-space: nowrap;
-    padding: 8px 14px;
-    font-size: 13px;
-  }
-
-  /* Error summary cards */
-  .error-summary {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 14px;
-  }
-
-  .summary-value {
-    font-size: 20px;
-  }
-
-  .summary-label {
-    font-size: 12px;
-  }
-
-  /* History summary: single col */
-  .history-summary-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  /* Grading history list max-height reduce */
-  .grading-history-list {
-    max-height: 300px;
-  }
-
-  /* Form grid single col */
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Logout modal */
-  .logout-modal-content {
-    padding: 24px 18px 18px;
-  }
-
-  .logout-modal-actions {
-    flex-direction: column;
-  }
-
-  .logout-btn-cancel,
-  .logout-btn-confirm {
-    width: 100%;
-  }
-}
-
 /* ========================================
    STUDENT VIEW STYLES
    ======================================== */
@@ -3214,6 +2813,407 @@ body {
 
   .st-error-header {
     flex-wrap: wrap;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .sidebar-menu {
+    width: 240px;
+  }
+
+  .home-main {
+    padding: 30px;
+  }
+
+  .section-header h1 {
+    font-size: 28px;
+  }
+
+  .grading-history-layout {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .home-wrapper {
+    flex-direction: column;
+  }
+
+  .sidebar-menu {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    border-right: none;
+    border-bottom: 2px solid #FFD4B4;
+    padding: 0;
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .menu-list {
+    display: flex;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto;
+    border-radius: 0;
+  }
+
+  .menu-item {
+    margin: 0;
+    padding: 0;
+    min-width: 100px;
+    flex-shrink: 0;
+  }
+
+  .menu-link {
+    border-radius: 0;
+    border-left: none;
+    border-bottom: 4px solid transparent;
+    padding: 12px 10px;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .menu-link:hover {
+    padding-left: 10px;
+  }
+
+  .menu-link.active {
+    border-left: none;
+    border-bottom: 4px solid #4B5320;
+  }
+
+  .menu-link.active::before {
+    display: none;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .user-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .home-main {
+    padding: 16px;
+    height: auto;
+  }
+
+  .section-header {
+    margin-bottom: 20px;
+  }
+
+  .section-header h1 {
+    font-size: 22px;
+  }
+
+  .section-header p {
+    font-size: 14px;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+
+  /* Classes toolbar: wrap for mobile */
+  .classes-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .search-bar {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .errors-toolbar-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .errors-toolbar-actions .error-filter-select {
+    flex: 1;
+  }
+
+  .errors-toolbar-actions .btn-add-class {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* Errors search */
+  .search-bar-errors {
+    max-width: none;
+    width: 100%;
+  }
+
+  .report-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .grading-history-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .history-detail-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+
+  .class-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .exam-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .class-card {
+    padding: 16px;
+  }
+
+  .exam-card {
+    padding: 16px;
+  }
+
+  .class-title {
+    font-size: 18px;
+  }
+
+  .history-detail-header {
+    flex-direction: column;
+  }
+
+  /* History summary */
+  .history-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .history-summary-card {
+    padding: 16px;
+  }
+
+  .history-summary-value {
+    font-size: 24px;
+  }
+
+  /* Student exam summary */
+  .st-exam-summary {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .st-summary-card {
+    padding: 14px 10px;
+  }
+
+  .st-summary-card .st-summary-value {
+    font-size: 22px;
+  }
+
+  /* Student exam card */
+  .st-exam-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .st-exam-scores {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .st-error-header {
+    flex-wrap: wrap;
+  }
+
+  /* Profile field wrap */
+  .profile-field {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  /* Error type header */
+  .error-type-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Class modal full screen on mobile */
+  .class-modal-content {
+    max-width: 100%;
+    max-height: 90vh;
+    margin: 8px;
+    overflow-y: auto;
+  }
+
+  /* Toast full width on mobile */
+  .home-toast {
+    left: 12px;
+    right: 12px;
+    top: 12px;
+    min-width: unset;
+    max-width: unset;
+    width: calc(100% - 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 24px;
+  }
+
+  .school-name {
+    font-size: 11px;
+  }
+
+  .user-name {
+    font-size: 13px;
+  }
+
+  .btn-logout {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .section-header h1 {
+    font-size: 19px;
+  }
+
+  .home-main {
+    padding: 12px;
+  }
+
+  .profile-card {
+    padding: 14px;
+  }
+
+  .class-info {
+    grid-template-columns: 1fr;
+  }
+
+  .class-action {
+    flex-direction: column;
+  }
+
+  .menu-item {
+    min-width: 80px;
+  }
+
+  .menu-link {
+    padding: 10px 8px;
+  }
+
+  .menu-link i {
+    font-size: 15px;
+  }
+
+  .menu-link span {
+    font-size: 10px;
+  }
+
+  .report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-table-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Student exam summary: 2 cols on phone */
+  .st-exam-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .st-summary-card {
+    padding: 12px 8px;
+  }
+
+  .st-summary-card .st-summary-icon {
+    font-size: 22px;
+  }
+
+  .st-summary-card .st-summary-value {
+    font-size: 18px;
+  }
+
+  .st-summary-card .st-summary-label {
+    font-size: 11px;
+  }
+
+  /* Exam tabs scroll */
+  .st-exam-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .st-exam-tab-btn {
+    white-space: nowrap;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* Error summary cards */
+  .error-summary {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .summary-value {
+    font-size: 20px;
+  }
+
+  .summary-label {
+    font-size: 12px;
+  }
+
+  /* History summary: single col */
+  .history-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Grading history list max-height reduce */
+  .grading-history-list {
+    max-height: 300px;
+  }
+
+  /* Form grid single col */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Logout modal */
+  .logout-modal-content {
+    padding: 24px 18px 18px;
+  }
+
+  .logout-modal-actions {
+    flex-direction: column;
+  }
+
+  .logout-btn-cancel,
+  .logout-btn-confirm {
+    width: 100%;
   }
 }
 
