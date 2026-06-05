@@ -1533,27 +1533,39 @@ async function confirmDeleteExam() {
 async function addExamsToClass() {
   const selected = document.querySelector('#examCheckboxList input[type="radio"]:checked');
   const selectedId = selected ? selected.value : null;
-  const submissionDeadline = document.getElementById('submissionDeadline').value;
-  const gradingDeadline = document.getElementById('gradingDeadline').value;
+  const submissionInput = document.getElementById('submissionDeadline');
+  const gradingInput = document.getElementById('gradingDeadline');
+  const submissionDeadline = submissionInput.value;
+  const gradingDeadline = gradingInput.value;
 
   if (!selectedId) {
-    alert('Vui lòng chọn một bài thi.');
+    showClassDetailToast('Vui lòng chọn một bài thi.', 'error');
+    return;
+  }
+
+  if (submissionInput.validity && submissionInput.validity.badInput) {
+    showClassDetailToast('Thời gian hạn nộp bài không hợp lệ (ngày không tồn tại).', 'error');
+    return;
+  }
+  
+  if (gradingInput.validity && gradingInput.validity.badInput) {
+    showClassDetailToast('Thời gian hạn chấm bài không hợp lệ (ngày không tồn tại).', 'error');
     return;
   }
 
   if (!submissionDeadline || !gradingDeadline) {
-    alert('Vui lòng nhập đầy đủ hạn nộp bài và hạn chấm bài.');
+    showClassDetailToast('Vui lòng nhập đầy đủ hạn nộp bài và hạn chấm bài hợp lệ.', 'error');
     return;
   }
 
   const now = new Date().getTime();
   if (new Date(submissionDeadline).getTime() <= now) {
-    alert('Hạn nộp bài phải là thời gian trong tương lai.');
+    showClassDetailToast('Hạn nộp bài phải là thời gian trong tương lai.', 'error');
     return;
   }
 
   if (new Date(gradingDeadline).getTime() <= new Date(submissionDeadline).getTime()) {
-    alert('Hạn chấm bài phải lớn hơn hạn nộp bài.');
+    showClassDetailToast('Hạn chấm bài phải lớn hơn hạn nộp bài.', 'error');
     return;
   }
 
@@ -1591,21 +1603,21 @@ async function addExamsToClass() {
         });
         if (!retry.ok) {
           const err = await retry.json().catch(() => null);
-          alert(err?.message || `Thêm bài thi thất bại (${retry.status}).`);
+          showClassDetailToast(err?.message || `Thêm bài thi thất bại (${retry.status}).`, 'error');
           return;
         }
       } else {
-        alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+        showClassDetailToast('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.', 'error');
         return;
       }
     } else if (!res.ok) {
       const err = await res.json().catch(() => null);
-      alert(err?.message || `Thêm bài thi thất bại (${res.status}).`);
+      showClassDetailToast(err?.message || `Thêm bài thi thất bại (${res.status}).`, 'error');
       return;
     }
   } catch (e) {
     console.error('addExamsToClass API error', e);
-    alert('Có lỗi kết nối khi thêm bài thi. Vui lòng thử lại.');
+    showClassDetailToast('Có lỗi kết nối khi thêm bài thi. Vui lòng thử lại.', 'error');
     return;
   }
 
