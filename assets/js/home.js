@@ -2357,7 +2357,7 @@ function loadGradingHistoryContent() {
     <div class="grading-history-layout">
       <div class="grading-history-list">
         ${records.map(record => `
-          <button class="grading-history-item ${record.id === selectedRecord.id ? 'active' : ''}" onclick="selectGradingHistory('${record.id}')">
+          <button class="grading-history-item ${record.id === selectedRecord.id ? 'active' : ''}" data-id="${record.id}" onclick="selectGradingHistory('${record.id}')">
             <div class="grading-history-item-top">
               <span class="grading-history-exam">${record.examName}</span>
               <span class="grading-history-mode ${record.gradingMode}">${formatHistoryMode(record.gradingMode)}</span>
@@ -2529,8 +2529,34 @@ async function _fetchHistoryDetailApi(record) {
 }
 
 function selectGradingHistory(recordId) {
+  if (selectedGradingHistoryId === recordId) return;
+
   selectedGradingHistoryId = recordId;
-  loadGradingHistoryContent();
+
+  // Cập nhật class active trên giao diện mà không re-render danh sách (giữ vị trí scroll)
+  const listItems = document.querySelectorAll('.grading-history-item');
+  listItems.forEach(item => {
+    if (item.getAttribute('data-id') === String(recordId)) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+
+  // Tìm lại bản ghi được chọn
+  const records = getTeacherGradingHistory();
+  const selectedRecord = records.find(r => String(r.id) === String(recordId)) || records[0];
+
+  // Chỉ re-render phần chi tiết bên phải
+  const detailEl = document.querySelector('.grading-history-detail');
+  if (detailEl && selectedRecord) {
+    detailEl.innerHTML = renderGradingHistoryDetail(selectedRecord);
+  }
+
+  // Lấy dữ liệu API nếu có
+  if (selectedRecord) {
+    _fetchHistoryDetailApi(selectedRecord);
+  }
 }
 
 function _renderHistoryPagination() {
