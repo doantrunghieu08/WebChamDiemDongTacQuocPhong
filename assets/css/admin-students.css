@@ -9,6 +9,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .admin-students-breadcrumb {
@@ -87,7 +90,7 @@ body {
 
 .admin-students-list-panel {
   position: sticky;
-  top: calc(88px + 24px);
+  top: 0;
   max-height: calc(100vh - 88px - 48px);
   overflow-y: auto;
 }
@@ -238,6 +241,12 @@ body {
   .admin-students-hero-stats {
     min-width: 0;
     width: 100%;
+  }
+
+  .admin-students-list-panel {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 }
 

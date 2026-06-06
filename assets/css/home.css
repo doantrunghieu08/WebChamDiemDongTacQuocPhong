@@ -1794,10 +1794,16 @@ body {
   transition: all 0.2s ease;
 }
 
-.grading-history-item:hover,
-.grading-history-item.active {
+.grading-history-item:hover {
   border-color: #4B5320;
   box-shadow: 0 8px 24px rgba(220, 20, 60, 0.12);
+  transform: translateY(-2px);
+}
+
+.grading-history-item.active {
+  border-color: #4B5320;
+  background: #f8fbfa;
+  box-shadow: 0 0 0 2px #4B5320, 0 8px 24px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
