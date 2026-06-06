@@ -817,9 +817,11 @@ function loadExamsContent() {
   if (!examGrid || !emptyState) return;
 
   const keyword = (document.getElementById('searchExamCatalog')?.value || '').toLowerCase().trim();
+  const tagFilter = document.getElementById('filterExamCatalogTag')?.value || '';
   const showDeleted = examFilterStatus === 'deleted';
   const allExams = getExamCatalog().filter(exam => {
     if (showDeleted ? !exam.deleted : exam.deleted) return false;
+    if (tagFilter && exam.examCode !== tagFilter) return false;
     const text = `${exam.name} ${exam.description}`.toLowerCase();
     return text.includes(keyword);
   });
@@ -918,6 +920,26 @@ function goToExamPage(page) {
 function searchExams() {
   examPage = 0;
   loadExamsContent();
+}
+
+async function populateExamCatalogTagFilter() {
+  const select = document.getElementById('filterExamCatalogTag');
+  if (!select) return;
+
+  try {
+    const examTypes = await ExamsService.getExamTypes();
+    const allCodes = new Set(examTypes.map(et => et.examCode).filter(Boolean));
+    
+    select.innerHTML = '<option value="">Tất cả tag</option>';
+    Array.from(allCodes).sort().forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = code;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.warn('Lỗi khi tải danh sách tag bài thi', err);
+  }
 }
 
 function openSampleVideoDb() {
@@ -3682,6 +3704,7 @@ function initializePage() {
     // Teacher view (default)
     currentClasses = getTeacherClasses();
     getExamCatalog();
+    populateExamCatalogTagFilter();
     loadProfileContent();
     renderClasses(currentClasses);
     loadExamsContent();

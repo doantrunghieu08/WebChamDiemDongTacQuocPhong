@@ -3048,6 +3048,23 @@ body {
     align-items: flex-start;
   }
 
+  .field-value {
+    text-align: left;
+    word-break: break-word;
+  }
+
+  /* Exam tabs scroll for tablet and mobile */
+  .st-exam-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px; /* space for scrollbar */
+  }
+
+  .st-exam-tab-btn {
+    white-space: nowrap;
+  }
+
   /* Error type header */
   .error-type-header {
     flex-wrap: wrap;
@@ -3157,6 +3174,8 @@ body {
 
   .st-summary-card .st-summary-label {
     font-size: 11px;
+    word-break: break-word;
+    line-height: 1.3;
   }
 
   /* Exam tabs scroll */
