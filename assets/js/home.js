@@ -2693,19 +2693,12 @@ function loadReportContent() {
 
     <div class="chart-row">
       <div class="chart-container">
-        <div class="chart-title"><i class="fas fa-chart-bar"></i> Số lượng sinh viên mắc lỗi theo loại</div>
-        <canvas id="chartErrorByType"></canvas>
+        <div class="chart-title"><i class="fas fa-chart-line"></i> Điểm trừ theo loại lỗi</div>
+        <canvas id="chartDeduction"></canvas>
       </div>
       <div class="chart-container">
         <div class="chart-title"><i class="fas fa-chart-pie"></i> Tỷ lệ mức độ lỗi</div>
         <canvas id="chartSeverity"></canvas>
-      </div>
-    </div>
-
-    <div class="chart-row">
-      <div class="chart-container chart-wide">
-        <div class="chart-title"><i class="fas fa-chart-line"></i> Điểm trừ theo loại lỗi</div>
-        <canvas id="chartDeduction"></canvas>
       </div>
     </div>
 
@@ -2764,33 +2757,7 @@ function renderCharts() {
 
   const chartColors = ['#DC143C', '#FF6B35', '#FFB64D', '#2ecc71', '#3498db', '#9b59b6', '#e67e22'];
 
-  // Chart 1: Bar - Students per error type
-  const ctx1 = document.getElementById('chartErrorByType');
-  if (ctx1) {
-    const chart1Label = 'Số sinh viên';
-    new Chart(ctx1, {
-      type: 'bar',
-      data: {
-        labels: errorNames,
-        datasets: [{
-          label: chart1Label,
-          data: errorStudentCounts,
-          backgroundColor: chartColors.slice(0, errorData.length),
-          borderColor: chartColors.slice(0, errorData.length),
-          borderWidth: 1,
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } },
-          x: { ticks: { maxRotation: 45, minRotation: 0, font: { size: 11 } } }
-        }
-      }
-    });
-  }
+  // Chart 1: (Đã bị gỡ bỏ theo yêu cầu)
 
   // Chart 2: Doughnut - Severity ratio
   const ctx2 = document.getElementById('chartSeverity');
@@ -2825,22 +2792,25 @@ function renderCharts() {
   const ctx3 = document.getElementById('chartDeduction');
   if (ctx3) {
     new Chart(ctx3, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: errorNames,
         datasets: [{
           label: 'Điểm trừ',
           data: errorDeductions,
-          backgroundColor: errorData.map(e =>
-            e.severity === 'cao' ? 'rgba(198,40,40,0.75)' :
-            e.severity === 'trung-binh' ? 'rgba(230,81,0,0.75)' : 'rgba(249,168,37,0.75)'
-          ),
-          borderColor: errorData.map(e =>
+          backgroundColor: 'rgba(75, 83, 32, 0.2)',
+          borderColor: '#4B5320',
+          borderWidth: 2,
+          pointBackgroundColor: errorData.map(e =>
             e.severity === 'cao' ? '#c62828' :
             e.severity === 'trung-binh' ? '#e65100' : '#f9a825'
           ),
-          borderWidth: 1,
-          borderRadius: 6
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.3
         }]
       },
       options: {
