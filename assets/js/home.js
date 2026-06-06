@@ -2422,7 +2422,7 @@ function renderGradingHistoryDetail(record) {
             </div>
             <div class="history-frame-score">${Number(frame.total || 0).toFixed(1)}</div>
           </div>
-          ${frame.imageUrl ? `<img src="${frame.imageUrl}" class="history-frame-img" alt="Frame ${index + 1}" loading="lazy" onclick="openImageViewer('${frame.imageUrl}')" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">` : ''}
+          ${frame.imageUrl ? `<img src="${frame.imageUrl}" class="history-frame-img" alt="Frame ${index + 1}" loading="lazy" onclick="openImageViewer('${frame.imageUrl}')" style="cursor: pointer; transition: transform 0.2s; user-select: none; -webkit-user-select: none; -webkit-user-drag: none;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">` : ''}
           <div class="history-tag-list">
             ${(frame.errors || []).map(error => `<span class="history-tag">${error.name}${error.note ? ` · ${error.note}` : ''}</span>`).join('')}
           </div>
