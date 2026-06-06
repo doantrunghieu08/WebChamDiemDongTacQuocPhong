@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chấm Điểm Động Tác Quốc Phòng – HACTECH</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/chamdiem.css" />
 </head>
 <body>
@@ -59,7 +60,7 @@
               <span id="vid-total">02</span>
               &nbsp; Thời điểm: <span id="current-time" class="time-accent">00:00</span>
             </div>
-            <button class="btn-snap" onclick="captureFrame()" title="Chụp ảnh khung hình hiện tại">📸</button>
+            <button class="btn-snap" onclick="captureFrame()" title="Chụp ảnh khung hình hiện tại"><i class="fas fa-camera"></i></button>
           </div>
 
           <div class="video-area" id="video-area">
@@ -75,7 +76,6 @@
             <span id="footer-time" class="time-bold">00:00</span>
           </div>
 
-          <!-- Controls -->
           <div class="controls">
             <button class="ctrl" onclick="seek(-10)" title="Lùi 10s">&#9664;&#9664;</button>
             <button class="ctrl" id="play-btn" onclick="togglePlay()">&#9654;</button>
@@ -85,7 +85,7 @@
               <div class="prog-fill" id="prog-fill"></div>
               <div class="prog-dot" id="prog-dot"></div>
             </div>
-            <button class="btn-snap" id="btnSnap" title="Chụp ảnh khung hình hiện tại">📸</button>
+            <button class="btn-snap" id="btnSnap" onclick="captureFrame()" title="Chụp ảnh khung hình hiện tại"><i class="fas fa-camera"></i></button>
           </div>
 
           <!-- Thumbnails -->

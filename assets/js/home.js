@@ -2422,7 +2422,7 @@ function renderGradingHistoryDetail(record) {
             </div>
             <div class="history-frame-score">${Number(frame.total || 0).toFixed(1)}</div>
           </div>
-          ${frame.imageUrl ? `<img src="${frame.imageUrl}" class="history-frame-img" alt="Frame ${index + 1}" loading="lazy">` : ''}
+          ${frame.imageUrl ? `<img src="${frame.imageUrl}" class="history-frame-img" alt="Frame ${index + 1}" loading="lazy" onclick="openImageViewer('${frame.imageUrl}')" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">` : ''}
           <div class="history-tag-list">
             ${(frame.errors || []).map(error => `<span class="history-tag">${error.name}${error.note ? ` · ${error.note}` : ''}</span>`).join('')}
           </div>
@@ -3765,6 +3765,56 @@ function initializePage() {
   }
 
   attachEvents();
+}
+
+function openImageViewer(url) {
+  let viewer = document.getElementById('imageViewerModal');
+  if (!viewer) {
+    viewer = document.createElement('div');
+    viewer.id = 'imageViewerModal';
+    viewer.style.display = 'none';
+    viewer.style.position = 'fixed';
+    viewer.style.zIndex = '9999';
+    viewer.style.top = '0';
+    viewer.style.left = '0';
+    viewer.style.width = '100vw';
+    viewer.style.height = '100vh';
+    viewer.style.backgroundColor = 'rgba(0,0,0,0.85)';
+    viewer.style.justifyContent = 'center';
+    viewer.style.alignItems = 'center';
+    viewer.style.backdropFilter = 'blur(5px)';
+    
+    viewer.innerHTML = `
+      <span style="position:absolute; top:20px; right:30px; color:#fff; font-size:40px; font-weight:bold; cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#f00'" onmouseout="this.style.color='#fff'" onclick="closeImageViewer()">&times;</span>
+      <img id="imageViewerImg" src="" style="max-width:90%; max-height:90%; border-radius:8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain;">
+    `;
+    
+    // Close on click outside
+    viewer.addEventListener('click', function(e) {
+      if (e.target === viewer) {
+        closeImageViewer();
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && viewer.style.display === 'flex') {
+        closeImageViewer();
+      }
+    });
+    
+    document.body.appendChild(viewer);
+  }
+  
+  document.getElementById('imageViewerImg').src = url;
+  viewer.style.display = 'flex';
+}
+
+function closeImageViewer() {
+  const viewer = document.getElementById('imageViewerModal');
+  if (viewer) {
+    viewer.style.display = 'none';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);
