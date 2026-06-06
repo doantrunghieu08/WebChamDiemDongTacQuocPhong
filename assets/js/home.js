@@ -2757,9 +2757,9 @@ function renderCharts() {
   });
 
   const hasHistory = historyRecords.length > 0;
-  // Số sinh viên mắc lỗi theo loại (từ lịch sử); nếu không có history fallback sang điểm trừ
+  // Số sinh viên mắc lỗi theo loại (từ lịch sử)
   const errorStudentCounts = errorData.map(e =>
-    hasHistory ? (errorStudentMap[e.name] ? errorStudentMap[e.name].size : 0) : e.deduction
+    errorStudentMap[e.name] ? errorStudentMap[e.name].size : 0
   );
 
   const chartColors = ['#DC143C', '#FF6B35', '#FFB64D', '#2ecc71', '#3498db', '#9b59b6', '#e67e22'];
@@ -2767,7 +2767,7 @@ function renderCharts() {
   // Chart 1: Bar - Students per error type
   const ctx1 = document.getElementById('chartErrorByType');
   if (ctx1) {
-    const chart1Label = hasHistory ? 'Số sinh viên' : 'Điểm trừ (chưa có lịch sử)';
+    const chart1Label = 'Số sinh viên';
     new Chart(ctx1, {
       type: 'bar',
       data: {
