@@ -361,6 +361,18 @@ async function loadStudentListPage(page = 0) {
   studentListTotalPages = result.totalPages;
   renderStudentManagerListFromData(result.students);
   renderStudentListPagination();
+
+  // Scroll lên đầu danh sách sau khi chuyển trang
+  setTimeout(() => {
+    const listPanel = document.querySelector('.admin-students-list-panel');
+    if (listPanel) {
+      listPanel.scrollTo({ top: 0, behavior: 'smooth' });
+      // Trên mobile, khi danh sách nằm dưới form, cuộn nguyên trang đến đầu danh sách
+      if (window.innerWidth <= 1100) {
+        listPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, 50);
 }
 
 function renderStudentManagerListFromData(students) {
