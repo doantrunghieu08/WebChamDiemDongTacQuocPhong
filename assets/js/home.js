@@ -1781,10 +1781,16 @@ function renderErrors() {
 
   const activeData = currentErrorData.filter(e => !e.deleted);
   const keyword = (document.getElementById('searchError')?.value || '').toLowerCase().trim();
+  const severityFilter = document.getElementById('filterErrorSeverity')?.value || '';
+  
   const filteredAll = (errorFilterStatus === 'deleted'
     ? currentErrorData.filter(e => e.deleted)
     : activeData
-  ).filter(e => !keyword || `${e.name} ${e.description}`.toLowerCase().includes(keyword));
+  ).filter(e => {
+    if (severityFilter && e.severity !== severityFilter) return false;
+    if (keyword && !`${e.name} ${e.description}`.toLowerCase().includes(keyword)) return false;
+    return true;
+  });
 
   // Phân trang local
   const totalLocal   = filteredAll.length;
@@ -1812,7 +1818,6 @@ function renderErrors() {
             <div class="error-type-info">
               <div class="error-type-name">
                 ${error.name}
-                <span class="error-type-count">${error.students.length} sinh viên</span>
               </div>
               <div class="error-type-description">${error.note || error.description}</div>
             </div>

@@ -176,6 +176,12 @@
                 <button id="tabHomeErrorDeleted" type="button" class="admin-subtab" style="padding: 10px 16px; background: none; border: none; font-weight: 600; font-size: 15px; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;" onclick="switchHomeErrorFilterTab('deleted')">Đã xóa</button>
               </div>
               <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 8px;">
+                <select id="filterErrorSeverity" class="form-select search-input" style="min-width: 150px; border-radius: 8px; padding: 0 12px; height: 44px; margin: 0; cursor: pointer;" onchange="searchErrors()">
+                  <option value="">Tất cả mức độ</option>
+                  <option value="cao">Nghiêm trọng</option>
+                  <option value="trung-binh">Trung bình</option>
+                  <option value="thap">Thấp</option>
+                </select>
                 <div class="search-bar search-bar-errors" style="margin: 0; min-width: 250px;">
                   <i class="fas fa-search search-icon"></i>
                   <input type="text" id="searchError" class="search-input" placeholder="Tìm kiếm lỗi..." oninput="searchErrors()">
