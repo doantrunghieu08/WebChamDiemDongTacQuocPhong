@@ -1854,10 +1854,6 @@ function renderErrors() {
           <span class="summary-label"><i class="fas fa-check-circle"></i> Thấp</span>
           <span class="summary-value">${lowCount}</span>
         </div>
-        <div class="summary-item">
-          <span class="summary-label"><i class="fas fa-users"></i> SV mắc lỗi</span>
-          <span class="summary-value">${totalStudents}</span>
-        </div>
       </div>`;
   }
 
