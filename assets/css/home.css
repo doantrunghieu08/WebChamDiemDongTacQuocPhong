@@ -1288,38 +1288,45 @@ body {
 
 /* ===== ERRORS SECTION ===== */
 #errorSummaryFixed {
-  position: sticky;
-  top: -1px;
-  z-index: 50;
-  background: linear-gradient(135deg, #FFF5E1 0%, #FFE4B5 100%);
-  padding: 12px 50px 10px 50px;
-  margin: 0 -50px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
-}
-
-@media (max-width: 1024px) {
-  #errorSummaryFixed {
-    padding: 12px 30px 10px 30px;
-    margin: 0 -30px;
-  }
-}
-
-@media (max-width: 768px) {
-  #errorSummaryFixed {
-    padding: 10px 16px 8px 16px;
-    margin: 0 -16px;
-  }
-}
-
-@media (max-width: 480px) {
-  #errorSummaryFixed {
-    padding: 8px 12px 8px 12px;
-    margin: 0 -12px;
-  }
+  margin-bottom: 10px;
 }
 
 .errors-section {
   max-width: 1200px;
+  max-height: calc(100vh - 360px);
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.errors-section::-webkit-scrollbar {
+  width: 6px;
+}
+.errors-section::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.02);
+  border-radius: 4px;
+}
+.errors-section::-webkit-scrollbar-thumb {
+  background: rgba(75, 83, 32, 0.2);
+  border-radius: 4px;
+}
+.errors-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 83, 32, 0.4);
+}
+
+@media (max-width: 1024px) {
+  .errors-section {
+    max-height: calc(100vh - 380px);
+  }
+}
+@media (max-width: 768px) {
+  .errors-section {
+    max-height: calc(100vh - 420px);
+  }
+}
+@media (max-width: 480px) {
+  .errors-section {
+    max-height: calc(100vh - 480px);
+  }
 }
 
 .error-summary {
