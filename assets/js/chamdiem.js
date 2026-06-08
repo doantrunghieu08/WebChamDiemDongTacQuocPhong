@@ -2028,16 +2028,13 @@ function _renderComparePoseResult(data) {
     const barPct = s; // score từ 0-100 chính là %
     const card = document.createElement('div');
     card.className = 'cpose-joint-card';
-    card.title = `Nhấn để xem so sánh frame tại khớp ${JOINT_NAMES_VI[joint] || joint}`;
+    card.title = `Khớp ${JOINT_NAMES_VI[joint] || joint}`;
     card.innerHTML =
       '<div class="cpose-joint-name">' + (JOINT_NAMES_VI[joint] || joint) + '</div>' +
       '<div class="cpose-joint-diff ' + cls + '">' + avg.toFixed(1) + '°</div>' +
       '<div class="cpose-joint-bar-wrap"><div class="cpose-joint-bar ' + cls + '" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
-      '<div class="cpose-joint-label">Độ lệch TB</div>' +
-      '<div class="cpose-joint-card-click-hint">👆 Xem frame so sánh</div>';
+      '<div class="cpose-joint-label">Độ lệch TB</div>';
 
-    // Click → mở modal frame so sánh
-    card.addEventListener('click', () => openJointFrameModal(joint, s, avg, scores));
     grid.appendChild(card);
   });
 
@@ -2145,6 +2142,21 @@ function _renderComparePoseResult(data) {
             responsive: true,
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
+            onClick: (e, elements, chart) => {
+              if (elements.length > 0) {
+                const firstPoint = elements[0];
+                const datasetIndex = firstPoint.datasetIndex;
+                const index = firstPoint.index;
+                const pointData = chart.data.datasets[datasetIndex].data[index];
+                const time = pointData.x;
+                const s = scores[jointKey] ?? 100;
+                const avgDiff = 45 * (1 - s / 100);
+                openJointFrameModal(jointKey, s, avgDiff, scores, time);
+              }
+            },
+            onHover: (e, elements) => {
+              e.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+            },
             scales: {
               x: { type: 'linear', title: { display: true, text: 'Thời gian (s)' } },
               y: { title: { display: true, text: 'Góc (°)' }, suggestedMin: 0, suggestedMax: 180 }
@@ -2161,7 +2173,7 @@ function _renderComparePoseResult(data) {
 }
 
 // ---- OPEN JOINT FRAME MODAL ----
-async function openJointFrameModal(jointKey, score, avgDiff, allScores) {
+async function openJointFrameModal(jointKey, score, avgDiff, allScores, targetTime = null) {
   const modal = document.getElementById('joint-frame-modal');
   const loading = document.getElementById('jfm-loading');
   const compareRow = document.getElementById('jfm-compare-row');
@@ -2178,14 +2190,14 @@ async function openJointFrameModal(jointKey, score, avgDiff, allScores) {
 
   // Tiêu đề modal
   const jointNameVi = JOINT_NAMES_VI[jointKey] || jointKey;
-  document.getElementById('joint-frame-modal-title').textContent = '🦴 So Sánh Frame – ' + jointNameVi;
+  document.getElementById('joint-frame-modal-title').textContent = '🦴 Chi Tiết Frame – ' + jointNameVi;
 
   // Banner info khớp
   const cls = _diffClass(avgDiff);
   const clsLabel = cls === 'good' ? '✅ Tốt' : cls === 'medium' ? '⚠️ Cần cải thiện' : '❌ Lệch nhiều';
   document.getElementById('jfm-joint-info').innerHTML =
     '<div class="jfm-joint-name">🦴 ' + jointNameVi + '</div>' +
-    '<div class="jfm-joint-score-chip ' + cls + '">' + clsLabel + ' — ' + avgDiff.toFixed(1) + '° sai lệch</div>' +
+    '<div class="jfm-joint-score-chip ' + cls + '">' + clsLabel + ' — ' + avgDiff.toFixed(1) + '° sai lệch TB</div>' +
     '<div class="jfm-joint-desc">Điểm tương đồng: ' + Math.round(score) + '%</div>';
 
   modal.style.display = 'flex';
@@ -2193,30 +2205,62 @@ async function openJointFrameModal(jointKey, score, avgDiff, allScores) {
   // Hiện loading
   loading.style.display = 'flex';
 
-  // Tìm frame tốt nhất từ studentPoseData (frame có sai lệch lớn nhất tại joint này)
   const studentFrames = state.studentPoseData?.frames || [];
-  const standardFrames = state.standardPoseData?.frames || [];
 
   let bestStudentFrame = null;
   let bestStudentFrameIdx = 0;
-  let bestStudentTime = 0;
+  let bestStudentTime = targetTime;
 
-  // Tìm frame sinh viên có góc khớp được ghi nhận (nếu có frames data)
-  if (studentFrames.length > 0) {
-    // Lấy frame ở giữa video nếu không có thông tin sai lệch cụ thể
+  // Tìm frame sinh viên gần nhất với targetTime
+  if (targetTime !== null && studentFrames.length > 0) {
+    let minDiff = Infinity;
+    for (let i = 0; i < studentFrames.length; i++) {
+      const t = studentFrames[i]?.timestamp ?? studentFrames[i]?.time ?? (i / 30);
+      const diff = Math.abs(t - targetTime);
+      if (diff < minDiff) {
+        minDiff = diff;
+        bestStudentFrameIdx = i;
+        bestStudentFrame = studentFrames[i];
+      }
+    }
+    bestStudentTime = bestStudentFrame?.timestamp ?? bestStudentFrame?.time ?? (bestStudentFrameIdx / 30);
+  } else if (studentFrames.length > 0) {
+    // Fallback: Lấy frame ở giữa video nếu không có targetTime
     bestStudentFrameIdx = Math.floor(studentFrames.length * 0.4);
     bestStudentFrame = studentFrames[bestStudentFrameIdx];
     bestStudentTime = bestStudentFrame?.timestamp ?? bestStudentFrame?.time ?? (bestStudentFrameIdx / 30);
   }
 
-  // Lấy frame tương ứng từ standardData
+  // Tìm frame chuẩn gần nhất với targetTime
+  const standardFrames = state.standardPoseData?.frames || [];
   let bestStandardFrame = null;
   let bestStandardTime = 0;
+
   if (standardFrames.length > 0) {
-    const stdIdx = bestStudentFrameIdx < standardFrames.length ? bestStudentFrameIdx : Math.floor(standardFrames.length * 0.4);
-    bestStandardFrame = standardFrames[stdIdx];
-    bestStandardTime = bestStandardFrame?.timestamp ?? bestStandardFrame?.time ?? (stdIdx / 30);
+    if (targetTime !== null) {
+      let minDiff = Infinity;
+      for (let i = 0; i < standardFrames.length; i++) {
+        const t = standardFrames[i]?.timestamp ?? standardFrames[i]?.time ?? (i / 30);
+        const diff = Math.abs(t - targetTime);
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestStandardFrame = standardFrames[i];
+          bestStandardTime = t;
+        }
+      }
+    } else {
+      const stdIdx = bestStudentFrameIdx < standardFrames.length ? bestStudentFrameIdx : Math.floor(standardFrames.length * 0.4);
+      bestStandardFrame = standardFrames[stdIdx];
+      bestStandardTime = bestStandardFrame?.timestamp ?? bestStandardFrame?.time ?? (stdIdx / 30);
+    }
   }
+
+  // Hiển thị lại đầy đủ 2 cột và divider
+  const divider = document.querySelector('.jfm-vs-divider');
+  const stdPanel = document.querySelector('.jfm-frame-panel:last-child');
+  if (divider) divider.style.display = 'flex';
+  if (stdPanel) stdPanel.style.display = 'flex';
+  if (compareRow) compareRow.style.gridTemplateColumns = '';
 
   // Trích xuất frame từ video bài thi
   const vid = document.getElementById('main-video-player');

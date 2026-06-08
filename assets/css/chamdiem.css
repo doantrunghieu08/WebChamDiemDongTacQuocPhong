@@ -2392,26 +2392,6 @@ body {
 .jfm-no-video-text { font-size: 15px; font-weight: 600; color: var(--txt2); }
 .jfm-no-video-sub { font-size: 13px; color: var(--txt3); }
 
-/* Make joint cards clickable */
-.cpose-joint-card {
-  cursor: pointer;
-}
-.cpose-joint-card:hover {
-  border-color: #0ea5e9;
-  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.2);
-  transform: translateY(-2px);
-}
-.cpose-joint-card-click-hint {
-  font-size: 10px;
-  color: #0ea5e9;
-  font-weight: 600;
-  opacity: 0;
-  transition: opacity 0.2s;
-  text-align: center;
-}
-.cpose-joint-card:hover .cpose-joint-card-click-hint {
-  opacity: 1;
-}
 
 /* Skeleton overlay */
 .jfm-skeleton-canvas {
