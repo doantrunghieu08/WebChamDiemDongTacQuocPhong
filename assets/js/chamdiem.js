@@ -1937,7 +1937,49 @@ function _diffLabel(deg) {
   return '❌ Lệch nhiều';
 }
 
+
+function resetComparePoseResult() {
+  _setCposeState('empty');
+  const desc = document.querySelector('.cpose-empty-desc');
+  if (state.studentPoseData && state.standardPoseData) {
+    if (desc) desc.textContent = 'Dữ liệu tư thế của học sinh và dữ liệu chuẩn đã sẵn sàng. Nhấn bên dưới để bắt đầu so sánh.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 Bắt Đầu So Sánh Ngay';
+  } else if (state.studentPoseData) {
+    if (desc) desc.textContent = 'Dữ liệu tư thế học sinh đã sẵn sàng. Nhấn bên dưới để so sánh với chuẩn.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 So Sánh Tư Thế Ngay';
+  } else {
+    if (desc) desc.textContent = 'Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.';
+    const runBtn = document.getElementById('btnRunComparePose');
+    if (runBtn) runBtn.textContent = '🔍 Trích Xuất & So Sánh Ngay';
+  }
+}
+
+// ---- JOINT FRAME MODAL ----
+// Ánh xạ tên khớp → gợi ý khắc phục
+const JOINT_TIPS = {
+  left_shoulder:  'Giữ vai trái ngang bằng với vai phải, không nhô lên hoặc co lại. Tập các bài giãn cơ vai trước khi luyện tập.',
+  right_shoulder: 'Giữ vai phải thẳng và cân bằng với vai trái. Chú ý không nghiêng người sang phải khi thực hiện động tác.',
+  left_elbow:     'Giữ khuỷu tay trái đúng góc theo quy định. Luyện tập trước gương để kiểm tra biên độ tay.',
+  right_elbow:    'Giữ khuỷu tay phải đúng góc theo quy định. Đảm bảo tay vung đúng nhịp với bước chân.',
+  left_hip:       'Giữ hông trái cân bằng, không xoay hoặc nghiêng. Phần thân dưới cần ổn định khi di chuyển.',
+  right_hip:      'Giữ hông phải thẳng và song song với hông trái. Chú ý không vặn hông khi bước.',
+  left_knee:      'Đầu gối trái cần nâng đúng độ cao quy định. Không co hoặc duỗi quá mức khi bước.',
+  right_knee:     'Đầu gối phải cần nâng đúng độ cao quy định. Giữ nhịp đều giữa hai chân.',
+};
+
+// Lưu dữ liệu scores để dùng trong modal frame
+let _lastCompareScores = null;
+let _lastEvaluation = null;
+
+
+
 function _renderComparePoseResult(data) {
+  // Lưu lại để dùng trong joint frame modal
+  _lastCompareScores = data?.scores || null;
+  _lastEvaluation = data?.evaluation || null;
+
   _setCposeState('result');
 
   const scores = data?.scores || {};
@@ -1976,7 +2018,7 @@ function _renderComparePoseResult(data) {
   document.getElementById('cpose-avg-diff').textContent = avgDiff.toFixed(1) + '°';
   document.getElementById('cpose-max-diff').textContent = maxDiff.toFixed(1) + '°';
 
-  // ---- Khớp cards ----
+  // ---- Khớp cards (có thể click) ----
   const grid = document.getElementById('cpose-joints-grid');
   grid.innerHTML = '';
   JOINTS.forEach(joint => {
@@ -1986,11 +2028,16 @@ function _renderComparePoseResult(data) {
     const barPct = s; // score từ 0-100 chính là %
     const card = document.createElement('div');
     card.className = 'cpose-joint-card';
+    card.title = `Nhấn để xem so sánh frame tại khớp ${JOINT_NAMES_VI[joint] || joint}`;
     card.innerHTML =
       '<div class="cpose-joint-name">' + (JOINT_NAMES_VI[joint] || joint) + '</div>' +
       '<div class="cpose-joint-diff ' + cls + '">' + avg.toFixed(1) + '°</div>' +
       '<div class="cpose-joint-bar-wrap"><div class="cpose-joint-bar ' + cls + '" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
-      '<div class="cpose-joint-label">Độ lệch TB</div>';
+      '<div class="cpose-joint-label">Độ lệch TB</div>' +
+      '<div class="cpose-joint-card-click-hint">👆 Xem frame so sánh</div>';
+
+    // Click → mở modal frame so sánh
+    card.addEventListener('click', () => openJointFrameModal(joint, s, avg, scores));
     grid.appendChild(card);
   });
 
@@ -2113,23 +2160,410 @@ function _renderComparePoseResult(data) {
   }
 }
 
-function resetComparePoseResult() {
-  _setCposeState('empty');
-  const desc = document.querySelector('.cpose-empty-desc');
-  if (state.studentPoseData && state.standardPoseData) {
-    if (desc) desc.textContent = 'Dữ liệu tư thế của học sinh và dữ liệu chuẩn đã sẵn sàng. Nhấn bên dưới để bắt đầu so sánh.';
-    const runBtn = document.getElementById('btnRunComparePose');
-    if (runBtn) runBtn.textContent = '🔍 Bắt Đầu So Sánh Ngay';
-  } else if (state.studentPoseData) {
-    if (desc) desc.textContent = 'Dữ liệu tư thế học sinh đã sẵn sàng. Nhấn bên dưới để so sánh với chuẩn.';
-    const runBtn = document.getElementById('btnRunComparePose');
-    if (runBtn) runBtn.textContent = '🔍 So Sánh Tư Thế Ngay';
+// ---- OPEN JOINT FRAME MODAL ----
+async function openJointFrameModal(jointKey, score, avgDiff, allScores) {
+  const modal = document.getElementById('joint-frame-modal');
+  const loading = document.getElementById('jfm-loading');
+  const compareRow = document.getElementById('jfm-compare-row');
+  const noVideo = document.getElementById('jfm-no-video');
+  const diffDetail = document.getElementById('jfm-diff-detail');
+  const suggestion = document.getElementById('jfm-suggestion');
+
+  // Reset state
+  loading.style.display = 'none';
+  compareRow.style.display = 'none';
+  noVideo.style.display = 'none';
+  diffDetail.style.display = 'none';
+  suggestion.style.display = 'none';
+
+  // Tiêu đề modal
+  const jointNameVi = JOINT_NAMES_VI[jointKey] || jointKey;
+  document.getElementById('joint-frame-modal-title').textContent = '🦴 So Sánh Frame – ' + jointNameVi;
+
+  // Banner info khớp
+  const cls = _diffClass(avgDiff);
+  const clsLabel = cls === 'good' ? '✅ Tốt' : cls === 'medium' ? '⚠️ Cần cải thiện' : '❌ Lệch nhiều';
+  document.getElementById('jfm-joint-info').innerHTML =
+    '<div class="jfm-joint-name">🦴 ' + jointNameVi + '</div>' +
+    '<div class="jfm-joint-score-chip ' + cls + '">' + clsLabel + ' — ' + avgDiff.toFixed(1) + '° sai lệch</div>' +
+    '<div class="jfm-joint-desc">Điểm tương đồng: ' + Math.round(score) + '%</div>';
+
+  modal.style.display = 'flex';
+
+  // Hiện loading
+  loading.style.display = 'flex';
+
+  // Tìm frame tốt nhất từ studentPoseData (frame có sai lệch lớn nhất tại joint này)
+  const studentFrames = state.studentPoseData?.frames || [];
+  const standardFrames = state.standardPoseData?.frames || [];
+
+  let bestStudentFrame = null;
+  let bestStudentFrameIdx = 0;
+  let bestStudentTime = 0;
+
+  // Tìm frame sinh viên có góc khớp được ghi nhận (nếu có frames data)
+  if (studentFrames.length > 0) {
+    // Lấy frame ở giữa video nếu không có thông tin sai lệch cụ thể
+    bestStudentFrameIdx = Math.floor(studentFrames.length * 0.4);
+    bestStudentFrame = studentFrames[bestStudentFrameIdx];
+    bestStudentTime = bestStudentFrame?.timestamp ?? bestStudentFrame?.time ?? (bestStudentFrameIdx / 30);
+  }
+
+  // Lấy frame tương ứng từ standardData
+  let bestStandardFrame = null;
+  let bestStandardTime = 0;
+  if (standardFrames.length > 0) {
+    const stdIdx = bestStudentFrameIdx < standardFrames.length ? bestStudentFrameIdx : Math.floor(standardFrames.length * 0.4);
+    bestStandardFrame = standardFrames[stdIdx];
+    bestStandardTime = bestStandardFrame?.timestamp ?? bestStandardFrame?.time ?? (stdIdx / 30);
+  }
+
+  // Trích xuất frame từ video bài thi
+  const vid = document.getElementById('main-video-player');
+  const hasVideo = vid && vid.src && vid.readyState >= 1;
+
+  loading.style.display = 'none';
+
+  if (!hasVideo && studentFrames.length === 0) {
+    noVideo.style.display = 'flex';
+    _renderJointDiffDetail(allScores, jointKey);
+    _renderJointSuggestion(jointKey, avgDiff);
+    return;
+  }
+
+  compareRow.style.display = 'grid';
+
+  // Vẽ canvas sinh viên
+  const studentCanvas = document.getElementById('jfm-student-canvas');
+  const studentTimeBadge = document.getElementById('jfm-student-time-badge');
+  const studentDesc = document.getElementById('jfm-student-desc');
+
+  if (hasVideo) {
+    await _drawVideoFrameToCanvas(vid, studentCanvas, bestStudentTime || state.currentTime, jointKey, bestStudentFrame, '#ef4444');
+    studentTimeBadge.textContent = '⏱ t=' + formatTime(Math.round(bestStudentTime || state.currentTime));
+    studentDesc.textContent = state.currentStudent?.name ? '📹 ' + state.currentStudent.name : '📹 Bài thi sinh viên';
   } else {
-    if (desc) desc.textContent = 'Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.';
-    const runBtn = document.getElementById('btnRunComparePose');
-    if (runBtn) runBtn.textContent = '🔍 Trích Xuất & So Sánh Ngay';
+    // Vẽ skeleton từ data frame
+    _drawSkeletonFrameToCanvas(studentCanvas, bestStudentFrame, '#ef4444', jointKey);
+    studentTimeBadge.textContent = '⏱ t=' + formatTime(Math.round(bestStudentTime));
+    studentDesc.textContent = '📹 Bài thi sinh viên (skeleton)';
+  }
+
+  // Vẽ canvas chuẩn
+  const standardCanvas = document.getElementById('jfm-standard-canvas');
+  const standardTimeBadge = document.getElementById('jfm-standard-time-badge');
+  const standardDesc = document.getElementById('jfm-standard-desc');
+
+  if (bestStandardFrame) {
+    _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
+    standardTimeBadge.textContent = '⏱ t=' + formatTime(Math.round(bestStandardTime));
+    standardDesc.textContent = '✅ Frame chuẩn (tham chiếu)';
+  } else if (standardFrames.length === 0) {
+    // Không có standard frame data – hiển thị thông báo
+    _drawPlaceholderCanvas(standardCanvas, '✅ Chưa có dữ liệu\nframe chuẩn', '#16a34a');
+    standardTimeBadge.textContent = '';
+    standardDesc.textContent = '✅ Frame chuẩn (chưa có dữ liệu chi tiết)';
+  }
+
+  // Hiển thị diff detail và suggestion
+  _renderJointDiffDetail(allScores, jointKey);
+  _renderJointSuggestion(jointKey, avgDiff);
+}
+
+function closeJointFrameModal(e) {
+  if (e && e.target !== document.getElementById('joint-frame-modal')) return;
+  document.getElementById('joint-frame-modal').style.display = 'none';
+}
+
+// Vẽ frame từ video element vào canvas + overlay skeleton
+async function _drawVideoFrameToCanvas(vid, canvas, seekTime, highlightJoint, frameData, skeletonColor) {
+  return new Promise(resolve => {
+    const W = 480, H = 270;
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Tua video đến thời điểm cần xem
+    const prevTime = vid.currentTime;
+    const wasPaused = vid.paused;
+
+    function draw() {
+      try {
+        ctx.drawImage(vid, 0, 0, W, H);
+      } catch (e) {
+        // CORS hoặc không vẽ được → vẽ nền tối
+        ctx.fillStyle = '#0a0f1e';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.font = 'bold 14px Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('📹 Frame bài thi', W / 2, H / 2 - 10);
+        ctx.font = '12px Segoe UI, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillText('(Không thể hiển thị do CORS)', W / 2, H / 2 + 14);
+      }
+
+      // Vẽ skeleton overlay nếu có data
+      if (frameData) {
+        _drawSkeletonOverlay(ctx, frameData, W, H, skeletonColor, highlightJoint);
+      } else {
+        // Vẽ chỉ highlight khung cho khớp nếu không có frameData
+        ctx.strokeStyle = skeletonColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(10, 10, W - 20, H - 20);
+        ctx.setLineDash([]);
+      }
+
+      // Khôi phục video về trạng thái cũ
+      if (!wasPaused) {
+        // không tua lại nếu đang phát
+      } else {
+        vid.currentTime = prevTime;
+      }
+      resolve();
+    }
+
+    if (Math.abs(vid.currentTime - seekTime) < 0.5) {
+      // Không cần tua
+      draw();
+    } else {
+      vid.pause();
+      vid.currentTime = Math.max(0, seekTime);
+      const onSeeked = () => {
+        vid.removeEventListener('seeked', onSeeked);
+        draw();
+      };
+      vid.addEventListener('seeked', onSeeked);
+      // Timeout dự phòng sau 2s
+      setTimeout(() => {
+        vid.removeEventListener('seeked', onSeeked);
+        draw();
+      }, 2000);
+    }
+  });
+}
+
+// Vẽ skeleton từ frame data lên canvas (không cần video)
+function _drawSkeletonFrameToCanvas(canvas, frameData, color, highlightJoint) {
+  const W = 480, H = 270;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Nền tối
+  ctx.fillStyle = 'linear-gradient(135deg, #0a0f1e, #0c1a2e)';
+  ctx.fillStyle = '#0a1020';
+  ctx.fillRect(0, 0, W, H);
+
+  // Lưới nền nhẹ
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  if (frameData) {
+    _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint);
+  } else {
+    // Placeholder text
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 13px Segoe UI, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🦴 Skeleton', W / 2, H / 2 - 8);
+    ctx.font = '11px Segoe UI, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillText('(Chưa có dữ liệu frame)', W / 2, H / 2 + 14);
   }
 }
+
+// Vẽ canvas placeholder
+function _drawPlaceholderCanvas(canvas, text, color) {
+  const W = 480, H = 270;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a1020';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = color || '#16a34a';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.strokeRect(8, 8, W - 16, H - 16);
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = 'bold 14px Segoe UI, sans-serif';
+  ctx.textAlign = 'center';
+  const lines = text.split('\n');
+  lines.forEach((line, i) => {
+    ctx.fillText(line, W / 2, H / 2 - (lines.length - 1) * 10 + i * 22);
+  });
+}
+
+// Ánh xạ tên khớp → keypoint index (theo chuẩn MediaPipe/MoveNet pose 17 keypoints)
+const JOINT_KP_IDX = {
+  left_shoulder:  5,
+  right_shoulder: 6,
+  left_elbow:     7,
+  right_elbow:    8,
+  left_hip:       11,
+  right_hip:      12,
+  left_knee:      13,
+  right_knee:     14,
+};
+
+// Các cạnh skeleton để vẽ
+const POSE_CONNECTIONS = [
+  [5,6],[5,7],[7,9],[6,8],[8,10],    // arms
+  [5,11],[6,12],[11,12],              // torso
+  [11,13],[13,15],[12,14],[14,16],   // legs
+  [0,1],[0,2],[1,3],[2,4],           // face
+];
+
+// Vẽ skeleton overlay lên ctx từ frameData
+function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
+  if (!frameData) return;
+
+  // Hỗ trợ các format keypoints: array of [y,x,score] hoặc [{x,y,score,name}]
+  let kps = frameData.keypoints || frameData.joints || null;
+  if (!kps) return;
+
+  // Normalize keypoints thành [{x, y, score}] trong [0,1]
+  const normalized = [];
+  if (Array.isArray(kps)) {
+    if (Array.isArray(kps[0])) {
+      // [[y, x, score], ...] format (MoveNet)
+      kps.forEach(kp => {
+        normalized.push({ y: kp[0], x: kp[1], score: kp[2] ?? 1 });
+      });
+    } else {
+      // [{x, y, score/confidence, name}, ...] format
+      kps.forEach(kp => {
+        normalized.push({ x: kp.x ?? kp.px ?? 0, y: kp.y ?? kp.py ?? 0, score: kp.score ?? kp.confidence ?? 1 });
+      });
+    }
+  }
+
+  if (normalized.length === 0) return;
+
+  // Xác định bounding box để scale
+  const xs = normalized.filter(k => k.score > 0.1).map(k => k.x);
+  const ys = normalized.filter(k => k.score > 0.1).map(k => k.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const rangeX = maxX - minX || 1;
+  const rangeY = maxY - minY || 1;
+
+  const margin = 40;
+  function toCanvas(kp) {
+    // Nếu tọa độ đã trong [0,1]
+    let px, py;
+    if (maxX <= 1.01 && maxY <= 1.01 && minX >= -0.01 && minY >= -0.01) {
+      px = margin + kp.x * (W - margin * 2);
+      py = margin + kp.y * (H - margin * 2);
+    } else {
+      // Tọa độ pixel → normalize
+      px = margin + ((kp.x - minX) / rangeX) * (W - margin * 2);
+      py = margin + ((kp.y - minY) / rangeY) * (H - margin * 2);
+    }
+    return [px, py];
+  }
+
+  // Vẽ connections
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.7;
+  POSE_CONNECTIONS.forEach(([a, b]) => {
+    const kpA = normalized[a], kpB = normalized[b];
+    if (!kpA || !kpB || kpA.score < 0.2 || kpB.score < 0.2) return;
+    const [ax, ay] = toCanvas(kpA);
+    const [bx, by] = toCanvas(kpB);
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+  });
+
+  // Vẽ keypoints
+  const highlightIdx = JOINT_KP_IDX[highlightJoint] ?? -1;
+  normalized.forEach((kp, idx) => {
+    if (kp.score < 0.2) return;
+    const [px, py] = toCanvas(kp);
+    const isHighlight = idx === highlightIdx;
+    const r = isHighlight ? 7 : 4;
+    ctx.globalAlpha = isHighlight ? 1 : 0.8;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = isHighlight ? '#fff' : color;
+    ctx.fill();
+    if (isHighlight) {
+      // Vòng ngoài nhấn mạnh
+      ctx.beginPath();
+      ctx.arc(px, py, r + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+    }
+  });
+  ctx.globalAlpha = 1;
+}
+
+// Hiển thị sai lệch từng khớp trong modal
+function _renderJointDiffDetail(allScores, highlightJoint) {
+  if (!allScores) return;
+  const diffDetail = document.getElementById('jfm-diff-detail');
+  const diffList = document.getElementById('jfm-diff-list');
+  diffList.innerHTML = '';
+
+  const JOINTS = Object.keys(JOINT_NAMES_VI);
+  JOINTS.forEach(joint => {
+    const s = allScores[joint] ?? 100;
+    const diff = 45 * (1 - s / 100);
+    const cls = _diffClass(diff);
+    const isHighlight = joint === highlightJoint;
+    const barPct = Math.min(100, (diff / 45) * 100);
+
+    const item = document.createElement('div');
+    item.className = 'jfm-diff-item';
+    item.style.fontWeight = isHighlight ? '700' : '';
+    item.style.opacity = isHighlight ? '1' : '0.75';
+    item.innerHTML =
+      '<div class="jfm-diff-joint-name">' + (JOINT_NAMES_VI[joint] || joint) + (isHighlight ? ' ◀' : '') + '</div>' +
+      '<div class="jfm-diff-bar-wrap"><div class="jfm-diff-bar ' + cls + '" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
+      '<div class="jfm-diff-value ' + cls + '">' + diff.toFixed(1) + '°</div>';
+    diffList.appendChild(item);
+  });
+
+  diffDetail.style.display = 'block';
+}
+
+// Hiển thị gợi ý khắc phục
+function _renderJointSuggestion(jointKey, avgDiff) {
+  const suggestion = document.getElementById('jfm-suggestion');
+  const suggestionText = document.getElementById('jfm-suggestion-text');
+  
+  // Lấy gợi ý từ evaluation nếu có
+  let tipText = JOINT_TIPS[jointKey] || 'Luyện tập thêm để cải thiện khớp này.';
+  
+  if (_lastEvaluation?.suggestions?.length > 0) {
+    const evalSuggestion = _lastEvaluation.suggestions.find(s => 
+      s.joint && s.joint.toLowerCase().includes(JOINT_NAMES_VI[jointKey]?.toLowerCase().split(' ')[0] || '')
+    );
+    if (evalSuggestion) {
+      tipText = evalSuggestion.issue + '\n→ Khắc phục: ' + evalSuggestion.fix;
+    }
+  }
+
+  const cls = _diffClass(avgDiff);
+  if (cls === 'good') {
+    suggestion.style.display = 'none';
+    return;
+  }
+
+  suggestionText.innerHTML = tipText.replace('\n→', '<br/><strong>→</strong>');
+  suggestion.style.display = 'flex';
+}
+
+
 
 // ---- TOAST ----
 let toastTimer = null;

@@ -411,9 +411,86 @@
     </div>
   </div>
 
+  <!-- Modal So Sánh Frame Khớp (Joint Frame Compare) -->
+  <div class="modal-backdrop" id="joint-frame-modal" style="display:none" onclick="closeJointFrameModal(event)">
+    <div class="modal joint-frame-modal">
+      <div class="modal-header">
+        <span id="joint-frame-modal-title">🦴 So Sánh Frame – Khớp</span>
+        <button class="modal-close" onclick="document.getElementById('joint-frame-modal').style.display='none'">&#10005;</button>
+      </div>
+      <div class="modal-body joint-frame-modal-body" id="joint-frame-modal-body">
+
+        <!-- Thông tin khớp -->
+        <div class="jfm-joint-info" id="jfm-joint-info"></div>
+
+        <!-- Loading state -->
+        <div class="jfm-loading" id="jfm-loading" style="display:none">
+          <div class="jfm-spinner"></div>
+          <div class="jfm-loading-text">Đang trích xuất frame từ video...</div>
+        </div>
+
+        <!-- So sánh 2 frame side by side -->
+        <div class="jfm-compare-row" id="jfm-compare-row" style="display:none">
+          <!-- Frame sinh viên -->
+          <div class="jfm-frame-panel">
+            <div class="jfm-frame-label jfm-label-student">
+              <span class="jfm-label-dot student"></span>
+              Video Bài Thi Sinh Viên
+            </div>
+            <div class="jfm-canvas-wrap">
+              <canvas id="jfm-student-canvas" class="jfm-canvas"></canvas>
+              <div class="jfm-time-badge" id="jfm-student-time-badge"></div>
+            </div>
+            <div class="jfm-frame-desc" id="jfm-student-desc"></div>
+          </div>
+
+          <!-- Divider -->
+          <div class="jfm-vs-divider">
+            <div class="jfm-vs-line"></div>
+            <div class="jfm-vs-text">VS</div>
+            <div class="jfm-vs-line"></div>
+          </div>
+
+          <!-- Frame chuẩn -->
+          <div class="jfm-frame-panel">
+            <div class="jfm-frame-label jfm-label-standard">
+              <span class="jfm-label-dot standard"></span>
+              Frame Chuẩn
+            </div>
+            <div class="jfm-canvas-wrap">
+              <canvas id="jfm-standard-canvas" class="jfm-canvas"></canvas>
+              <div class="jfm-time-badge jfm-time-badge-standard" id="jfm-standard-time-badge"></div>
+            </div>
+            <div class="jfm-frame-desc" id="jfm-standard-desc"></div>
+          </div>
+        </div>
+
+        <!-- Sai lệch chi tiết tại frame -->
+        <div class="jfm-diff-detail" id="jfm-diff-detail" style="display:none">
+          <div class="jfm-diff-title">📐 Sai Lệch Góc Tại Frame Này</div>
+          <div class="jfm-diff-list" id="jfm-diff-list"></div>
+        </div>
+
+        <!-- Gợi ý khắc phục -->
+        <div class="jfm-suggestion" id="jfm-suggestion" style="display:none">
+          <div class="jfm-suggestion-icon">💡</div>
+          <div class="jfm-suggestion-text" id="jfm-suggestion-text"></div>
+        </div>
+
+        <!-- Trạng thái: không có video -->
+        <div class="jfm-no-video" id="jfm-no-video" style="display:none">
+          <div class="jfm-no-video-icon">📹</div>
+          <div class="jfm-no-video-text">Không thể trích xuất frame: video chưa được tải hoặc không khả dụng.</div>
+          <div class="jfm-no-video-sub">Hãy đảm bảo video bài thi đã được tải lên và đang phát.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/assets/js/api/config.js?v=20260515"></script>
   <script src="/assets/js/api/exams.js?v=20260515b"></script>
-  <script src="/assets/js/chamdiem.js?v=20260522b"></script>
+  <script src="/assets/js/chamdiem.js?v=20260608c"></script>
 </body>
 </html>
