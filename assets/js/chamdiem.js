@@ -2466,8 +2466,9 @@ const POSE_CONNECTIONS = [
 function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
   if (!frameData) return;
 
-  // Hỗ trợ các format keypoints: array of [y,x,score] hoặc [{x,y,score,name}]
-  let kps = frameData.keypoints || frameData.joints || null;
+  // Hỗ trợ các format keypoints: array of [y,x,score], [{x,y,score}], landmarks
+  let kps = frameData.keypoints || frameData.joints || frameData.landmarks || frameData.pose || null;
+  if (!kps && Array.isArray(frameData)) kps = frameData;
   if (!kps) return;
 
   // Normalize keypoints thành [{x, y, score}] trong [0,1]
@@ -2479,9 +2480,13 @@ function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
         normalized.push({ y: kp[0], x: kp[1], score: kp[2] ?? 1 });
       });
     } else {
-      // [{x, y, score/confidence, name}, ...] format
+      // [{x, y, score/confidence/visibility, name}, ...] format
       kps.forEach(kp => {
-        normalized.push({ x: kp.x ?? kp.px ?? 0, y: kp.y ?? kp.py ?? 0, score: kp.score ?? kp.confidence ?? 1 });
+        normalized.push({ 
+          x: kp.x ?? kp.px ?? 0, 
+          y: kp.y ?? kp.py ?? 0, 
+          score: kp.score ?? kp.confidence ?? kp.visibility ?? 1 
+        });
       });
     }
   }
