@@ -2298,8 +2298,52 @@ async function openJointFrameModal(jointKey, score, avgDiff, allScores, targetTi
   const standardTimeBadge = document.getElementById('jfm-standard-time-badge');
   const standardDesc = document.getElementById('jfm-standard-desc');
 
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
+  const standardVideoUrl = gradingExam.sampleVideoUrl || (gradingExam.videos && gradingExam.videos[0]?.url) || null;
+
   if (bestStandardFrame) {
-    _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
+    if (standardVideoUrl) {
+      let stdVid = document.getElementById('standard-video-player');
+      if (!stdVid) {
+        stdVid = document.createElement('video');
+        stdVid.id = 'standard-video-player';
+        stdVid.crossOrigin = 'anonymous';
+        stdVid.style.display = 'none';
+        document.body.appendChild(stdVid);
+      }
+      
+      const drawStdVideo = async () => {
+         await _drawVideoFrameToCanvas(stdVid, standardCanvas, bestStandardTime, jointKey, bestStandardFrame, '#16a34a');
+      };
+
+      if (stdVid.src !== standardVideoUrl) {
+        stdVid.src = standardVideoUrl;
+        stdVid.load();
+      }
+
+      if (stdVid.readyState >= 1) {
+        await drawStdVideo();
+      } else {
+        // Show loading state briefly
+        _drawPlaceholderCanvas(standardCanvas, 'Đang tải video mẫu...', '#16a34a');
+        await new Promise(resolve => {
+          const onLoaded = async () => {
+             stdVid.removeEventListener('loadedmetadata', onLoaded);
+             await drawStdVideo();
+             resolve();
+          };
+          stdVid.addEventListener('loadedmetadata', onLoaded);
+          setTimeout(() => {
+             stdVid.removeEventListener('loadedmetadata', onLoaded);
+             _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
+             resolve();
+          }, 4000);
+        });
+      }
+    } else {
+      _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
+    }
+    
     standardTimeBadge.textContent = '⏱ t=' + formatTime(Math.round(bestStandardTime));
     standardDesc.textContent = '✅ Frame chuẩn (tham chiếu)';
   } else if (standardFrames.length === 0) {
@@ -2551,7 +2595,37 @@ function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
 
   // Bỏ qua nếu không có keypoints hợp lệ
   const validKps = normalized.filter(k => k.score > 0.1);
-  if (validKps.length === 0) return;
+  if (validKps.length === 0) {
+      // DEBUG: In ra cấu trúc của frameData lên canvas để kiểm tra
+      if (ctx) {
+          ctx.fillStyle = 'rgba(0,0,0,0.7)';
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = 'yellow';
+          ctx.font = '12px monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText("Lỗi: Không tìm thấy keypoints trong frameData", 10, 20);
+          
+          let debugText = "frameData is " + typeof frameData;
+          if (typeof frameData === 'object' && frameData !== null) {
+              const keys = Object.keys(frameData);
+              debugText += " | keys: " + keys.slice(0, 8).join(', ');
+              ctx.fillText(debugText, 10, 40);
+              
+              // In thêm một số value mẫu
+              let yPos = 60;
+              for (let i = 0; i < Math.min(keys.length, 5); i++) {
+                  let k = keys[i];
+                  let v = frameData[k];
+                  let vType = Array.isArray(v) ? `Array(${v.length})` : typeof v;
+                  ctx.fillText(`- ${k}: ${vType}`, 10, yPos);
+                  yPos += 15;
+              }
+          } else {
+              ctx.fillText(debugText, 10, 40);
+          }
+      }
+      return;
+  }
 
   // Xác định bounding box để scale
   const xs = validKps.map(k => k.x);
