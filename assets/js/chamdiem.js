@@ -2359,12 +2359,18 @@ async function _drawVideoFrameToCanvas(vid, canvas, seekTime, highlightJoint, fr
         ctx.setLineDash([]);
       }
 
-      // Khôi phục video về trạng thái cũ
+      // Không tua lại prevTime để video "nằm ở frame đó" giúp người dùng xem chi tiết
       if (!wasPaused) {
-        // không tua lại nếu đang phát
-      } else {
-        vid.currentTime = prevTime;
+        vid.play().catch(()=>{});
       }
+      
+      // Đồng bộ state để UI (thanh progress, thời gian) cập nhật đúng với frame hiện tại
+      if (typeof window.state !== 'undefined') {
+          window.state.currentTime = seekTime;
+          if (typeof updateTimeDisplay === 'function') updateTimeDisplay();
+          if (typeof updateProgressBar === 'function') updateProgressBar();
+      }
+      
       resolve();
     }
 
@@ -2466,36 +2472,90 @@ const POSE_CONNECTIONS = [
 function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
   if (!frameData) return;
 
-  // Hỗ trợ các format keypoints: array of [y,x,score], [{x,y,score}], landmarks
-  let kps = frameData.keypoints || frameData.joints || frameData.landmarks || frameData.pose || null;
+  // Tìm kps (keypoints) từ các thuộc tính phổ biến
+  let kps = frameData.keypoints || frameData.joints || frameData.landmarks || frameData.pose || frameData.poseLandmarks || null;
   if (!kps && Array.isArray(frameData)) kps = frameData;
-  if (!kps) return;
+  if (!kps && typeof frameData === 'object') {
+     // Thử tìm bất kỳ mảng nào có vẻ là tọa độ (ít nhất 10 phần tử)
+     for (const k in frameData) {
+         if (Array.isArray(frameData[k]) && frameData[k].length >= 10) {
+             kps = frameData[k];
+             break;
+         }
+     }
+  }
+  
+  if (!kps) {
+      // Có thể frameData chính là một object dictionary chứa tọa độ (VD: {"left_shoulder": {x, y}, ...})
+      kps = frameData;
+  }
 
-  // Normalize keypoints thành [{x, y, score}] trong [0,1]
+  // Normalize keypoints thành [{x, y, score}] để phù hợp với POSE_CONNECTIONS (chuẩn MoveNet 17 keypoints)
   const normalized = [];
+  
+  // Khởi tạo mảng trống 33 phần tử để đảm bảo index đúng nếu dùng object dictionary
+  for (let i = 0; i < 33; i++) {
+      normalized.push({ x: 0, y: 0, score: 0 });
+  }
+
   if (Array.isArray(kps)) {
-    if (Array.isArray(kps[0])) {
-      // [[y, x, score], ...] format (MoveNet)
-      kps.forEach(kp => {
-        normalized.push({ y: kp[0], x: kp[1], score: kp[2] ?? 1 });
+    if (kps.length > 0 && Array.isArray(kps[0])) {
+      // Dạng [[y, x, score], ...] (MoveNet raw output)
+      kps.forEach((kp, i) => {
+        if (i < 33) normalized[i] = { y: kp[0], x: kp[1], score: kp[2] ?? 1 };
       });
     } else {
-      // [{x, y, score/confidence/visibility, name}, ...] format
-      kps.forEach(kp => {
-        normalized.push({ 
-          x: kp.x ?? kp.px ?? 0, 
-          y: kp.y ?? kp.py ?? 0, 
-          score: kp.score ?? kp.confidence ?? kp.visibility ?? 1 
-        });
+      // Dạng [{x, y, score}, ...]
+      kps.forEach((kp, i) => {
+        if (i < 33) {
+            normalized[i] = { 
+              x: kp.x ?? kp.px ?? 0, 
+              y: kp.y ?? kp.py ?? 0, 
+              score: kp.score ?? kp.confidence ?? kp.visibility ?? 1 
+            };
+        }
       });
+    }
+  } else if (typeof kps === 'object') {
+    // Dạng dictionary mapping tên khớp -> tọa độ
+    for (const [key, kp] of Object.entries(kps)) {
+        if (!kp || typeof kp !== 'object') continue;
+        
+        let idx = -1;
+        if (!isNaN(parseInt(key))) {
+            idx = parseInt(key);
+        } else if (JOINT_KP_IDX[key] !== undefined) {
+            idx = JOINT_KP_IDX[key];
+        } else {
+            // Fallback mapping cho MediaPipe / MoveNet names
+            const keymap = {
+                'nose': 0, 'left_eye_inner': 1, 'left_eye': 2, 'left_eye_outer': 3,
+                'right_eye_inner': 4, 'right_eye': 5, 'right_eye_outer': 6,
+                'left_ear': 7, 'right_ear': 8, 'mouth_left': 9, 'mouth_right': 10,
+                'left_shoulder': 5, 'right_shoulder': 6, 'left_elbow': 7, 'right_elbow': 8,
+                'left_wrist': 9, 'right_wrist': 10, 'left_hip': 11, 'right_hip': 12, 
+                'left_knee': 13, 'right_knee': 14, 'left_ankle': 15, 'right_ankle': 16
+            };
+            if (keymap[key] !== undefined) idx = keymap[key];
+        }
+        
+        if (idx >= 0 && idx < 33) {
+            normalized[idx] = {
+                x: kp.x ?? kp.px ?? 0,
+                y: kp.y ?? kp.py ?? 0,
+                score: kp.score ?? kp.confidence ?? kp.visibility ?? 1
+            };
+        }
     }
   }
 
-  if (normalized.length === 0) return;
+  // Bỏ qua nếu không có keypoints hợp lệ
+  const validKps = normalized.filter(k => k.score > 0.1);
+  if (validKps.length === 0) return;
 
   // Xác định bounding box để scale
-  const xs = normalized.filter(k => k.score > 0.1).map(k => k.x);
-  const ys = normalized.filter(k => k.score > 0.1).map(k => k.y);
+  const xs = validKps.map(k => k.x);
+  const ys = validKps.map(k => k.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
   const rangeX = maxX - minX || 1;
