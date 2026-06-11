@@ -306,11 +306,10 @@ const ExamsService = {
      * @returns {Promise<string>} JSON string của standardData
      */
     async extractTemplate(videoUrl) {
-        const response = await fetch('https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-template', {
+        const response = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-template', {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
+            'Content-Type': 'application/json'
           },
             body: JSON.stringify({ videoUrl }),
         });

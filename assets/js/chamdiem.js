@@ -1502,11 +1502,10 @@ async function doConfirmSubmission() {
     if (aiVideoUrl) {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       try {
-        const aiRes = await fetch('https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-student', {
+        const aiRes = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-student', {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ videoUrl: aiVideoUrl })
         });
@@ -1776,7 +1775,7 @@ function closeAIGradeModal(e) {
 }
 
 // ---- AI API ENDPOINTS ----
-const AI_BASE_URL = 'https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai';
+const AI_BASE_URL = 'http://103.75.182.246/runpod-ai';
 
 // ---- COMPARE POSE ----
 
@@ -1831,8 +1830,7 @@ async function runComparePose() {
       const res = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ videoUrl })
       });
@@ -1873,8 +1871,7 @@ async function runComparePose() {
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
@@ -1896,8 +1893,7 @@ async function runComparePose() {
     const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate-pairwise-vlm`, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(evalPayload)
     });

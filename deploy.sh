@@ -27,6 +27,16 @@ ssh ${VPS_USER}@${VPS_IP} "apt-get install -y nginx 2>/dev/null || yum install -
 echo "==> Copy Nginx config..."
 scp nginx.conf ${VPS_USER}@${VPS_IP}:${NGINX_CONF}
 
+echo "==> Tạo cấu hình ẩn cho Token..."
+if [ -f .env ]; then
+  source .env
+  echo "proxy_set_header Authorization \"Bearer ${RUNPOD_API_KEY}\";" > runpod_token.conf
+else
+  echo "proxy_set_header Authorization \"Bearer \";" > runpod_token.conf
+fi
+scp runpod_token.conf ${VPS_USER}@${VPS_IP}:/etc/nginx/runpod_token.conf
+rm runpod_token.conf
+
 echo "==> Kích hoạt site và reload Nginx..."
 ssh ${VPS_USER}@${VPS_IP} "
   ln -sf ${NGINX_CONF} /etc/nginx/sites-enabled/hactech 2>/dev/null || true
