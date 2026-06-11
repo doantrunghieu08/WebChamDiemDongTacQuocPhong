@@ -306,9 +306,12 @@ const ExamsService = {
      * @returns {Promise<string>} JSON string của standardData
      */
     async extractTemplate(videoUrl) {
-        const response = await fetch('https://stung-ceremony-charity.ngrok-free.dev/api/ai/extract-template', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        const response = await fetch('https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-template', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
+          },
             body: JSON.stringify({ videoUrl }),
         });
 

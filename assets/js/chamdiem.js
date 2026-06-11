@@ -1502,11 +1502,11 @@ async function doConfirmSubmission() {
     if (aiVideoUrl) {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       try {
-        const aiRes = await fetch('https://stung-ceremony-charity.ngrok-free.dev/api/ai/extract-student', {
+        const aiRes = await fetch('https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-student', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
+            'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
           },
           body: JSON.stringify({ videoUrl: aiVideoUrl })
         });
@@ -1775,8 +1775,10 @@ function closeAIGradeModal(e) {
   document.getElementById('ai-grade-modal').style.display = 'none';
 }
 
+// ---- AI API ENDPOINTS ----
+const AI_BASE_URL = 'https://we5fbzw0sf65u6.api.runpod.ai';
+
 // ---- COMPARE POSE ----
-const AI_BASE_URL = 'https://stung-ceremony-charity.ngrok-free.dev';
 
 function openComparePoseModal() {
   document.getElementById('compare-pose-modal').style.display = 'flex';
@@ -1830,7 +1832,7 @@ async function runComparePose() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
         },
         body: JSON.stringify({ videoUrl })
       });
@@ -1872,7 +1874,7 @@ async function runComparePose() {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
       },
       body: JSON.stringify(payload)
     });
@@ -1891,11 +1893,11 @@ async function runComparePose() {
       scores: json.scores
     };
 
-    const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate`, {
+    const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate-pairwise-vlm`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        'Authorization': window.RUNPOD_TOKEN ? 'Bearer ' + window.RUNPOD_TOKEN : ''
       },
       body: JSON.stringify(evalPayload)
     });
