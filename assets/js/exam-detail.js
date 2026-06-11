@@ -1321,7 +1321,7 @@ async function callSubmissionApi(status) {
     if (aiVideoUrl) {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       try {
-        const aiRes = await fetch('https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-student', {
+        const aiRes = await fetch('https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-student', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

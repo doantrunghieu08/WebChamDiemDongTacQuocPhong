@@ -1502,7 +1502,7 @@ async function doConfirmSubmission() {
     if (aiVideoUrl) {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       try {
-        const aiRes = await fetch('https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-student', {
+        const aiRes = await fetch('https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-student', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -1776,7 +1776,7 @@ function closeAIGradeModal(e) {
 }
 
 // ---- AI API ENDPOINTS ----
-const AI_BASE_URL = 'https://we5fbzw0sf65u6.api.runpod.ai';
+const AI_BASE_URL = 'https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai';
 
 // ---- COMPARE POSE ----
 

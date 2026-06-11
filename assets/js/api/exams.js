@@ -306,7 +306,7 @@ const ExamsService = {
      * @returns {Promise<string>} JSON string của standardData
      */
     async extractTemplate(videoUrl) {
-        const response = await fetch('https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-template', {
+        const response = await fetch('https://corsproxy.io/?https://we5fbzw0sf65u6.api.runpod.ai/api/ai/extract-template', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
