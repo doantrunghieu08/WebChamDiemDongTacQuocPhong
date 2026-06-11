@@ -728,7 +728,7 @@ function updateUploadAreaVisibility() {
   renderDeadlineNotice();
 
   if (uploadArea) {
-    uploadArea.style.display = (uploadedVideos.length >= 2 || isSubmitted || submissionClosed) ? 'none' : '';
+    uploadArea.style.display = (uploadedVideos.length >= 1 || isSubmitted || submissionClosed) ? 'none' : '';
   }
   if (submitArea) {
     if (isSubmitted || submissionClosed) {
@@ -859,17 +859,17 @@ function handleFiles(files) {
   }
 
   const maxSize = 500 * 1024 * 1024; // 500MB
-  const maxVideos = 2;
+  const maxVideos = 1;
   let remaining = maxVideos - uploadedVideos.length;
 
   if (remaining <= 0) {
-    showToast('Đã đạt giới hạn 2 video. Xóa video cũ để tải lên video mới.');
+    showToast('Đã đạt giới hạn 1 video. Xóa video cũ để tải lên video mới.');
     return;
   }
 
   files.forEach(file => {
     if (remaining <= 0) {
-      showToast('Chỉ được tải tối đa 2 video');
+      showToast('Chỉ được tải tối đa 1 video');
       return;
     }
     if (file.size > maxSize) {
