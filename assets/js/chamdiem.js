@@ -1982,20 +1982,47 @@ let _lastCompareScores = null;
 let _lastEvaluation = null;
 
 // Bảng dịch các cụm từ tiếng Anh thường gặp từ AI → tiếng Việt
+// Thứ tự: cụ thể → tổng quát (tránh match sai)
 const _VI_PHRASES = [
-  [/angled too far forward/gi,          'góc về phía trước quá nhiều'],
-  [/angled too far back(ward)?/gi,       'góc về phía sau quá nhiều'],
-  [/angled incorrectly/gi,               'góc độ chưa đúng'],
-  [/bending too much/gi,                 'cong quá mức'],
-  [/not straight/gi,                     'chưa thẳng'],
-  [/genu valgum \(bowed knee\)/gi,       'đầu gối vòng kiềng (cong vào trong)'],
-  [/genu varum/gi,                       'đầu gối cong ra ngoài'],
-  [/align shoulder with body(?: centerline)?/gi, 'căn vai thẳng với thân người'],
-  [/align shoulder with hips? and torso/gi,      'căn vai thẳng với hông và thân'],
-  [/straighten the left knee to match the model'?s? posture/gi,  'duỗi thẳng gối trái theo đúng tư thế mẫu'],
-  [/straighten the right knee to match the model'?s? posture/gi, 'duỗi thẳng gối phải theo đúng tư thế mẫu'],
-  [/keep the knee(?: joint)? straight/gi,  'giữ thẳng khớp gối'],
-  [/giữ thẳng đầu gối khi đứng, tránh cong về phía sau/gi, 'giữ thẳng đầu gối khi đứng, tránh cong về phía sau'],
+  // ── Lỗi góc / angle error ──────────────────────────────────────────
+  [/angle error:\s*([\d.]+)\s*degrees?\s*\(standard\)/gi, 'lỗi góc: $1° (so với chuẩn)'],
+  [/angle error:\s*([\d.]+)\s*degrees?/gi,                'lỗi góc: $1°'],
+  [/bending angle is too large/gi,                        'góc cong quá lớn'],
+  [/angled too far forward/gi,                            'góc về phía trước quá nhiều'],
+  [/angled too far back(?:ward)?/gi,                      'góc về phía sau quá nhiều'],
+  [/angled incorrectly/gi,                                'góc độ chưa đúng'],
+  [/bending too much/gi,                                  'cong quá mức'],
+  [/not straight/gi,                                      'chưa thẳng'],
+  // ── Vấn đề đầu gối ─────────────────────────────────────────────────
+  [/genu valgum\s*\(bowed knees?\)/gi,                    'đầu gối vòng kiềng (cong vào trong)'],
+  [/genu valgum\s*\(bowed knee\)/gi,                      'đầu gối vòng kiềng (cong vào trong)'],
+  [/genu valgum/gi,                                       'đầu gối vòng kiềng'],
+  [/genu varum/gi,                                        'đầu gối cong ra ngoài'],
+  [/keep the knee(?: joint)? straight/gi,                 'giữ thẳng khớp gối'],
+  // ── Khắc phục vai ──────────────────────────────────────────────────
+  [/align (?:the )?left shoulder with the standard posture\.?/gi,  'căn vai trái theo đúng tư thế chuẩn'],
+  [/align (?:the )?right shoulder with the standard posture\.?/gi, 'căn vai phải theo đúng tư thế chuẩn'],
+  [/align shoulder with (?:the )?torso(?: for better posture)?\.?/gi, 'căn vai thẳng với thân để có tư thế tốt hơn'],
+  [/align shoulder with body(?: centerline)?/gi,          'căn vai thẳng với thân người'],
+  [/align shoulder with hips? and torso/gi,               'căn vai thẳng với hông và thân'],
+  // ── Khắc phục gối ──────────────────────────────────────────────────
+  [/align the knee directly over the ankle and hip,?\s*avoid excessive inward bending of the knee\.?/gi, 'giữ đầu gối thẳng hàng với mắt cá chân và hông, tránh cong vào trong quá mức'],
+  [/straighten the left knee to match the (?:model'?s?|standard) posture\.?/gi,  'duỗi thẳng gối trái theo đúng tư thế chuẩn'],
+  [/straighten the right knee to match the (?:model'?s?|standard) posture\.?/gi, 'duỗi thẳng gối phải theo đúng tư thế chuẩn'],
+  [/straighten the left knee/gi,  'duỗi thẳng gối trái'],
+  [/straighten the right knee/gi, 'duỗi thẳng gối phải'],
+  [/straighten (?:the )?knee/gi,  'duỗi thẳng đầu gối'],
+  // ── Hông / khuỷu / chung ───────────────────────────────────────────
+  [/keep (?:the )?hips? level/gi,      'giữ hông ngang bằng'],
+  [/rotate (?:the )?hip/gi,            'xoay hông'],
+  [/extend (?:the )?elbow/gi,          'duỗi thẳng khuỷu tay'],
+  [/bend (?:the )?elbow/gi,            'cong khuỷu tay'],
+  [/maintain (?:proper )?posture/gi,   'duy trì tư thế đúng'],
+  [/correct (?:your )?posture/gi,      'chỉnh lại tư thế'],
+  [/for better posture/gi,             'để có tư thế tốt hơn'],
+  [/with the standard posture/gi,      'theo tư thế chuẩn'],
+  [/with standard/gi,                  'so với chuẩn'],
+  // ── Tên khớp (snake_case → tiếng Việt) ────────────────────────────
   [/left_shoulder/gi,  'Vai trái'],
   [/right_shoulder/gi, 'Vai phải'],
   [/left_elbow/gi,     'Khuỷu trái'],
@@ -2012,7 +2039,6 @@ function _translateToVi(text) {
   for (const [pattern, replacement] of _VI_PHRASES) {
     result = result.replace(pattern, replacement);
   }
-  return result;
 }
 
 
