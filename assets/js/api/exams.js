@@ -306,7 +306,7 @@ const ExamsService = {
      * @returns {Promise<string>} JSON string của standardData
      */
     async extractTemplate(videoUrl) {
-        const response = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-template/', {
+        const response = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-template', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'
