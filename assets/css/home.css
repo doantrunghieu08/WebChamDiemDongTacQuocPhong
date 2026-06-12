@@ -3415,3 +3415,50 @@ body {
     transform: translateY(0) translateX(0);
   }
 }
+
+/* --- Progress bar for AI extraction in Home --- */
+.cpose-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.cpose-loading-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--txt2, #1a1a1a);
+}
+.cpose-loading-sub {
+  font-size: 13px;
+  color: var(--txt3, #666666);
+}
+.cpose-progress-wrap {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.cpose-progress-bar-outer {
+  width: 100%;
+  height: 8px;
+  background: var(--bg4, #e2e8f0);
+  border-radius: 99px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+.cpose-progress-bar-inner {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.cpose-progress-pct {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0ea5e9;
+}

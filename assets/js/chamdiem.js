@@ -1496,11 +1496,47 @@ async function doConfirmSubmission() {
     ? API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO
     : 'http://103.75.182.246:8080/teacher/submission/upload-video';
 
+let _uploadExtractProgressInterval = null;
+
+function _startUploadExtractProgress() {
+  _stopUploadExtractProgress();
+  const loadingDiv = document.getElementById('upload-extract-loading');
+  if (loadingDiv) loadingDiv.style.display = 'flex';
+
+  const bar = document.getElementById('upload-extract-progress-bar');
+  const pctText = document.getElementById('upload-extract-progress-pct');
+  if (!bar || !pctText) return;
+  
+  let pct = 0;
+  bar.style.width = '0%';
+  pctText.textContent = '0%';
+  
+  _uploadExtractProgressInterval = setInterval(() => {
+    if (pct < 50) pct += 2;
+    else if (pct < 80) pct += 1;
+    else if (pct < 95) pct += 0.2;
+    if (pct > 99) pct = 99;
+    
+    bar.style.width = pct + '%';
+    pctText.textContent = Math.floor(pct) + '%';
+  }, 300);
+}
+
+function _stopUploadExtractProgress() {
+  if (_uploadExtractProgressInterval) {
+    clearInterval(_uploadExtractProgressInterval);
+    _uploadExtractProgressInterval = null;
+  }
+  const loadingDiv = document.getElementById('upload-extract-loading');
+  if (loadingDiv) loadingDiv.style.display = 'none';
+}
+
   try {
     let studentDataStr = null;
     const aiVideoUrl = body.videoUrl1 || body.videoUrl2;
     if (aiVideoUrl) {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
+      _startUploadExtractProgress();
       try {
         const aiRes = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-student', {
           method: 'POST',
@@ -1524,6 +1560,8 @@ async function doConfirmSubmission() {
       } catch (aiErr) {
         console.warn('Lỗi trích xuất khung xương:', aiErr);
         showToast('Lỗi khi trích xuất dữ liệu khung xương.');
+      } finally {
+        _stopUploadExtractProgress();
       }
     }
     body.studentData = studentDataStr;
@@ -1597,6 +1635,8 @@ async function doConfirmSubmission() {
     console.error('[doConfirmSubmission]', err);
     showToast(err.message || 'Xác nhận nộp bài thất bại. Vui lòng thử lại.', true);
     setUploadBtnsDisabled(false);
+  } finally {
+    _stopUploadExtractProgress();
   }
 }
 // ---- END UPLOAD STUDENT VIDEO ----

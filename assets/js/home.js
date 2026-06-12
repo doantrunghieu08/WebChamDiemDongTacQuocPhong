@@ -1391,6 +1391,9 @@ function closeExamModal() {
   if (modal) {
     modal.style.display = 'none';
   }
+  if (typeof _stopExamSaveProgress === 'function') {
+    _stopExamSaveProgress();
+  }
 }
 
 function openSaveExamConfirmModal(message, onConfirm) {
@@ -1466,6 +1469,49 @@ function showHomeToast(message) {
   }, 2500);
 }
 
+let _examSaveProgressInterval = null;
+
+function _startExamSaveProgress(msg) {
+  _stopExamSaveProgress();
+  const loadingDiv = document.getElementById('exam-save-loading');
+  const msgEl = document.getElementById('exam-save-loading-text');
+  const actionsDiv = document.getElementById('exam-form-actions');
+  
+  if (loadingDiv) loadingDiv.style.display = 'flex';
+  if (msgEl && msg) msgEl.textContent = msg;
+  if (actionsDiv) actionsDiv.style.display = 'none';
+
+  const bar = document.getElementById('exam-save-progress-bar');
+  const pctText = document.getElementById('exam-save-progress-pct');
+  if (!bar || !pctText) return;
+  
+  let pct = 0;
+  bar.style.width = '0%';
+  pctText.textContent = '0%';
+  
+  _examSaveProgressInterval = setInterval(() => {
+    if (pct < 50) pct += 2;
+    else if (pct < 80) pct += 1;
+    else if (pct < 95) pct += 0.2;
+    if (pct > 99) pct = 99;
+    
+    bar.style.width = pct + '%';
+    pctText.textContent = Math.floor(pct) + '%';
+  }, 300);
+}
+
+function _stopExamSaveProgress() {
+  if (_examSaveProgressInterval) {
+    clearInterval(_examSaveProgressInterval);
+    _examSaveProgressInterval = null;
+  }
+  const loadingDiv = document.getElementById('exam-save-loading');
+  const actionsDiv = document.getElementById('exam-form-actions');
+  
+  if (loadingDiv) loadingDiv.style.display = 'none';
+  if (actionsDiv) actionsDiv.style.display = 'flex';
+}
+
 function saveExam(event) {
   event.preventDefault();
 
@@ -1532,10 +1578,13 @@ function saveExam(event) {
           let standardData = null;
           if (sampleVideoUrl) {
             showHomeToast('Đang trích xuất dữ liệu chuẩn từ video mẫu...');
+            _startExamSaveProgress('Đang trích xuất dữ liệu chuẩn từ video mẫu...');
             try {
               standardData = await ExamsService.extractTemplate(sampleVideoUrl);
             } catch (extractErr) {
               console.warn('Trích xuất dữ liệu chuẩn thất bại, tiếp tục cập nhật bài thi:', extractErr);
+            } finally {
+              _stopExamSaveProgress();
             }
           }
           await ExamsService.updateTeacherExam(id, {
@@ -1567,10 +1616,13 @@ function saveExam(event) {
           let standardData = null;
           if (sampleVideoUrl) {
             showHomeToast('Đang trích xuất dữ liệu chuẩn từ video mẫu...');
+            _startExamSaveProgress('Đang trích xuất dữ liệu chuẩn từ video mẫu...');
             try {
               standardData = await ExamsService.extractTemplate(sampleVideoUrl);
             } catch (extractErr) {
               console.warn('Trích xuất dữ liệu chuẩn thất bại, tiếp tục tạo bài thi:', extractErr);
+            } finally {
+              _stopExamSaveProgress();
             }
           }
           const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examTypeId, standardData);
@@ -1600,6 +1652,7 @@ function saveExam(event) {
     loadExamsContent();
     closeExamModal();
     showHomeToast(successMessage);
+    _stopExamSaveProgress();
   });
 }
 

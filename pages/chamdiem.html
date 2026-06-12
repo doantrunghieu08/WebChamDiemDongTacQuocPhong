@@ -307,6 +307,18 @@
           <div class="upload-confirm-banner">&#10003; Video đã được tải lên Cloudinary thành công!</div>
           <div class="upload-confirm-list" id="upload-confirm-list"></div>
           <p class="upload-video-desc" style="margin-top:12px">Nhấn <strong>Xác nhận nộp bài</strong> để lưu video vào bài thi của sinh viên.</p>
+          
+          <!-- Thêm thanh tiến trình trích xuất khung xương -->
+          <div class="cpose-loading" id="upload-extract-loading" style="display:none; padding: 16px 0 0;">
+            <div class="cpose-loading-text">Đang trích xuất dữ liệu khung xương...</div>
+            <div class="cpose-progress-wrap" style="display:flex;">
+              <div class="cpose-progress-bar-outer">
+                <div class="cpose-progress-bar-inner" id="upload-extract-progress-bar"></div>
+              </div>
+              <div class="cpose-progress-pct" id="upload-extract-progress-pct">0%</div>
+            </div>
+            <div class="cpose-loading-sub">Quá trình này có thể mất 15–60 giây</div>
+          </div>
         </div>
 
       </div>

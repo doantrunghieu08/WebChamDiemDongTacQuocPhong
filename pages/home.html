@@ -400,9 +400,22 @@
           <p class="exam-video-note">Mỗi bài thi cần 1 video mẫu. Tên video sẽ tự động lấy theo tên file bạn tải lên.</p>
           <div id="examVideoList" class="exam-video-list"></div>
         </div>
-        <div class="form-actions">
+        
+        <!-- Thêm thanh tiến trình lưu bài thi / trích xuất dữ liệu -->
+        <div class="cpose-loading" id="exam-save-loading" style="display:none; padding: 16px 0 0;">
+          <div class="cpose-loading-text" id="exam-save-loading-text">Đang trích xuất dữ liệu chuẩn từ video mẫu...</div>
+          <div class="cpose-progress-wrap" style="display:flex;">
+            <div class="cpose-progress-bar-outer">
+              <div class="cpose-progress-bar-inner" id="exam-save-progress-bar"></div>
+            </div>
+            <div class="cpose-progress-pct" id="exam-save-progress-pct">0%</div>
+          </div>
+          <div class="cpose-loading-sub">Quá trình này có thể mất 15–60 giây</div>
+        </div>
+
+        <div class="form-actions" id="exam-form-actions">
           <button type="button" class="btn-class-action btn-details" id="btnCancelExamModal">Hủy</button>
-          <button type="submit" class="btn-class-action btn-grade">Lưu bài thi</button>
+          <button type="submit" class="btn-class-action btn-grade" id="btnSaveExam">Lưu bài thi</button>
         </div>
       </form>
     </div>
