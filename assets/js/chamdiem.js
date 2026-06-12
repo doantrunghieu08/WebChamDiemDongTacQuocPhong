@@ -1884,8 +1884,18 @@ async function runComparePose() {
 
     // Bước 3: Gọi evaluate để lấy nhận xét
     document.getElementById('cpose-loading-text').textContent = 'Đang phân tích chuyên sâu bằng AI...';
+
+    // API evaluate-pairwise-vlm yêu cầu standardData phải có video_url
+    const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
+    const standardVideoUrl = gradingExam.sampleVideoUrl
+      || (gradingExam.videos && gradingExam.videos[0]?.url)
+      || null;
+
     const evalPayload = {
-      standardData: state.standardPoseData || {},
+      standardData: {
+        ...(state.standardPoseData || {}),
+        video_url: standardVideoUrl
+      },
       studentData: state.studentPoseData,
       scores: json.scores
     };
