@@ -1809,10 +1809,60 @@ function closeComparePoseModal(e) {
   document.getElementById('compare-pose-modal').style.display = 'none';
 }
 
-function _setCposeState(stateStr) {
+let _extractProgressInterval = null;
+
+function _setCposeState(stateStr, isExtracting = false) {
   document.getElementById('cpose-empty-state').style.display   = stateStr === 'empty'   ? '' : 'none';
   document.getElementById('cpose-loading-state').style.display = stateStr === 'loading' ? '' : 'none';
   document.getElementById('cpose-result-state').style.display  = stateStr === 'result'  ? '' : 'none';
+
+  if (stateStr === 'loading') {
+    const progWrap = document.getElementById('cpose-progress-wrap');
+    const spinner = document.getElementById('cpose-loading-spinner');
+    if (isExtracting) {
+      if (spinner) spinner.style.display = 'none';
+      if (progWrap) {
+        progWrap.style.display = 'flex';
+        _startExtractProgress();
+      }
+    } else {
+      if (spinner) spinner.style.display = '';
+      if (progWrap) {
+        progWrap.style.display = 'none';
+        _stopExtractProgress();
+      }
+    }
+  } else {
+    _stopExtractProgress();
+  }
+}
+
+function _startExtractProgress() {
+  _stopExtractProgress();
+  const bar = document.getElementById('cpose-progress-bar');
+  const pctText = document.getElementById('cpose-progress-pct');
+  if (!bar || !pctText) return;
+  
+  let pct = 0;
+  bar.style.width = '0%';
+  pctText.textContent = '0%';
+  
+  _extractProgressInterval = setInterval(() => {
+    if (pct < 50) pct += 2;
+    else if (pct < 80) pct += 1;
+    else if (pct < 95) pct += 0.2;
+    if (pct > 99) pct = 99;
+    
+    bar.style.width = pct + '%';
+    pctText.textContent = Math.floor(pct) + '%';
+  }, 300);
+}
+
+function _stopExtractProgress() {
+  if (_extractProgressInterval) {
+    clearInterval(_extractProgressInterval);
+    _extractProgressInterval = null;
+  }
 }
 
 async function runComparePose() {
@@ -1824,7 +1874,7 @@ async function runComparePose() {
       showToast('Chưa có video bài thi. Vui lòng tải video lên trước.', true);
       return;
     }
-    _setCposeState('loading');
+    _setCposeState('loading', true);
     document.getElementById('cpose-loading-text').textContent = 'Đang trích xuất dữ liệu khung xương...';
     try {
       const res = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
