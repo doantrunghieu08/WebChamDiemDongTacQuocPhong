@@ -805,9 +805,9 @@ body {
   box-shadow: 0 8px 18px rgba(255, 107, 53, 0.12);
 }
 
-.exam-video-row.has-file .exam-upload-box {
+/* .exam-video-row.has-file .exam-upload-box {
   display: none;
-}
+} */
 
 .exam-upload-icon {
   width: 40px;

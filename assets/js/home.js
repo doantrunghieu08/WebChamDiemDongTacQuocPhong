@@ -1528,11 +1528,22 @@ function saveExam(event) {
       const sampleVideoUrl = videos.find(v => v.url)?.url || '';
       if (typeof ExamsService !== 'undefined') {
         try {
+          // Trích xuất standardData từ video mẫu mới (nếu có)
+          let standardData = null;
+          if (sampleVideoUrl) {
+            showHomeToast('Đang trích xuất dữ liệu chuẩn từ video mẫu...');
+            try {
+              standardData = await ExamsService.extractTemplate(sampleVideoUrl);
+            } catch (extractErr) {
+              console.warn('Trích xuất dữ liệu chuẩn thất bại, tiếp tục cập nhật bài thi:', extractErr);
+            }
+          }
           await ExamsService.updateTeacherExam(id, {
             idExamType: examTypeId,
             name,
             description,
             sampleVideoUrl,
+            standardData,
           });
         } catch (err) {
           console.warn('Cập nhật bài thi trên server thất bại, lưu local:', err);

@@ -280,17 +280,23 @@ const ExamsService = {
      */
     /**
      * Cập nhật bài thi
-     * PUT http://103.75.182.246:8080/api/teacher/update-exam/{examId}
+     * PUT http://103.75.182.246/api/teacher/update-exam/{examId}
      * @param {string|number} examId - ID bài thi cần cập nhật
-     * @param {object} payload - { idExamType, name, description, sampleVideoUrl }
+     * @param {object} payload - { idExamType, name, description, sampleVideoUrl, standardData }
      * @returns {Promise<object>} Bài thi sau khi cập nhật
      */
-    async updateTeacherExam(examId, { idExamType, name, description, sampleVideoUrl }) {
+    async updateTeacherExam(examId, { idExamType, name, description, sampleVideoUrl, standardData }) {
         const url = API_CONFIG.ENDPOINTS.UPDATE_TEACHER_EXAM(examId);
         const response = await ApiClient.fetchWithAuth(url, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idExamType: idExamType || null, name, description, sampleVideoUrl: sampleVideoUrl || null }),
+            body: JSON.stringify({
+                idExamType: idExamType || null,
+                name,
+                description,
+                sampleVideoUrl: sampleVideoUrl || null,
+                standardData: standardData || null,
+            }),
         });
         if (!response.ok) {
             const errJson = await response.json().catch(() => null);
