@@ -1981,6 +1981,40 @@ const JOINT_TIPS = {
 let _lastCompareScores = null;
 let _lastEvaluation = null;
 
+// Bảng dịch các cụm từ tiếng Anh thường gặp từ AI → tiếng Việt
+const _VI_PHRASES = [
+  [/angled too far forward/gi,          'góc về phía trước quá nhiều'],
+  [/angled too far back(ward)?/gi,       'góc về phía sau quá nhiều'],
+  [/angled incorrectly/gi,               'góc độ chưa đúng'],
+  [/bending too much/gi,                 'cong quá mức'],
+  [/not straight/gi,                     'chưa thẳng'],
+  [/genu valgum \(bowed knee\)/gi,       'đầu gối vòng kiềng (cong vào trong)'],
+  [/genu varum/gi,                       'đầu gối cong ra ngoài'],
+  [/align shoulder with body(?: centerline)?/gi, 'căn vai thẳng với thân người'],
+  [/align shoulder with hips? and torso/gi,      'căn vai thẳng với hông và thân'],
+  [/straighten the left knee to match the model'?s? posture/gi,  'duỗi thẳng gối trái theo đúng tư thế mẫu'],
+  [/straighten the right knee to match the model'?s? posture/gi, 'duỗi thẳng gối phải theo đúng tư thế mẫu'],
+  [/keep the knee(?: joint)? straight/gi,  'giữ thẳng khớp gối'],
+  [/giữ thẳng đầu gối khi đứng, tránh cong về phía sau/gi, 'giữ thẳng đầu gối khi đứng, tránh cong về phía sau'],
+  [/left_shoulder/gi,  'Vai trái'],
+  [/right_shoulder/gi, 'Vai phải'],
+  [/left_elbow/gi,     'Khuỷu trái'],
+  [/right_elbow/gi,    'Khuỷu phải'],
+  [/left_hip/gi,       'Hông trái'],
+  [/right_hip/gi,      'Hông phải'],
+  [/left_knee/gi,      'Gối trái'],
+  [/right_knee/gi,     'Gối phải'],
+];
+
+function _translateToVi(text) {
+  if (!text) return text;
+  let result = String(text);
+  for (const [pattern, replacement] of _VI_PHRASES) {
+    result = result.replace(pattern, replacement);
+  }
+  return result;
+}
+
 
 
 function _renderComparePoseResult(data) {
@@ -2073,7 +2107,11 @@ function _renderComparePoseResult(data) {
     if (evaluation.suggestions?.length > 0) {
       html += '<div style="color:var(--orange)"><strong>Cần cải thiện:</strong><ul style="margin:4px 0 0 20px">';
       evaluation.suggestions.forEach(s => {
-        html += '<li style="margin-bottom:4px"><b>' + s.joint + '</b>: ' + s.issue + '<br/><i style="color:#666">→ Khắc phục: ' + s.fix + '</i></li>';
+        // Dịch tên khớp dùng JOINT_NAMES_VI, fallback sang bảng dịch cụm từ
+        const jointVi = JOINT_NAMES_VI[s.joint] || _translateToVi(s.joint);
+        const issueVi = _translateToVi(s.issue);
+        const fixVi   = _translateToVi(s.fix);
+        html += '<li style="margin-bottom:4px"><b>' + jointVi + '</b>: ' + issueVi + '<br/><i style="color:#666">→ Khắc phục: ' + fixVi + '</i></li>';
       });
       html += '</ul></div>';
     }
