@@ -323,7 +323,12 @@ const ExamsService = {
             throw new Error(data?.message || 'Trích xuất dữ liệu chuẩn thất bại');
         }
 
-        return JSON.stringify(data.standardData);
+        // Chỉ lấy trường frames, bỏ qua fps và các trường thừa khác
+        const frames = data.standardData.frames;
+        if (!frames) {
+            throw new Error('Dữ liệu chuẩn không có trường frames');
+        }
+        return JSON.stringify({ frames });
     },
 
     async createTeacherExam(name, description, sampleVideoUrl, teacherId, idExamCode, standardData) {
