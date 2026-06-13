@@ -2693,45 +2693,39 @@ function toggleErrorStudent(errorId, idx) {
   }
 }
 
-function loadReportContent() {
+async function loadReportContent() {
   const container = document.getElementById('reportContent');
   if (!container) {
     return;
   }
 
-  // Sử dụng dữ liệu JS đã tải sẵn, không cần gọi API
-  const classes = currentClasses;
+  const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || currentUser?.name || 'GV001';
 
-  // Tính tổng sinh viên từ classStudents sessionStorage (được cập nhật khi mở trang lớp)
-  const allClassStudents = JSON.parse(sessionStorage.getItem('classStudents') || '{}');
+  let totalClasses = 0;
   let totalStudents = 0;
-  classes.forEach(c => {
-    const arr = allClassStudents[c.classId];
-    if (Array.isArray(arr)) {
-      totalStudents += arr.length;
-    } else {
-      totalStudents += (c.studentCount || 0);
+  let totalErrorTypes = 0;
+  let totalErrorOccurrences = 0;
+
+  try {
+    const res = await fetch(`http://103.75.182.246:8080/public/api/reports/summary?idTeacher=${encodeURIComponent(teacherId)}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.code === 200 && json.data) {
+        totalClasses = json.data.totalClasses || 0;
+        totalStudents = json.data.totalStudents || 0;
+        totalErrorTypes = json.data.totalErrorTypes || 0;
+        totalErrorOccurrences = json.data.totalErrorOccurrences || 0;
+      }
     }
-  });
-
-  const activeErrors = currentErrorData.filter(e => !e.deleted);
-  const totalErrors = activeErrors.length;
-
-  // Tính lượt mắc lỗi từ lịch sử chấm điểm
-  const historyRecords = getTeacherGradingHistory();
-  let totalSVErrors = 0;
-  historyRecords.forEach(record => {
-    if (!Array.isArray(record.history)) return;
-    record.history.forEach(frame => {
-      totalSVErrors += Array.isArray(frame.errors) ? frame.errors.length : 0;
-    });
-  });
+  } catch (err) {
+    console.error('Lỗi khi tải báo cáo tổng quan:', err);
+  }
 
   container.innerHTML = `
     <div class="report-grid">
       <div class="report-card">
         <div class="report-icon"><i class="fas fa-school" style="color:#DC143C"></i></div>
-        <div class="report-value">${classes.length}</div>
+        <div class="report-value">${totalClasses}</div>
         <div class="report-label">Đơn vị</div>
       </div>
       <div class="report-card">
@@ -2741,12 +2735,12 @@ function loadReportContent() {
       </div>
       <div class="report-card">
         <div class="report-icon"><i class="fas fa-exclamation-triangle" style="color:#e65100"></i></div>
-        <div class="report-value">${totalErrors}</div>
+        <div class="report-value">${totalErrorTypes}</div>
         <div class="report-label">Loại lỗi</div>
       </div>
       <div class="report-card">
         <div class="report-icon"><i class="fas fa-user-times" style="color:#c62828"></i></div>
-        <div class="report-value">${totalSVErrors}</div>
+        <div class="report-value">${totalErrorOccurrences}</div>
         <div class="report-label">Lượt mắc lỗi</div>
       </div>
     </div>
@@ -2774,10 +2768,12 @@ function loadReportContent() {
     </div>
   `;
 
-  renderCharts();
+  await renderCharts();
 }
 
-function renderCharts() {
+async function renderCharts() {
+  const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || currentUser?.name || 'GV001';
+
   const errorData = currentErrorData.filter(e => !e.deleted);
   const errorNames = errorData.map(e => e.name.length > 20 ? e.name.substring(0, 20) + '...' : e.name);
   const errorDeductions = errorData.map(e => e.deduction);
@@ -2785,35 +2781,26 @@ function renderCharts() {
   const medCount = errorData.filter(e => e.severity === 'trung-binh').length;
   const lowCount = errorData.filter(e => e.severity === 'thap').length;
 
-  // Tính dữ liệu từ lịch sử chấm điểm
-  // Bỏ filter teacherId để tránh mismatch khi sessionStorage được load khác nhau
-  const historyRecords = getStoredGradingHistory();
-  const errorStudentMap = {}; // { errorName: Set<studentCode> }
-  const classErrorMap = {};
-  const errorOccurrenceMap = {}; // { errorName: count }
+  let apiErrorsByClass = [];
+  let apiTopErrors = [];
 
-  historyRecords.forEach(record => {
-    const studentCode = record.studentCode || '';
-    const className = record.className || 'Chưa rõ';
-    if (!Array.isArray(record.history)) return;
-    record.history.forEach(frame => {
-      if (!Array.isArray(frame.errors)) return;
-      frame.errors.forEach(err => {
-        const name = err.name || '';
-        if (!name) return;
-        if (!errorStudentMap[name]) errorStudentMap[name] = new Set();
-        if (studentCode) errorStudentMap[name].add(studentCode);
-        classErrorMap[className] = (classErrorMap[className] || 0) + 1;
-        errorOccurrenceMap[name] = (errorOccurrenceMap[name] || 0) + 1;
-      });
-    });
-  });
+  try {
+    const [resByClass, resTop] = await Promise.all([
+      fetch(`http://103.75.182.246:8080/public/api/reports/errors-by-class?idTeacher=${encodeURIComponent(teacherId)}`),
+      fetch(`http://103.75.182.246:8080/public/api/reports/top-errors?idTeacher=${encodeURIComponent(teacherId)}`)
+    ]);
 
-  const hasHistory = historyRecords.length > 0;
-  // Số sinh viên mắc lỗi theo loại (từ lịch sử)
-  const errorStudentCounts = errorData.map(e =>
-    errorStudentMap[e.name] ? errorStudentMap[e.name].size : 0
-  );
+    if (resByClass.ok) {
+      const json = await resByClass.json();
+      if (json.code === 200 && json.data) apiErrorsByClass = json.data;
+    }
+    if (resTop.ok) {
+      const json = await resTop.json();
+      if (json.code === 200 && json.data) apiTopErrors = json.data;
+    }
+  } catch (err) {
+    console.error('Lỗi khi tải dữ liệu biểu đồ:', err);
+  }
 
   const chartColors = ['#DC143C', '#FF6B35', '#FFB64D', '#2ecc71', '#3498db', '#9b59b6', '#e67e22'];
 
@@ -2884,11 +2871,11 @@ function renderCharts() {
     });
   }
 
-  // Chart 4: Bar - Errors by class (từ lịch sử; fallback: số lượng loại lỗi × số lớp)
+  // Chart 4: Bar - Errors by class (từ API; fallback: số lượng loại lỗi × số lớp)
   let chart4Labels, chart4Data, chart4DatasetLabel;
-  if (Object.keys(classErrorMap).length > 0) {
-    chart4Labels = Object.keys(classErrorMap).sort();
-    chart4Data = chart4Labels.map(c => classErrorMap[c]);
+  if (apiErrorsByClass.length > 0) {
+    chart4Labels = apiErrorsByClass.map(item => item.className || item.classId);
+    chart4Data = apiErrorsByClass.map(item => item.totalErrors || 0);
     chart4DatasetLabel = 'Số lượt lỗi';
   } else {
     // Fallback: hiển thị số loại lỗi đang có theo từng lớp đang quản lý
@@ -2936,25 +2923,33 @@ function renderCharts() {
     });
   }
 
-  // Chart 5: Polar Area - Top 5 errors by student count (từ lịch sử)
-  // errorOccurrenceMap đã được tính ở trên
-  // Fallback: nếu chưa có lịch sử, dùng deduction để xếp hạng
-  const sortedErrors = errorData.length > 0
-    ? [...errorData].sort((a, b) => {
-        const ca = errorOccurrenceMap[a.name] || 0;
-        const cb = errorOccurrenceMap[b.name] || 0;
-        return cb !== ca ? cb - ca : b.deduction - a.deduction;
-      }).slice(0, 5)
-    : [];
+  // Chart 5: Polar Area - Top 5 errors by student count (từ API)
+  let chart5Labels = [];
+  let chart5Data = [];
+
+  if (apiTopErrors.length > 0) {
+    chart5Labels = apiTopErrors.map(e => {
+      const name = e.errorName || '';
+      return name.length > 18 ? name.substring(0, 18) + '...' : name;
+    });
+    chart5Data = apiTopErrors.map(e => e.totalOccurrences || 0);
+  } else {
+    // Fallback: nếu API không có dữ liệu, dùng deduction để xếp hạng
+    const sortedErrors = errorData.length > 0
+      ? [...errorData].sort((a, b) => b.deduction - a.deduction).slice(0, 5)
+      : [];
+    chart5Labels = sortedErrors.map(e => e.name.length > 18 ? e.name.substring(0, 18) + '...' : e.name);
+    chart5Data = sortedErrors.map(e => e.deduction || 0);
+  }
 
   const ctx5 = document.getElementById('chartTopErrors');
   if (ctx5) {
     new Chart(ctx5, {
       type: 'polarArea',
       data: {
-        labels: sortedErrors.map(e => e.name.length > 18 ? e.name.substring(0, 18) + '...' : e.name),
+        labels: chart5Labels,
         datasets: [{
-          data: sortedErrors.map(e => errorOccurrenceMap[e.name] || e.deduction || 0),
+          data: chart5Data,
           backgroundColor: ['rgba(220,20,60,0.6)', 'rgba(255,107,53,0.6)', 'rgba(255,182,77,0.6)', 'rgba(46,204,113,0.6)', 'rgba(52,152,219,0.6)'],
           borderWidth: 2,
           borderColor: '#fff'
