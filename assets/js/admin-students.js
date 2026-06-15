@@ -314,16 +314,19 @@ async function searchClassStudentsFromServer(classId, keyword, page, size) {
     const json = await res.json().catch(() => null);
 
     // Support Spring Page in json.data or json.data.content
-    let rawList, totalPages;
+    let rawList, totalPages, totalElements;
     if (json?.data && !Array.isArray(json.data) && Array.isArray(json.data.content)) {
       rawList = json.data.content;
       totalPages = json.data.totalPages ?? 1;
+      totalElements = json.data.totalElements ?? rawList.length;
     } else if (Array.isArray(json?.data?.content ?? json?.content)) {
       rawList = json.content || json.data.content;
       totalPages = json.totalPages ?? json.data?.totalPages ?? 1;
+      totalElements = json.totalElements ?? json.data?.totalElements ?? rawList.length;
     } else {
       rawList = Array.isArray(json?.data) ? json.data : [];
       totalPages = json?.totalPages ?? 1;
+      totalElements = json?.totalElements ?? rawList.length;
     }
 
     const students = rawList.map(s => ({
@@ -333,7 +336,7 @@ async function searchClassStudentsFromServer(classId, keyword, page, size) {
       gender: s.gender || '',
       avatarImage: s.avatarImage || null
     }));
-    return { students, totalPages: Math.max(1, totalPages) };
+    return { students, totalPages: Math.max(1, totalPages), totalElements };
   } catch (err) {
     console.error('searchClassStudentsFromServer error', err);
     return null;
@@ -361,6 +364,19 @@ async function loadStudentListPage(page = 0) {
   studentListTotalPages = result.totalPages;
   renderStudentManagerListFromData(result.students);
   renderStudentListPagination();
+
+  // Cập nhật lại tổng số sinh viên hiển thị ở tiêu đề lớp
+  if (page === 0 && !studentListKeyword) {
+    const countElem = document.getElementById('adminStudentsCount');
+    if (countElem) {
+      countElem.textContent = `${result.totalElements} sinh viên`;
+    }
+    // Cập nhật class item trong adminStudentsClasses
+    const cls = getActiveClass();
+    if (cls) {
+      cls.studentCount = result.totalElements;
+    }
+  }
 
   // Scroll lên đầu danh sách sau khi chuyển trang
   setTimeout(() => {
@@ -440,7 +456,12 @@ async function loadClassStudentsFromServer(classId) {
     }
 
     const json = await res.json().catch(() => null);
-    const list = json?.data || json;
+    let list = json?.data || json;
+    if (list && !Array.isArray(list) && Array.isArray(list.content)) {
+      list = list.content;
+    } else if (json && Array.isArray(json.content)) {
+      list = json.content;
+    }
     if (!Array.isArray(list)) return null;
 
     const students = list.map(s => ({
