@@ -3335,9 +3335,9 @@ async function _doLoadStudentExams() {
   }
 
   // Chia thành 3 nhóm
-  const doneExams    = exams.filter(e => e.practiceScore !== null || e.officialScore !== null || e.isSubmitted);
-  const expiredExams = exams.filter(e => e.practiceScore === null && e.officialScore === null && !e.isSubmitted && e.isSubmissionClosed);
-  const pendingExams = exams.filter(e => e.practiceScore === null && e.officialScore === null && !e.isSubmitted && !e.isSubmissionClosed);
+  const expiredExams = exams.filter(e => e.isSubmissionClosed);
+  const doneExams    = exams.filter(e => !e.isSubmissionClosed && (e.practiceScore !== null || e.officialScore !== null || e.isSubmitted));
+  const pendingExams = exams.filter(e => !e.isSubmissionClosed && e.practiceScore === null && e.officialScore === null && !e.isSubmitted);
 
   const officialExams = exams.filter(e => e.officialScore !== null);
   const avgScore = officialExams.length > 0
