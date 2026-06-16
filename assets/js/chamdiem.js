@@ -2129,6 +2129,7 @@ function _translateToVi(text) {
   for (const [pattern, replacement] of _VI_PHRASES) {
     result = result.replace(pattern, replacement);
   }
+  return result;
 }
 
 
