@@ -2224,11 +2224,8 @@ function _renderComparePoseResult(data) {
     if (evaluation.suggestions?.length > 0) {
       html += '<div style="color:var(--orange)"><strong>Cần cải thiện:</strong><ul style="margin:4px 0 0 20px">';
       evaluation.suggestions.forEach(s => {
-        // Dịch tên khớp dùng JOINT_NAMES_VI, fallback sang bảng dịch cụm từ
-        const jointVi = JOINT_NAMES_VI[s.joint] || _translateToVi(s.joint);
-        const issueVi = _translateToVi(s.issue);
-        const fixVi   = _translateToVi(s.fix);
-        html += '<li style="margin-bottom:4px"><b>' + jointVi + '</b>: ' + issueVi + '<br/><i style="color:#666">→ Khắc phục: ' + fixVi + '</i></li>';
+        const jointName = JOINT_NAMES_VI[s.joint] || s.joint;
+        html += '<li style="margin-bottom:4px"><b>' + jointName + '</b>: ' + s.issue + '<br/><i style="color:#666">→ Fix: ' + s.fix + '</i></li>';
       });
       html += '</ul></div>';
     }
