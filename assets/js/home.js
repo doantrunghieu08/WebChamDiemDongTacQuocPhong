@@ -3540,7 +3540,7 @@ async function openExamDetail(examId) {
   // Fetch song song: classExamId và điểm sinh viên
   const [serverExams, submissionsMap, myExamScores] = await Promise.all([
     (classId && (!exam || exam.classExamId == null))
-      ? ExamsService.getExamsByClass(classId).catch(() => null)
+      ? ExamsService.getExamsByClass(classId, 0, 100).catch(() => null)
       : Promise.resolve(null),
     fetchStudentSubmissions(studentId),
     fetchStudentMyExam(studentId)
