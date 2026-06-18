@@ -1073,6 +1073,24 @@ body {
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.cd-exam-checklist::-webkit-scrollbar {
+  width: 6px;
+}
+.cd-exam-checklist::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.cd-exam-checklist::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.cd-exam-checklist::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .cd-exam-checkbox {
