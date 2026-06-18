@@ -677,6 +677,62 @@ function cancelAdminPopup() {
   }
 }
 
+let _globalImportProgressInterval = null;
+function showGlobalImportProgress(message = 'Đang tải lên...') {
+  let overlay = document.getElementById('globalImportProgressOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'globalImportProgressOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;';
+    overlay.innerHTML = `
+      <div style="background:#fff;padding:24px;border-radius:8px;width:320px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <h4 id="globalImportProgressTitle" style="margin:0 0 16px 0;color:#1e293b;font-size:16px;">${message}</h4>
+        <div style="background:#e2e8f0;border-radius:999px;height:12px;overflow:hidden;margin-bottom:8px;">
+          <div id="globalImportProgressBar" style="background:#16a34a;height:100%;width:0%;transition:width 0.3s ease;"></div>
+        </div>
+        <div id="globalImportProgressText" style="font-size:14px;color:#64748b;font-weight:bold;">0%</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  } else {
+    document.getElementById('globalImportProgressTitle').textContent = message;
+  }
+  overlay.style.display = 'flex';
+  
+  const bar = document.getElementById('globalImportProgressBar');
+  const text = document.getElementById('globalImportProgressText');
+  let pct = 0;
+  bar.style.width = '0%';
+  text.textContent = '0%';
+  
+  _globalImportProgressInterval = setInterval(() => {
+    if (pct < 50) pct += 5;
+    else if (pct < 80) pct += 2;
+    else if (pct < 95) pct += 0.5;
+    if (pct > 99) pct = 99;
+    
+    bar.style.width = pct + '%';
+    text.textContent = Math.floor(pct) + '%';
+  }, 200);
+}
+
+function hideGlobalImportProgress() {
+  if (_globalImportProgressInterval) {
+    clearInterval(_globalImportProgressInterval);
+    _globalImportProgressInterval = null;
+  }
+  const overlay = document.getElementById('globalImportProgressOverlay');
+  if (overlay) {
+    const bar = document.getElementById('globalImportProgressBar');
+    const text = document.getElementById('globalImportProgressText');
+    if (bar) bar.style.width = '100%';
+    if (text) text.textContent = '100%';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  }
+}
+
 function showAdminNotice(title, message, variant = 'info') {
   openAdminPopup({ title, message, variant, confirmText: 'Đóng' });
 }
@@ -1621,6 +1677,8 @@ function attachAdminEvents() {
 
       const importUrl = API_CONFIG.ENDPOINTS.IMPORT_CLASSES;
 
+      showGlobalImportProgress('Đang nhập lớp từ Excel...');
+
       // Thử upload lên server trước
       try {
         const formData = new FormData();
@@ -1640,6 +1698,7 @@ function attachAdminEvents() {
           }
           renderClasses();
           renderAssignments();
+          hideGlobalImportProgress();
           showAdminNotice('Nhập thành công', json?.message || 'Đã nhập lớp từ Excel (server).', 'success');
           return;
         }
@@ -1650,6 +1709,7 @@ function attachAdminEvents() {
         throw new Error(detail);
       } catch (err) {
         console.warn('Server import-classes failed:', err);
+        hideGlobalImportProgress();
         showAdminNotice('Lỗi import lên server', err?.message || 'Không thể import lên server. Kiểm tra lại.', 'danger');
         e.target.value = '';
         return;
@@ -1661,12 +1721,14 @@ function attachAdminEvents() {
         try {
           workbook = XLSX.read(data, { type: 'binary' });
         } catch (err) {
+          hideGlobalImportProgress();
           showAdminNotice('Lỗi file', 'Không đọc được file Excel.', 'danger');
           return;
         }
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
         if (!rows.length) {
+          hideGlobalImportProgress();
           showAdminNotice('File rỗng', 'Không có dữ liệu trong file.', 'warning');
           return;
         }
@@ -1683,12 +1745,14 @@ function attachAdminEvents() {
           newClasses.push({ classId, className, semester, year, roomNumber, studentCount: 0, assignedTeacherId: '', assignedTeacherName: '' });
         }
         if (!newClasses.length) {
+          hideGlobalImportProgress();
           showAdminNotice('Không có lớp mới', 'Tất cả lớp trong file đã tồn tại hoặc thiếu thông tin.', 'warning');
           return;
         }
         saveAdminClasses([...newClasses, ...adminClasses]);
         renderClasses();
         renderAssignments();
+        hideGlobalImportProgress();
         showAdminNotice('Nhập thành công', `Đã thêm ${newClasses.length} lớp từ Excel.`, 'success');
       };
       reader.readAsBinaryString(file);
@@ -1708,6 +1772,8 @@ function attachAdminEvents() {
 
     const importUrl = API_CONFIG.ENDPOINTS.IMPORT_USERS;
 
+    showGlobalImportProgress('Đang nhập tài khoản từ Excel...');
+
     // Thử upload lên server trước
     try {
       const formData = new FormData();
@@ -1721,6 +1787,7 @@ function attachAdminEvents() {
         syncTeacherClassAssignments();
         await refreshUserList(0);
         renderAssignments();
+        hideGlobalImportProgress();
         showAdminNotice('Nhập thành công', json?.message || 'Đã nhập tài khoản từ Excel (server).', 'success');
         e.target.value = '';
         return;
@@ -1733,6 +1800,7 @@ function attachAdminEvents() {
       throw new Error(detail);
     } catch (err) {
       console.warn('Server import (accounts) failed:', err);
+      hideGlobalImportProgress();
       showAdminNotice('Lỗi import lên server', err?.message || 'Không thể import lên server. Kiểm tra lại.', 'danger');
       e.target.value = '';
       return;
@@ -1743,18 +1811,20 @@ function attachAdminEvents() {
     reader.onload = function(evt) {
       const data = evt.target.result;
       let workbook;
-      try {
-        workbook = XLSX.read(data, { type: 'binary' });
-      } catch (err) {
-        showAdminNotice('Lỗi file', 'Không đọc được file Excel.', 'danger');
-        return;
-      }
+        try {
+          workbook = XLSX.read(data, { type: 'binary' });
+        } catch (err) {
+          hideGlobalImportProgress();
+          showAdminNotice('Lỗi file', 'Không đọc được file Excel.', 'danger');
+          return;
+        }
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-      if (!rows.length) {
-        showAdminNotice('File rỗng', 'Không có dữ liệu trong file.', 'warning');
-        return;
-      }
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        if (!rows.length) {
+          hideGlobalImportProgress();
+          showAdminNotice('File rỗng', 'Không có dữ liệu trong file.', 'warning');
+          return;
+        }
       // Các trường: id, name, username, role, password, birthday
       const newAccounts = [];
       for (const row of rows) {
@@ -1769,19 +1839,21 @@ function attachAdminEvents() {
         if (adminAccounts.some(acc => acc.id.toLowerCase() === id.toLowerCase())) continue;
         if (adminAccounts.some(acc => acc.username.toLowerCase() === username.toLowerCase())) continue;
         newAccounts.push({ id, name, username, role, password, birthday, status: 'active', email: '' });
-      }
-      if (!newAccounts.length) {
-        showAdminNotice('Không có tài khoản mới', 'Tất cả tài khoản trong file đã tồn tại hoặc thiếu thông tin.', 'warning');
-        return;
-      }
-      saveAdminAccounts([...newAccounts, ...adminAccounts]);
-      syncTeacherClassAssignments();
-      renderAccounts();
-      renderAssignments();
-      showAdminNotice('Nhập thành công', `Đã thêm ${newAccounts.length} tài khoản từ Excel.`, 'success');
-      e.target.value = '';
-    };
-    reader.readAsBinaryString(file);
+        }
+        if (!newAccounts.length) {
+          hideGlobalImportProgress();
+          showAdminNotice('Không có tài khoản mới', 'Tất cả tài khoản trong file đã tồn tại hoặc thiếu thông tin.', 'warning');
+          return;
+        }
+        saveAdminAccounts([...newAccounts, ...adminAccounts]);
+        syncTeacherClassAssignments();
+        renderAccounts();
+        renderAssignments();
+        hideGlobalImportProgress();
+        showAdminNotice('Nhập thành công', `Đã thêm ${newAccounts.length} tài khoản từ Excel.`, 'success');
+        e.target.value = '';
+      };
+      reader.readAsBinaryString(file);
   }
   document.getElementById('btnAdminLogout')?.addEventListener('click', handleAdminLogout);
   // Gắn lại sự kiện submit cho form để phân biệt thêm/sửa

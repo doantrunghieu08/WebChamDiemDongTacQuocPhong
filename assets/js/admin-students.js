@@ -536,6 +536,62 @@ function cancelAdminStudentsPopup() {
   }
 }
 
+let _studentImportProgressInterval = null;
+function showStudentImportProgress(message = 'Đang tải lên...') {
+  let overlay = document.getElementById('studentImportProgressOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'studentImportProgressOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;';
+    overlay.innerHTML = `
+      <div style="background:#fff;padding:24px;border-radius:8px;width:320px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <h4 id="studentImportProgressTitle" style="margin:0 0 16px 0;color:#1e293b;font-size:16px;">${message}</h4>
+        <div style="background:#e2e8f0;border-radius:999px;height:12px;overflow:hidden;margin-bottom:8px;">
+          <div id="studentImportProgressBar" style="background:#16a34a;height:100%;width:0%;transition:width 0.3s ease;"></div>
+        </div>
+        <div id="studentImportProgressText" style="font-size:14px;color:#64748b;font-weight:bold;">0%</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  } else {
+    document.getElementById('studentImportProgressTitle').textContent = message;
+  }
+  overlay.style.display = 'flex';
+  
+  const bar = document.getElementById('studentImportProgressBar');
+  const text = document.getElementById('studentImportProgressText');
+  let pct = 0;
+  bar.style.width = '0%';
+  text.textContent = '0%';
+  
+  _studentImportProgressInterval = setInterval(() => {
+    if (pct < 50) pct += 5;
+    else if (pct < 80) pct += 2;
+    else if (pct < 95) pct += 0.5;
+    if (pct > 99) pct = 99;
+    
+    bar.style.width = pct + '%';
+    text.textContent = Math.floor(pct) + '%';
+  }, 200);
+}
+
+function hideStudentImportProgress() {
+  if (_studentImportProgressInterval) {
+    clearInterval(_studentImportProgressInterval);
+    _studentImportProgressInterval = null;
+  }
+  const overlay = document.getElementById('studentImportProgressOverlay');
+  if (overlay) {
+    const bar = document.getElementById('studentImportProgressBar');
+    const text = document.getElementById('studentImportProgressText');
+    if (bar) bar.style.width = '100%';
+    if (text) text.textContent = '100%';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  }
+}
+
 function showAdminStudentsNotice(title, message, variant = 'info') {
   openAdminStudentsPopup({ title, message, variant, confirmText: 'Đóng' });
 }
@@ -707,6 +763,8 @@ async function handleStudentExcelFile(event) {
   const baseHost = (adminBase.split('/admin')[0]) || (API_CONFIG?.BASE_URL?.split('/public')[0]) || '';
   const importUrl = `${baseHost}/admin/import-to-class/${encodeURIComponent(activeClassId)}`;
 
+  showStudentImportProgress('Đang nhập sinh viên từ Excel...');
+
   // Thử upload lên server trước
   try {
     const formData = new FormData();
@@ -726,11 +784,13 @@ async function handleStudentExcelFile(event) {
       // Reload danh sách sinh viên từ server
       await loadClassStudentsFromServer(activeClassId);
       refreshStudentPage();
+      hideStudentImportProgress();
       showAdminStudentsNotice('Nhập thành công', json?.message || 'Đã nhập sinh viên từ Excel (server).', 'success');
       return;
     }
   } catch (err) {
     console.warn('Server import-to-class failed, falling back to client parse.', err);
+    hideStudentImportProgress();
   }
 
   // Fallback: xử lý client-side
@@ -743,6 +803,7 @@ async function handleStudentExcelFile(event) {
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
       if (rows.length < 2) {
+        hideStudentImportProgress();
         showAdminStudentsNotice('Thiếu dữ liệu', 'File Excel không có dữ liệu.', 'warning');
         return;
       }
@@ -792,8 +853,10 @@ async function handleStudentExcelFile(event) {
       if (skipped > 0) {
         message += ` Bỏ qua ${skipped} mã trùng.`;
       }
+      hideStudentImportProgress();
       showAdminStudentsNotice('Cập nhật thành công', message, 'success');
     } catch (error) {
+      hideStudentImportProgress();
       showAdminStudentsNotice('Đọc file thất bại', 'Không đọc được file Excel. Vui lòng kiểm tra định dạng file.', 'warning');
     }
   };
