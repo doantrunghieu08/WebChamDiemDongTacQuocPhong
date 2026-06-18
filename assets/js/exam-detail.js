@@ -1319,7 +1319,6 @@ async function callSubmissionApi(status) {
     let studentDataStr = null;
     const aiVideoUrl = payload.videoUrl1 || payload.videoUrl2;
     if (aiVideoUrl) {
-      showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       try {
         const aiRes = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-student', {
           method: 'POST',
@@ -1331,13 +1330,9 @@ async function callSubmissionApi(status) {
         const aiJson = await aiRes.json();
         if (aiJson?.status === 'success' && aiJson?.studentData) {
           studentDataStr = JSON.stringify(aiJson.studentData);
-          showToast('Trích xuất dữ liệu thành công!');
-        } else {
-          showToast('Trích xuất dữ liệu không thành công.');
         }
       } catch (aiErr) {
         console.warn('Lỗi trích xuất khung xương:', aiErr);
-        showToast('Lỗi khi trích xuất dữ liệu khung xương.');
       }
     }
     payload.studentData = studentDataStr;
@@ -1409,9 +1404,13 @@ async function submitVideos() {
   const btnConfirm = document.querySelector('#edConfirmModal .ed-btn-confirm');
   if (btnConfirm) btnConfirm.disabled = true;
 
+  showSubmitProgress('Đang xử lý nộp bài...');
+
   const result = await callSubmissionApi('SUBMITTED');
 
   if (btnConfirm) btnConfirm.disabled = false;
+  
+  hideSubmitProgress();
 
   if (!result) {
     showToast('Nộp bài thất bại, vui lòng thử lại.');
@@ -1421,6 +1420,62 @@ async function submitVideos() {
   sessionStorage.setItem(getVideoStorageKey() + '_submitted', 'true');
   updateUploadAreaVisibility();
   showToast('Nộp bài thành công!');
+}
+
+let _submitProgressInterval = null;
+function showSubmitProgress(message = 'Đang nộp bài...') {
+  let overlay = document.getElementById('edSubmitProgressOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'edSubmitProgressOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;';
+    overlay.innerHTML = `
+      <div style="background:#fff;padding:24px;border-radius:8px;width:320px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        <h4 id="edSubmitProgressTitle" style="margin:0 0 16px 0;color:#1e293b;font-size:16px;">${message}</h4>
+        <div style="background:#e2e8f0;border-radius:999px;height:12px;overflow:hidden;margin-bottom:8px;">
+          <div id="edSubmitProgressBar" style="background:#16a34a;height:100%;width:0%;transition:width 0.3s ease;"></div>
+        </div>
+        <div id="edSubmitProgressText" style="font-size:14px;color:#64748b;font-weight:bold;">0%</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  } else {
+    document.getElementById('edSubmitProgressTitle').textContent = message;
+  }
+  overlay.style.display = 'flex';
+  
+  const bar = document.getElementById('edSubmitProgressBar');
+  const text = document.getElementById('edSubmitProgressText');
+  let pct = 0;
+  bar.style.width = '0%';
+  text.textContent = '0%';
+  
+  _submitProgressInterval = setInterval(() => {
+    if (pct < 60) pct += 4;
+    else if (pct < 85) pct += 1.5;
+    else if (pct < 98) pct += 0.3;
+    if (pct > 99) pct = 99;
+    
+    bar.style.width = pct + '%';
+    text.textContent = Math.floor(pct) + '%';
+  }, 200);
+}
+
+function hideSubmitProgress() {
+  if (_submitProgressInterval) {
+    clearInterval(_submitProgressInterval);
+    _submitProgressInterval = null;
+  }
+  const overlay = document.getElementById('edSubmitProgressOverlay');
+  if (overlay) {
+    const bar = document.getElementById('edSubmitProgressBar');
+    const text = document.getElementById('edSubmitProgressText');
+    if (bar) bar.style.width = '100%';
+    if (text) text.textContent = '100%';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  }
 }
 
 // Close modal on backdrop click
