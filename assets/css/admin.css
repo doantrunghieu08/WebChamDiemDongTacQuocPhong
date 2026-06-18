@@ -468,7 +468,8 @@ body {
 .admin-role-badge.admin   { background: #fff3e0; color: #e65100; }
 .admin-status-badge.active { background: #ecfdf3; color: #027a48; border: 1px solid #a7f0c4; }
 .admin-status-badge.locked { background: #fff2f0; color: #b42318; border: 1px solid #fcc8c3; }
-.admin-assigned-badge { background: #fff8e1; color: #8d5a00; }
+.admin-assigned-badge.assigned { background: #ecfdf3; color: #027a48; }
+.admin-assigned-badge.unassigned { background: #fff8e1; color: #8d5a00; }
 
 /* Locked account row appearance */
 .admin-table tr.locked {

@@ -886,7 +886,7 @@ function renderClasses() {
               <div class="admin-class-title">${cls.className}</div>
                 <div class="admin-class-subtitle">Mã lớp: ${cls.classId}</div>
             </div>
-            <span class="admin-assigned-badge">${scount} SV</span>
+            <span class="admin-assigned-badge ${cls.assignedTeacherName ? 'assigned' : 'unassigned'}">${cls.assignedTeacherName ? 'Đã phân công' : 'Chưa phân công'}</span>
           </div>
           <div class="admin-class-meta">
               <span><i class="fas fa-calendar-alt"></i> Năm học: ${cls.year}</span>
@@ -1012,7 +1012,7 @@ async function renderAssignments() {
             <div class="admin-assignment-title">${cls.className}</div>
             <div class="admin-assignment-subtitle">Mã lớp: ${cls.classId}</div>
           </div>
-          <span class="admin-assigned-badge">${getStoredStudentCount(cls.classId, cls.studentCount || 0)} SV</span>
+          <span class="admin-assigned-badge ${assignedName ? 'assigned' : 'unassigned'}">${assignedName ? 'Đã phân công' : 'Chưa phân công'}</span>
         </div>
         <div class="admin-class-meta">
           <span><i class="fas fa-calendar-alt"></i> Năm học: ${cls.year}</span>
