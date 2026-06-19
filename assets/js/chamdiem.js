@@ -1908,12 +1908,24 @@ function _stopExtractProgress() {
 async function runComparePose() {
   const videoUrl = state.videoUrls[state.currentVideo - 1] || state.videoUrls[0] || '';
   const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
+
+  // Unwrap studentData nếu cần
+  let stuData = state.studentPoseData;
+  if (stuData && stuData.studentData) stuData = stuData.studentData;
+  else if (stuData && stuData.data) stuData = stuData.data;
+
+  // Lấy dữ liệu chuẩn (standardData) từ state đã khôi phục từ DB
+  let stdData = state.standardPoseData;
+  if (stdData && stdData.standardData) stdData = stdData.standardData;
+  else if (stdData && stdData.data) stdData = stdData.data;
+
   const standardVideoUrl = gradingExam.sampleVideoUrl
     || (gradingExam.videos && gradingExam.videos[0]?.url)
+    || stdData?.video_url
     || null;
 
   // Bước 1: Trích xuất studentData nếu chưa có
-  if (!state.studentPoseData) {
+  if (!stuData) {
     if (!videoUrl) {
       showToast('Chưa có video bài thi. Vui lòng tải video lên trước.', true);
       return;
@@ -1930,6 +1942,10 @@ async function runComparePose() {
       const json = await res.json().catch(() => null);
       if (json?.status === 'success' && json?.studentData) {
         state.studentPoseData = json.studentData;
+        stuData = json.studentData;
+        if (stuData && stuData.studentData) stuData = stuData.studentData;
+        else if (stuData && stuData.data) stuData = stuData.data;
+
         const btnCP = document.getElementById('btnComparePose');
         if (btnCP) btnCP.classList.add('has-data');
       } else {
@@ -1947,60 +1963,28 @@ async function runComparePose() {
     _stopExtractProgress();
   }
 
-  // Bước 2: Luôn re-extract standardData từ video mẫu thực tế
-  // (không dùng data cũ trong DB vì có thể bị thiếu frame hoặc sai)
+  // Bước 2: Kiểm tra dữ liệu chuẩn (standardData)
+  if (!stdData || !stdData.frames || stdData.frames.length === 0) {
+    _setCposeState('empty');
+    showToast('Chưa có dữ liệu tư thế chuẩn (standardData) của bài thi này. Vui lòng nộp video bài mẫu trước.', true);
+    return;
+  }
+
+  if (!videoUrl) {
+    _setCposeState('empty');
+    showToast('Chưa có video bài thi để so sánh.', true);
+    return;
+  }
+
   if (!standardVideoUrl) {
     _setCposeState('empty');
     showToast('Bài thi này chưa có video mẫu chuẩn. Vui lòng cập nhật bài thi.', true);
     return;
   }
 
-  _setCposeState('loading');
-  _startExtractProgress();
-  document.getElementById('cpose-loading-text').textContent = 'Đang trích xuất dữ liệu chuẩn từ video mẫu...';
-
-  let freshStdData = null;
-  try {
-    const stdRes = await fetch(`${AI_BASE_URL}/api/ai/extract-template`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ videoUrl: standardVideoUrl })
-    });
-    const stdJson = await stdRes.json().catch(() => null);
-    if (stdJson?.status === 'success' && stdJson?.standardData?.frames?.length > 0) {
-      freshStdData = stdJson.standardData;
-      // Cập nhật state để dùng lại nếu user chạy lại
-      state.standardPoseData = freshStdData;
-      console.log('[compare-pose] Re-extracted standardData:', freshStdData.frames.length, 'frames');
-    } else {
-      _stopExtractProgress();
-      _setCposeState('empty');
-      showToast('Trích xuất dữ liệu chuẩn thất bại: ' + (stdJson?.message || 'Không có frames'), true);
-      return;
-    }
-  } catch (err) {
-    _stopExtractProgress();
-    _setCposeState('empty');
-    showToast('Lỗi kết nối khi trích xuất chuẩn: ' + err.message, true);
-    return;
-  }
-  _stopExtractProgress();
-
-  // Unwrap studentData nếu cần
-  let stuData = state.studentPoseData;
-  if (stuData && stuData.studentData) stuData = stuData.studentData;
-  else if (stuData && stuData.data) stuData = stuData.data;
-
-  let stdData = freshStdData;
-
   if (!stuData?.frames?.length) {
     _setCposeState('empty');
     showToast('Dữ liệu học sinh không có khung hình hợp lệ.', true);
-    return;
-  }
-  if (!stdData?.frames?.length) {
-    _setCposeState('empty');
-    showToast('Dữ liệu chuẩn không có khung hình hợp lệ.', true);
     return;
   }
 
@@ -2031,7 +2015,7 @@ async function runComparePose() {
 
     const evalPayload = {
       standardData: { ...stdData, video_url: standardVideoUrl },
-      studentData: stuData,
+      studentData: { ...stuData, video_url: videoUrl },
       scores: json.scores
     };
 
