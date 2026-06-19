@@ -1961,6 +1961,27 @@ async function runComparePose() {
   if (stdData && stdData.standardData) stdData = stdData.standardData;
   else if (stdData && stdData.data) stdData = stdData.data;
 
+  // ---- DEBUG LOG ----
+  console.group('[compare-pose] DEBUG');
+  console.log('AI_BASE_URL being used:', AI_BASE_URL);
+  console.log('stuData keys:', stuData ? Object.keys(stuData) : 'NULL');
+  console.log('stuData.frames count:', stuData?.frames?.length ?? 'N/A');
+
+  const frame0 = stuData?.frames?.[0];
+  console.log('stuData.frames[0] keys:', frame0 ? Object.keys(frame0) : 'N/A');
+  // Kiểm tra keypoints có bị null/zero không
+  const kps = frame0?.keypoints || frame0?.keypoints_3d || frame0?.joints || null;
+  console.log('stuData frame[0] keypoints type:', Array.isArray(kps) ? `Array[${kps.length}]` : typeof kps);
+  console.log('stuData frame[0] keypoints sample:', JSON.stringify(kps)?.slice(0, 200));
+
+  console.log('stdData keys:', stdData ? Object.keys(stdData) : 'NULL');
+  console.log('stdData.frames count:', stdData?.frames?.length ?? 'N/A');
+  const frame0std = stdData?.frames?.[0];
+  const kps2 = frame0std?.keypoints || frame0std?.keypoints_3d || frame0std?.joints || null;
+  console.log('stdData frame[0] keypoints sample:', JSON.stringify(kps2)?.slice(0, 200));
+  console.groupEnd();
+
+
   if (!stuData || !stuData.frames || stuData.frames.length === 0) {
     _setCposeState('empty');
     showToast('Dữ liệu học sinh không có khung hình hợp lệ.', true);
@@ -1978,6 +1999,10 @@ async function runComparePose() {
       standardData: stdData
     };
 
+    console.log('[compare-pose] Payload studentData.frames count:', payload.studentData?.frames?.length);
+    console.log('[compare-pose] Payload standardData.frames count:', payload.standardData?.frames?.length);
+    console.log('[compare-pose] Payload size (bytes):', JSON.stringify(payload).length);
+
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
       method: 'POST',
       headers: {
@@ -1986,6 +2011,7 @@ async function runComparePose() {
       body: JSON.stringify(payload)
     });
     const json = await res.json().catch(() => null);
+    console.log('[compare-pose] Response:', json);
     if (!res.ok || !json || !json.scores) {
       _setCposeState('empty');
       showToast('So sánh tư thế thất bại: HTTP ' + res.status, true);
