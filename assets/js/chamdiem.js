@@ -1907,21 +1907,24 @@ function _stopExtractProgress() {
 
 async function runComparePose() {
   const videoUrl = state.videoUrls[state.currentVideo - 1] || state.videoUrls[0] || '';
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
+  const standardVideoUrl = gradingExam.sampleVideoUrl
+    || (gradingExam.videos && gradingExam.videos[0]?.url)
+    || null;
 
-  // Bước 1: Nếu chưa có studentData → trích xuất trước
+  // Bước 1: Trích xuất studentData nếu chưa có
   if (!state.studentPoseData) {
     if (!videoUrl) {
       showToast('Chưa có video bài thi. Vui lòng tải video lên trước.', true);
       return;
     }
     _setCposeState('loading', true);
-    document.getElementById('cpose-loading-text').textContent = 'Đang trích xuất dữ liệu khung xương...';
+    _startExtractProgress();
+    document.getElementById('cpose-loading-text').textContent = 'Đang trích xuất dữ liệu học sinh...';
     try {
       const res = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoUrl, sample_rate: 1 })
       });
       const json = await res.json().catch(() => null);
@@ -1930,128 +1933,120 @@ async function runComparePose() {
         const btnCP = document.getElementById('btnComparePose');
         if (btnCP) btnCP.classList.add('has-data');
       } else {
-        const msg = json?.message || 'Trích xuất dữ liệu thất bại';
+        _stopExtractProgress();
         _setCposeState('empty');
-        showToast(msg, true);
+        showToast(json?.message || 'Trích xuất dữ liệu học sinh thất bại', true);
         return;
       }
     } catch (err) {
+      _stopExtractProgress();
       _setCposeState('empty');
-      showToast('Lỗi kết nối khi trích xuất: ' + err.message, true);
+      showToast('Lỗi kết nối khi trích xuất học sinh: ' + err.message, true);
       return;
     }
+    _stopExtractProgress();
   }
 
-  // Bước 2: Gọi compare-pose
-  _setCposeState('loading');
-  document.getElementById('cpose-loading-text').textContent = 'Đang so sánh tư thế với chuẩn...';
-
-  if (!state.standardPoseData) {
+  // Bước 2: Luôn re-extract standardData từ video mẫu thực tế
+  // (không dùng data cũ trong DB vì có thể bị thiếu frame hoặc sai)
+  if (!standardVideoUrl) {
     _setCposeState('empty');
-    showToast('Chưa có dữ liệu tư thế chuẩn (standardData) của bài thi này. Vui lòng nộp video bài mẫu trước.', true);
+    showToast('Bài thi này chưa có video mẫu chuẩn. Vui lòng cập nhật bài thi.', true);
     return;
   }
 
-  // Unwrap in case data was saved with a wrapper (e.g. legacy data)
+  _setCposeState('loading');
+  _startExtractProgress();
+  document.getElementById('cpose-loading-text').textContent = 'Đang trích xuất dữ liệu chuẩn từ video mẫu...';
+
+  let freshStdData = null;
+  try {
+    const stdRes = await fetch(`${AI_BASE_URL}/api/ai/extract-template`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ videoUrl: standardVideoUrl })
+    });
+    const stdJson = await stdRes.json().catch(() => null);
+    if (stdJson?.status === 'success' && stdJson?.standardData?.frames?.length > 0) {
+      freshStdData = stdJson.standardData;
+      // Cập nhật state để dùng lại nếu user chạy lại
+      state.standardPoseData = freshStdData;
+      console.log('[compare-pose] Re-extracted standardData:', freshStdData.frames.length, 'frames');
+    } else {
+      _stopExtractProgress();
+      _setCposeState('empty');
+      showToast('Trích xuất dữ liệu chuẩn thất bại: ' + (stdJson?.message || 'Không có frames'), true);
+      return;
+    }
+  } catch (err) {
+    _stopExtractProgress();
+    _setCposeState('empty');
+    showToast('Lỗi kết nối khi trích xuất chuẩn: ' + err.message, true);
+    return;
+  }
+  _stopExtractProgress();
+
+  // Unwrap studentData nếu cần
   let stuData = state.studentPoseData;
   if (stuData && stuData.studentData) stuData = stuData.studentData;
   else if (stuData && stuData.data) stuData = stuData.data;
 
-  let stdData = state.standardPoseData;
-  if (stdData && stdData.standardData) stdData = stdData.standardData;
-  else if (stdData && stdData.data) stdData = stdData.data;
+  let stdData = freshStdData;
 
-  // ---- DEBUG LOG ----
-  console.group('[compare-pose] DEBUG');
-  console.log('AI_BASE_URL being used:', AI_BASE_URL);
-  console.log('stuData keys:', stuData ? Object.keys(stuData) : 'NULL');
-  console.log('stuData.frames count:', stuData?.frames?.length ?? 'N/A');
-
-  const frame0 = stuData?.frames?.[0];
-  console.log('stuData.frames[0] keys:', frame0 ? Object.keys(frame0) : 'N/A');
-  // Kiểm tra keypoints có bị null/zero không
-  const kps = frame0?.keypoints || frame0?.keypoints_3d || frame0?.joints || null;
-  console.log('stuData frame[0] keypoints type:', Array.isArray(kps) ? `Array[${kps.length}]` : typeof kps);
-  console.log('stuData frame[0] keypoints sample:', JSON.stringify(kps)?.slice(0, 200));
-
-  console.log('stdData keys:', stdData ? Object.keys(stdData) : 'NULL');
-  console.log('stdData.frames count:', stdData?.frames?.length ?? 'N/A');
-  const frame0std = stdData?.frames?.[0];
-  const kps2 = frame0std?.keypoints || frame0std?.keypoints_3d || frame0std?.joints || null;
-  console.log('stdData frame[0] keypoints sample:', JSON.stringify(kps2)?.slice(0, 200));
-  console.groupEnd();
-
-
-  if (!stuData || !stuData.frames || stuData.frames.length === 0) {
+  if (!stuData?.frames?.length) {
     _setCposeState('empty');
     showToast('Dữ liệu học sinh không có khung hình hợp lệ.', true);
     return;
   }
-  if (!stdData || !stdData.frames || stdData.frames.length === 0) {
+  if (!stdData?.frames?.length) {
     _setCposeState('empty');
-    showToast('Dữ liệu chuẩn không có khung hình hợp lệ. Hãy tạo lại bài thi.', true);
+    showToast('Dữ liệu chuẩn không có khung hình hợp lệ.', true);
     return;
   }
 
+  console.log('[compare-pose] stuData frames:', stuData.frames.length, '| stdData frames:', stdData.frames.length);
+
+  // Bước 3: Gọi compare-pose
+  _setCposeState('loading');
+  document.getElementById('cpose-loading-text').textContent = 'Đang so sánh tư thế với chuẩn...';
+
   try {
-    const payload = {
-      studentData: stuData,
-      standardData: stdData
-    };
-
-    console.log('[compare-pose] Payload studentData.frames count:', payload.studentData?.frames?.length);
-    console.log('[compare-pose] Payload standardData.frames count:', payload.standardData?.frames?.length);
-    console.log('[compare-pose] Payload size (bytes):', JSON.stringify(payload).length);
-
+    const payload = { studentData: stuData, standardData: stdData };
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const json = await res.json().catch(() => null);
-    console.log('[compare-pose] Response:', json);
-    if (!res.ok || !json || !json.scores) {
+    console.log('[compare-pose] scores:', JSON.stringify(json?.scores));
+
+    if (!res.ok || !json?.scores) {
       _setCposeState('empty');
       showToast('So sánh tư thế thất bại: HTTP ' + res.status, true);
       return;
     }
 
-    // Bước 3: Gọi evaluate để lấy nhận xét
+    // Bước 4: Gọi evaluate để lấy nhận xét
     document.getElementById('cpose-loading-text').textContent = 'Đang phân tích chuyên sâu bằng AI...';
 
-    // API evaluate-pairwise-vlm yêu cầu standardData phải có video_url
-    const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
-    const standardVideoUrl = gradingExam.sampleVideoUrl
-      || (gradingExam.videos && gradingExam.videos[0]?.url)
-      || null;
-
     const evalPayload = {
-      standardData: {
-        ...(stdData || {}),
-        video_url: standardVideoUrl
-      },
+      standardData: { ...stdData, video_url: standardVideoUrl },
       studentData: stuData,
       scores: json.scores
     };
 
     const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate-pairwise-vlm`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(evalPayload)
     });
     const evalJson = await evalRes.json().catch(() => null);
 
-    const combinedData = {
+    _renderComparePoseResult({
       scores: json.scores,
       evaluation: evalJson?.evaluation,
       charts: evalJson?.charts
-    };
-
-    _renderComparePoseResult(combinedData);
+    });
   } catch (err) {
     _setCposeState('empty');
     showToast('Lỗi kết nối khi so sánh: ' + err.message, true);
