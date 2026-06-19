@@ -1543,7 +1543,7 @@ function _stopUploadExtractProgress() {
           headers: { 
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ videoUrl: aiVideoUrl })
+          body: JSON.stringify({ videoUrl: aiVideoUrl, sample_rate: 1 })
         });
         const aiJson = await aiRes.json();
         if (aiJson?.status === 'success' && aiJson?.studentData) {
@@ -1922,7 +1922,7 @@ async function runComparePose() {
         headers: { 
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ videoUrl })
+        body: JSON.stringify({ videoUrl, sample_rate: 1 })
       });
       const json = await res.json().catch(() => null);
       if (json?.status === 'success' && json?.studentData) {

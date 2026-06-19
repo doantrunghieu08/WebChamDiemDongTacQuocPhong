@@ -1325,7 +1325,7 @@ async function callSubmissionApi(status) {
           headers: { 
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ videoUrl: aiVideoUrl })
+          body: JSON.stringify({ videoUrl: aiVideoUrl, sample_rate: 1 })
         });
         const aiJson = await aiRes.json();
         if (aiJson?.status === 'success' && aiJson?.studentData) {
