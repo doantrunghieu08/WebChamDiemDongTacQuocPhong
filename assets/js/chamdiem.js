@@ -1952,10 +1952,30 @@ async function runComparePose() {
     return;
   }
 
+  // Unwrap in case data was saved with a wrapper (e.g. legacy data)
+  let stuData = state.studentPoseData;
+  if (stuData && stuData.studentData) stuData = stuData.studentData;
+  else if (stuData && stuData.data) stuData = stuData.data;
+
+  let stdData = state.standardPoseData;
+  if (stdData && stdData.standardData) stdData = stdData.standardData;
+  else if (stdData && stdData.data) stdData = stdData.data;
+
+  if (!stuData || !stuData.frames || stuData.frames.length === 0) {
+    _setCposeState('empty');
+    showToast('Dữ liệu học sinh không có khung hình hợp lệ.', true);
+    return;
+  }
+  if (!stdData || !stdData.frames || stdData.frames.length === 0) {
+    _setCposeState('empty');
+    showToast('Dữ liệu chuẩn không có khung hình hợp lệ. Hãy tạo lại bài thi.', true);
+    return;
+  }
+
   try {
     const payload = {
-      studentData: state.studentPoseData,
-      standardData: state.standardPoseData
+      studentData: stuData,
+      standardData: stdData
     };
 
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
@@ -1983,10 +2003,10 @@ async function runComparePose() {
 
     const evalPayload = {
       standardData: {
-        ...(state.standardPoseData || {}),
+        ...(stdData || {}),
         video_url: standardVideoUrl
       },
-      studentData: state.studentPoseData,
+      studentData: stuData,
       scores: json.scores
     };
 
