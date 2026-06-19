@@ -170,7 +170,7 @@ function loadVideoPlayer(index) {
 function loadGradingMode() {
   const mode = sessionStorage.getItem('gradingMode') || 'practice';
   state.gradingMode = mode;
-  
+
   // Update UI title based on mode
   let modeLabel = mode === 'practice' ? '(Luyện Tập)' : '(Lấy Điểm)';
   const breadcrumb = document.querySelector('.breadcrumb .cur');
@@ -185,7 +185,7 @@ function loadStudentInfo() {
   const selectedClass = JSON.parse(sessionStorage.getItem('selectedClass'));
   const gradingStudent = JSON.parse(sessionStorage.getItem('gradingStudent'));
   const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam'));
-  
+
   if (gradingStudent && gradingExam) {
     // Flow from class-detail.js
     const examName = gradingExam.name || 'Động tác Quốc phòng';
@@ -193,12 +193,12 @@ function loadStudentInfo() {
     document.getElementById('topbar-title').textContent = className ? `${className} - ${examName}` : examName;
     document.getElementById('breadcrumb-class').textContent = className;
     document.getElementById('breadcrumb-student').textContent = gradingStudent.name;
-    
+
     // Update page title
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${examName.toUpperCase()}`;
     document.title = `Chấm Điểm ${examName} – HACTECH`;
-    
+
     state.currentStudent = {
       name: gradingStudent.name,
       code: gradingStudent.code,
@@ -210,21 +210,21 @@ function loadStudentInfo() {
     document.getElementById('topbar-title').textContent = `${selectedStudent.className} - ${selectedStudent.subject}`;
     document.getElementById('breadcrumb-class').textContent = selectedStudent.className;
     document.getElementById('breadcrumb-student').textContent = selectedStudent.name;
-    
+
     // Update page title
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${selectedStudent.subject.toUpperCase()}`;
     document.title = `Chấm Điểm ${selectedStudent.subject} – HACTECH`;
-    
+
     state.currentStudent = selectedStudent;
   } else if (selectedClass) {
     document.getElementById('topbar-title').textContent = `${selectedClass.className} - ${selectedClass.subject}`;
     document.getElementById('breadcrumb-class').textContent = selectedClass.className;
-    
+
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${selectedClass.subject.toUpperCase()}`;
     document.title = `Chấm Điểm ${selectedClass.subject} – HACTECH`;
-    
+
     state.currentStudent = { className: selectedClass.className, name: 'Học sinh', subject: selectedClass.subject };
   }
 }
@@ -243,10 +243,10 @@ const state = {
   gradingSessionId: null,   // ID phiên chấm từ API
   videoUrls: [],            // [videoUrl1, videoUrl2] từ bài nộp của sinh viên
   errorTypes: [
-    { id: 1, name: 'Sai nhịp tay',          score: -1.0, note: 'Tay đánh không đều theo nhịp bước.' },
-    { id: 2, name: 'Bàn chân không vuông',  score: -0.5, note: 'Mũi chân và hướng bàn chân chưa đúng quy định.' },
-    { id: 3, name: 'Dáng người gù',         score: -1.0, note: 'Tư thế thân người không giữ được độ thẳng.' },
-    { id: 4, name: 'Mắt không nhìn thẳng',  score: -0.5, note: 'Ánh nhìn chưa hướng thẳng về phía trước.' },
+    { id: 1, name: 'Sai nhịp tay', score: -1.0, note: 'Tay đánh không đều theo nhịp bước.' },
+    { id: 2, name: 'Bàn chân không vuông', score: -0.5, note: 'Mũi chân và hướng bàn chân chưa đúng quy định.' },
+    { id: 3, name: 'Dáng người gù', score: -1.0, note: 'Tư thế thân người không giữ được độ thẳng.' },
+    { id: 4, name: 'Mắt không nhìn thẳng', score: -0.5, note: 'Ánh nhìn chưa hướng thẳng về phía trước.' },
     { id: 5, name: 'Tay không đúng tư thế', score: -0.5, note: 'Biên độ và vị trí tay chưa đúng mẫu động tác.' },
   ],
   timerInterval: null,
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateThumbActive();
   updateExamTotal();
   setupProgressBarDrag();
-  
+
   // Setup back button
   const btnBack = document.getElementById('btnBack');
   if (btnBack) {
@@ -587,7 +587,7 @@ function resetVideo() {
 }
 
 function seekByClick(e) {
-  const bar  = document.getElementById('prog-bar');
+  const bar = document.getElementById('prog-bar');
   const rect = bar.getBoundingClientRect();
   const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   state.currentTime = Math.round(ratio * state.duration);
@@ -629,7 +629,7 @@ function setupProgressBarDrag() {
 
 function switchVideo(n) {
   state.currentVideo = n;
-  state.currentTime  = 0;
+  state.currentTime = 0;
   if (state.isPlaying) togglePlay();
   document.getElementById('vid-index').textContent = String(n).padStart(2, '0');
   if (state.videoUrls.length >= n) {
@@ -643,14 +643,14 @@ function switchVideo(n) {
 
 function updateTimeDisplay() {
   const ts = formatTime(state.currentTime);
-  document.getElementById('current-time').textContent  = ts;
-  document.getElementById('footer-time').textContent   = ts;
+  document.getElementById('current-time').textContent = ts;
+  document.getElementById('footer-time').textContent = ts;
 }
 
 function updateProgressBar() {
   const pct = (state.currentTime / state.duration) * 100;
   document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-dot').style.left   = pct + '%';
+  document.getElementById('prog-dot').style.left = pct + '%';
 }
 
 function updateThumbActive() {
@@ -669,8 +669,8 @@ function formatTime(secs) {
 async function captureFrame() {
   if (!ensureGradingAvailable('chụp lỗi')) return;
 
-  state.capturedFrameTime    = state.currentTime;
-  state.assignedErrors       = [];
+  state.capturedFrameTime = state.currentTime;
+  state.assignedErrors = [];
   state.capturedFrameImageUrl = null;
   const ts = formatTime(state.capturedFrameTime);
 
@@ -709,7 +709,7 @@ async function captureFrame() {
 
     // Chụp khung hình hiện tại vào canvas
     const canvas = document.createElement('canvas');
-    canvas.width  = vid.videoWidth;
+    canvas.width = vid.videoWidth;
     canvas.height = vid.videoHeight;
     const ctx = canvas.getContext('2d');
     try {
@@ -779,10 +779,10 @@ async function captureFrame() {
       if (preview) {
         preview.innerHTML =
           '<a href="' + json.data.imageUrl + '" target="_blank" rel="noopener">' +
-            '<img src="' + json.data.imageUrl + '" alt="Frame t=' + ts + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block;"/>' +
+          '<img src="' + json.data.imageUrl + '" alt="Frame t=' + ts + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block;"/>' +
           '</a>' +
           '<div class="frame-badge-overlay" id="frame-badge-overlay" style="display:block">' +
-            'Frame t=<span id="overlay-frame-time">' + ts + '</span>' +
+          'Frame t=<span id="overlay-frame-time">' + ts + '</span>' +
           '</div>';
       }
       showToast('Đã lưu ảnh bằng chứng khung hình!');
@@ -815,7 +815,7 @@ function filterErrors() {
   const searchInput = document.getElementById('error-search');
   const searchTerm = searchInput.value.toLowerCase();
   const errorItems = document.querySelectorAll('.drop-item');
-  
+
   errorItems.forEach(item => {
     const errorName = item.querySelector('span').textContent.toLowerCase();
     if (errorName.includes(searchTerm)) {
@@ -886,10 +886,10 @@ function renderAssignedErrors() {
       div.className = 'err-row';
       div.innerHTML =
         '<span>' +
-          '<span class="err-num">' + (i + 1) + '.</span> ' +
-          '<span class="err-name-txt">' + e.name + '</span>' +
-          '<span class="err-score-val">(' + e.score.toFixed(1) + ')</span>' +
-          (e.note ? '<div class="err-note-txt">' + e.note + '</div>' : '') +
+        '<span class="err-num">' + (i + 1) + '.</span> ' +
+        '<span class="err-name-txt">' + e.name + '</span>' +
+        '<span class="err-score-val">(' + e.score.toFixed(1) + ')</span>' +
+        (e.note ? '<div class="err-note-txt">' + e.note + '</div>' : '') +
         '</span>' +
         '<button class="err-del" data-id="' + e.id + '">[Xóa]</button>';
       div.querySelector('.err-del').addEventListener('click', () => removeAssignedError(e.id));
@@ -952,11 +952,11 @@ async function finishGrading() {
     for (const e of state.assignedErrors) {
       try {
         const body = {
-          errorTypeId:   e.id,
-          deduction:     Math.abs(e.score),
-          frameTime:     state.capturedFrameTime,
+          errorTypeId: e.id,
+          deduction: Math.abs(e.score),
+          frameTime: state.capturedFrameTime,
           frameImageUrl: state.capturedFrameImageUrl || null,
-          notes:         e.note || '',
+          notes: e.note || '',
         };
         console.log('[finishGrading] POST add-error →', apiUrl, body);
         const resp = await fetch(apiUrl, {
@@ -980,11 +980,11 @@ async function finishGrading() {
 
   const total = state.assignedErrors.reduce((sum, e) => sum + e.score, 0);
   const record = {
-    id:       state.nextHistoryId++,
-    frameTs:  state.capturedFrameTime,
-    errors:   [...state.assignedErrors],
-    total:    total,
-    video:    state.currentVideo,
+    id: state.nextHistoryId++,
+    frameTs: state.capturedFrameTime,
+    errors: [...state.assignedErrors],
+    total: total,
+    video: state.currentVideo,
     imageUrl: state.capturedFrameImageUrl || null,
   };
   state.history.push(record);
@@ -992,12 +992,12 @@ async function finishGrading() {
 
   // Reset frame
   state.capturedFrameTime = null;
-  state.assignedErrors    = [];
+  state.assignedErrors = [];
   state.capturedFrameImageUrl = null;
-  document.getElementById('frame-badge').style.display         = 'none';
+  document.getElementById('frame-badge').style.display = 'none';
   document.getElementById('frame-badge-overlay') && (document.getElementById('frame-badge-overlay').style.display = 'none');
-  document.getElementById('err-tag-r').style.display           = 'none';
-  document.getElementById('err-tag-a').style.display           = 'none';
+  document.getElementById('err-tag-r').style.display = 'none';
+  document.getElementById('err-tag-a').style.display = 'none';
   // Khôi phục placeholder preview
   const preview = document.getElementById('frame-preview');
   if (preview) {
@@ -1201,8 +1201,8 @@ function renderHistoryTable() {
     const errStr = rec.errors.map(e => e.name + (e.note ? ' - ' + e.note : '') + ' (' + e.score.toFixed(1) + ')').join(', ');
     const imgCell = rec.imageUrl
       ? '<a href="' + rec.imageUrl + '" target="_blank" rel="noopener" title="Xem ảnh bằng chứng t=' + formatTime(rec.frameTs) + '">' +
-          '<img src="' + rec.imageUrl + '" alt="t=' + formatTime(rec.frameTs) + '" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border);display:block;"/>' +
-        '</a>'
+      '<img src="' + rec.imageUrl + '" alt="t=' + formatTime(rec.frameTs) + '" style="width:48px;height:36px;object-fit:cover;border-radius:4px;border:1px solid var(--border);display:block;"/>' +
+      '</a>'
       : '<div class="thumb-cell">V0' + rec.video + '</div>';
     const tr = document.createElement('tr');
     tr.innerHTML =
@@ -1212,9 +1212,9 @@ function renderHistoryTable() {
       '<td style="word-break:break-word">' + errStr + '</td>' +
       '<td class="score-neg">' + rec.total.toFixed(1) + '</td>' +
       '<td class="history-actions">' +
-        '<button type="button" class="adel" data-id="' + rec.id + '" aria-label="Xóa bản ghi">&times;</button>' +
+      '<button type="button" class="adel" data-id="' + rec.id + '" aria-label="Xóa bản ghi">&times;</button>' +
       '</td>';
-    tr.querySelector('.adel').addEventListener('click',  () => deleteRecord(rec.id));
+    tr.querySelector('.adel').addEventListener('click', () => deleteRecord(rec.id));
 
     // Click vào hàng → tua video đến thời điểm frame
     tr.style.cursor = 'pointer';
@@ -1249,14 +1249,14 @@ function editRecord(id) {
   if (!rec) return;
   // Khôi phục về panel để sửa
   state.capturedFrameTime = rec.frameTs;
-  state.assignedErrors    = [...rec.errors];
+  state.assignedErrors = [...rec.errors];
   state.history = state.history.filter(r => r.id !== id);
 
   const ts = formatTime(rec.frameTs);
-  document.getElementById('frame-badge').style.display         = 'block';
-  document.getElementById('frame-time').textContent            = ts;
+  document.getElementById('frame-badge').style.display = 'block';
+  document.getElementById('frame-time').textContent = ts;
   document.getElementById('frame-badge-overlay').style.display = 'block';
-  document.getElementById('overlay-frame-time').textContent    = ts;
+  document.getElementById('overlay-frame-time').textContent = ts;
 
   renderAssignedErrors();
   renderErrorTypeList();
@@ -1271,7 +1271,7 @@ function editRecord(id) {
 const _uploadVideoState = {
   file1: null, file2: null,
   uploadedUrl1: null, uploadedUrl2: null,
-  uploadedSize1: 0,   uploadedSize2: 0,
+  uploadedSize1: 0, uploadedSize2: 0,
 };
 
 function openUploadVideoModal() {
@@ -1359,10 +1359,10 @@ async function doUploadToCloudinary() {
   }
 
   const progressWrap = document.getElementById('upload-progress-wrap');
-  const progressBar  = document.getElementById('upload-progress-bar');
+  const progressBar = document.getElementById('upload-progress-bar');
   const progressLabel = document.getElementById('upload-progress-label');
   if (progressWrap) progressWrap.style.display = 'block';
-  if (progressBar)  progressBar.style.width = '0%';
+  if (progressBar) progressBar.style.width = '0%';
   setUploadBtnsDisabled(true);
 
   const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.UPLOAD_STUDENT_EXAM_VIDEO)
@@ -1370,14 +1370,14 @@ async function doUploadToCloudinary() {
     : 'http://103.75.182.246:8080/public/upload-student-exam';
 
   const studentName = state.currentStudent?.name || 'unknown';
-  const examTitle   = state.currentStudent?.subject || 'exam';
+  const examTitle = state.currentStudent?.subject || 'exam';
 
   try {
     // Upload video 1
     if (_uploadVideoState.file1) {
       if (progressLabel) progressLabel.textContent = 'Đang tải Video 01 lên…';
       const res1 = await _uploadOneVideo(apiUrl, _uploadVideoState.file1, studentName, examTitle, progressBar, 0, 50);
-      _uploadVideoState.uploadedUrl1  = res1.url;
+      _uploadVideoState.uploadedUrl1 = res1.url;
       _uploadVideoState.uploadedSize1 = _uploadVideoState.file1.size;
     }
 
@@ -1385,7 +1385,7 @@ async function doUploadToCloudinary() {
     if (_uploadVideoState.file2) {
       if (progressLabel) progressLabel.textContent = 'Đang tải Video 02 lên…';
       const res2 = await _uploadOneVideo(apiUrl, _uploadVideoState.file2, studentName, examTitle, progressBar, 50, 100);
-      _uploadVideoState.uploadedUrl2  = res2.url;
+      _uploadVideoState.uploadedUrl2 = res2.url;
       _uploadVideoState.uploadedSize2 = _uploadVideoState.file2.size;
     }
 
@@ -1483,53 +1483,53 @@ async function doConfirmSubmission() {
   }
 
   const body = {
-    idStudent:      studentCode,
-    idClassExam:    classExamId,   // khớp với DTO: int idClassExam
-    videoUrl1:      _uploadVideoState.uploadedUrl1 || null,
+    idStudent: studentCode,
+    idClassExam: classExamId,   // khớp với DTO: int idClassExam
+    videoUrl1: _uploadVideoState.uploadedUrl1 || null,
     fileSizeBytes1: _uploadVideoState.uploadedSize1 || 0,
-    videoUrl2:      _uploadVideoState.uploadedUrl2 || null,
+    videoUrl2: _uploadVideoState.uploadedUrl2 || null,
     fileSizeBytes2: _uploadVideoState.uploadedSize2 || 0,
-    status:         'SUBMITTED',
+    status: 'SUBMITTED',
   };
 
   const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO)
     ? API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO
     : 'http://103.75.182.246:8080/teacher/submission/upload-video';
 
-let _uploadExtractProgressInterval = null;
+  let _uploadExtractProgressInterval = null;
 
-function _startUploadExtractProgress() {
-  _stopUploadExtractProgress();
-  const loadingDiv = document.getElementById('upload-extract-loading');
-  if (loadingDiv) loadingDiv.style.display = 'flex';
+  function _startUploadExtractProgress() {
+    _stopUploadExtractProgress();
+    const loadingDiv = document.getElementById('upload-extract-loading');
+    if (loadingDiv) loadingDiv.style.display = 'flex';
 
-  const bar = document.getElementById('upload-extract-progress-bar');
-  const pctText = document.getElementById('upload-extract-progress-pct');
-  if (!bar || !pctText) return;
-  
-  let pct = 0;
-  bar.style.width = '0%';
-  pctText.textContent = '0%';
-  
-  _uploadExtractProgressInterval = setInterval(() => {
-    if (pct < 50) pct += 2;
-    else if (pct < 80) pct += 1;
-    else if (pct < 95) pct += 0.2;
-    if (pct > 99) pct = 99;
-    
-    bar.style.width = pct + '%';
-    pctText.textContent = Math.floor(pct) + '%';
-  }, 300);
-}
+    const bar = document.getElementById('upload-extract-progress-bar');
+    const pctText = document.getElementById('upload-extract-progress-pct');
+    if (!bar || !pctText) return;
 
-function _stopUploadExtractProgress() {
-  if (_uploadExtractProgressInterval) {
-    clearInterval(_uploadExtractProgressInterval);
-    _uploadExtractProgressInterval = null;
+    let pct = 0;
+    bar.style.width = '0%';
+    pctText.textContent = '0%';
+
+    _uploadExtractProgressInterval = setInterval(() => {
+      if (pct < 50) pct += 2;
+      else if (pct < 80) pct += 1;
+      else if (pct < 95) pct += 0.2;
+      if (pct > 99) pct = 99;
+
+      bar.style.width = pct + '%';
+      pctText.textContent = Math.floor(pct) + '%';
+    }, 300);
   }
-  const loadingDiv = document.getElementById('upload-extract-loading');
-  if (loadingDiv) loadingDiv.style.display = 'none';
-}
+
+  function _stopUploadExtractProgress() {
+    if (_uploadExtractProgressInterval) {
+      clearInterval(_uploadExtractProgressInterval);
+      _uploadExtractProgressInterval = null;
+    }
+    const loadingDiv = document.getElementById('upload-extract-loading');
+    if (loadingDiv) loadingDiv.style.display = 'none';
+  }
 
   try {
     let studentDataStr = null;
@@ -1540,7 +1540,7 @@ function _stopUploadExtractProgress() {
       try {
         const aiRes = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-student', {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ videoUrl: aiVideoUrl, sample_rate: 1 })
@@ -1611,7 +1611,7 @@ function _stopUploadExtractProgress() {
             const session = await ExamsService.startGradingSession(String(newSubmissionId), idTeacher, gradingMode);
             sessionStorage.setItem('gradingSession', JSON.stringify(session));
             state.gradingSessionId = session?.id ?? null;
-            
+
             // Khôi phục dữ liệu chuẩn (standardData) vào state để Compare Pose hoạt động
             const sub = session?.studentSubmissionResponse;
             if (sub && sub.standardData) {
@@ -1645,7 +1645,7 @@ function openAddErrorModal() {
   if (!ensureGradingAvailable('thêm lỗi mới')) return;
 
   document.getElementById('modal-backdrop').style.display = 'flex';
-  document.getElementById('new-error-name').value  = '';
+  document.getElementById('new-error-name').value = '';
   document.getElementById('new-error-description').value = '';
   document.getElementById('new-error-severity').value = 'trung-binh';
   document.getElementById('new-error-deduction').value = '';
@@ -1791,16 +1791,16 @@ function _showAIGradeModal({ loading = false, error = null, data = null } = {}) 
     html += '<div class="ai-no-errors">✅ AI không phát hiện lỗi nào trong video.</div>';
   } else {
     html += '<div class="ai-errors-title">Phát hiện ' + errors.length + ' lỗi:</div><div class="ai-errors-list">';
-    errors.forEach(function(e, i) {
-      const errorName = state.errorTypes.find(function(et) { return et.id === e.errorType; })?.name || ('Lỗi #' + e.errorType);
+    errors.forEach(function (e, i) {
+      const errorName = state.errorTypes.find(function (et) { return et.id === e.errorType; })?.name || ('Lỗi #' + e.errorType);
       html +=
         '<div class="ai-error-item">' +
-          '<div class="ai-error-header">' +
-            '<span class="ai-err-num">' + (i + 1) + '</span>' +
-            '<span class="ai-err-time">⏱ ' + (e.timestamp || '--:--') + '</span>' +
-            '<span class="ai-err-type">' + errorName + '</span>' +
-          '</div>' +
-          '<div class="ai-err-desc">' + e.description + '</div>' +
+        '<div class="ai-error-header">' +
+        '<span class="ai-err-num">' + (i + 1) + '</span>' +
+        '<span class="ai-err-time">⏱ ' + (e.timestamp || '--:--') + '</span>' +
+        '<span class="ai-err-type">' + errorName + '</span>' +
+        '</div>' +
+        '<div class="ai-err-desc">' + e.description + '</div>' +
         '</div>';
     });
     html += '</div>';
@@ -1852,9 +1852,9 @@ function closeComparePoseModal(e) {
 let _extractProgressInterval = null;
 
 function _setCposeState(stateStr, isExtracting = false) {
-  document.getElementById('cpose-empty-state').style.display   = stateStr === 'empty'   ? '' : 'none';
+  document.getElementById('cpose-empty-state').style.display = stateStr === 'empty' ? '' : 'none';
   document.getElementById('cpose-loading-state').style.display = stateStr === 'loading' ? '' : 'none';
-  document.getElementById('cpose-result-state').style.display  = stateStr === 'result'  ? '' : 'none';
+  document.getElementById('cpose-result-state').style.display = stateStr === 'result' ? '' : 'none';
 
   if (stateStr === 'loading') {
     const progWrap = document.getElementById('cpose-progress-wrap');
@@ -1882,17 +1882,17 @@ function _startExtractProgress() {
   const bar = document.getElementById('cpose-progress-bar');
   const pctText = document.getElementById('cpose-progress-pct');
   if (!bar || !pctText) return;
-  
+
   let pct = 0;
   bar.style.width = '0%';
   pctText.textContent = '0%';
-  
+
   _extractProgressInterval = setInterval(() => {
     if (pct < 50) pct += 2;
     else if (pct < 80) pct += 1;
     else if (pct < 95) pct += 0.2;
     if (pct > 99) pct = 99;
-    
+
     bar.style.width = pct + '%';
     pctText.textContent = Math.floor(pct) + '%';
   }, 300);
@@ -1919,7 +1919,7 @@ async function runComparePose() {
     try {
       const res = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ videoUrl, sample_rate: 1 })
@@ -1953,14 +1953,14 @@ async function runComparePose() {
   }
 
   try {
-    const payload = { 
+    const payload = {
       studentData: state.studentPoseData,
       standardData: state.standardPoseData
     };
 
     const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
@@ -1992,7 +1992,7 @@ async function runComparePose() {
 
     const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate-pairwise-vlm`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(evalPayload)
@@ -2013,14 +2013,14 @@ async function runComparePose() {
 }
 
 const JOINT_NAMES_VI = {
-  left_shoulder:  'Vai trái',
+  left_shoulder: 'Vai trái',
   right_shoulder: 'Vai phải',
-  left_elbow:     'Khuỷu trái',
-  right_elbow:    'Khuỷu phải',
-  left_hip:       'Hông trái',
-  right_hip:      'Hông phải',
-  left_knee:      'Gối trái',
-  right_knee:     'Gối phải',
+  left_elbow: 'Khuỷu trái',
+  right_elbow: 'Khuỷu phải',
+  left_hip: 'Hông trái',
+  right_hip: 'Hông phải',
+  left_knee: 'Gối trái',
+  right_knee: 'Gối phải',
 };
 
 function _diffClass(deg) {
@@ -2057,14 +2057,14 @@ function resetComparePoseResult() {
 // ---- JOINT FRAME MODAL ----
 // Ánh xạ tên khớp → gợi ý khắc phục
 const JOINT_TIPS = {
-  left_shoulder:  'Giữ vai trái ngang bằng với vai phải, không nhô lên hoặc co lại. Tập các bài giãn cơ vai trước khi luyện tập.',
+  left_shoulder: 'Giữ vai trái ngang bằng với vai phải, không nhô lên hoặc co lại. Tập các bài giãn cơ vai trước khi luyện tập.',
   right_shoulder: 'Giữ vai phải thẳng và cân bằng với vai trái. Chú ý không nghiêng người sang phải khi thực hiện động tác.',
-  left_elbow:     'Giữ khuỷu tay trái đúng góc theo quy định. Luyện tập trước gương để kiểm tra biên độ tay.',
-  right_elbow:    'Giữ khuỷu tay phải đúng góc theo quy định. Đảm bảo tay vung đúng nhịp với bước chân.',
-  left_hip:       'Giữ hông trái cân bằng, không xoay hoặc nghiêng. Phần thân dưới cần ổn định khi di chuyển.',
-  right_hip:      'Giữ hông phải thẳng và song song với hông trái. Chú ý không vặn hông khi bước.',
-  left_knee:      'Đầu gối trái cần nâng đúng độ cao quy định. Không co hoặc duỗi quá mức khi bước.',
-  right_knee:     'Đầu gối phải cần nâng đúng độ cao quy định. Giữ nhịp đều giữa hai chân.',
+  left_elbow: 'Giữ khuỷu tay trái đúng góc theo quy định. Luyện tập trước gương để kiểm tra biên độ tay.',
+  right_elbow: 'Giữ khuỷu tay phải đúng góc theo quy định. Đảm bảo tay vung đúng nhịp với bước chân.',
+  left_hip: 'Giữ hông trái cân bằng, không xoay hoặc nghiêng. Phần thân dưới cần ổn định khi di chuyển.',
+  right_hip: 'Giữ hông phải thẳng và song song với hông trái. Chú ý không vặn hông khi bước.',
+  left_knee: 'Đầu gối trái cần nâng đúng độ cao quy định. Không co hoặc duỗi quá mức khi bước.',
+  right_knee: 'Đầu gối phải cần nâng đúng độ cao quy định. Giữ nhịp đều giữa hai chân.',
 };
 
 // Lưu dữ liệu scores để dùng trong modal frame
@@ -2076,51 +2076,51 @@ let _lastEvaluation = null;
 const _VI_PHRASES = [
   // ── Lỗi góc / angle error ──────────────────────────────────────────
   [/angle error:\s*([\d.]+)\s*degrees?\s*\(standard\)/gi, 'lỗi góc: $1° (so với chuẩn)'],
-  [/angle error:\s*([\d.]+)\s*degrees?/gi,                'lỗi góc: $1°'],
-  [/bending angle is too large/gi,                        'góc cong quá lớn'],
-  [/angled too far forward/gi,                            'góc về phía trước quá nhiều'],
-  [/angled too far back(?:ward)?/gi,                      'góc về phía sau quá nhiều'],
-  [/angled incorrectly/gi,                                'góc độ chưa đúng'],
-  [/bending too much/gi,                                  'cong quá mức'],
-  [/not straight/gi,                                      'chưa thẳng'],
+  [/angle error:\s*([\d.]+)\s*degrees?/gi, 'lỗi góc: $1°'],
+  [/bending angle is too large/gi, 'góc cong quá lớn'],
+  [/angled too far forward/gi, 'góc về phía trước quá nhiều'],
+  [/angled too far back(?:ward)?/gi, 'góc về phía sau quá nhiều'],
+  [/angled incorrectly/gi, 'góc độ chưa đúng'],
+  [/bending too much/gi, 'cong quá mức'],
+  [/not straight/gi, 'chưa thẳng'],
   // ── Vấn đề đầu gối ─────────────────────────────────────────────────
-  [/genu valgum\s*\(bowed knees?\)/gi,                    'đầu gối vòng kiềng (cong vào trong)'],
-  [/genu valgum\s*\(bowed knee\)/gi,                      'đầu gối vòng kiềng (cong vào trong)'],
-  [/genu valgum/gi,                                       'đầu gối vòng kiềng'],
-  [/genu varum/gi,                                        'đầu gối cong ra ngoài'],
-  [/keep the knee(?: joint)? straight/gi,                 'giữ thẳng khớp gối'],
+  [/genu valgum\s*\(bowed knees?\)/gi, 'đầu gối vòng kiềng (cong vào trong)'],
+  [/genu valgum\s*\(bowed knee\)/gi, 'đầu gối vòng kiềng (cong vào trong)'],
+  [/genu valgum/gi, 'đầu gối vòng kiềng'],
+  [/genu varum/gi, 'đầu gối cong ra ngoài'],
+  [/keep the knee(?: joint)? straight/gi, 'giữ thẳng khớp gối'],
   // ── Khắc phục vai ──────────────────────────────────────────────────
-  [/align (?:the )?left shoulder with the standard posture\.?/gi,  'căn vai trái theo đúng tư thế chuẩn'],
+  [/align (?:the )?left shoulder with the standard posture\.?/gi, 'căn vai trái theo đúng tư thế chuẩn'],
   [/align (?:the )?right shoulder with the standard posture\.?/gi, 'căn vai phải theo đúng tư thế chuẩn'],
   [/align shoulder with (?:the )?torso(?: for better posture)?\.?/gi, 'căn vai thẳng với thân để có tư thế tốt hơn'],
-  [/align shoulder with body(?: centerline)?/gi,          'căn vai thẳng với thân người'],
-  [/align shoulder with hips? and torso/gi,               'căn vai thẳng với hông và thân'],
+  [/align shoulder with body(?: centerline)?/gi, 'căn vai thẳng với thân người'],
+  [/align shoulder with hips? and torso/gi, 'căn vai thẳng với hông và thân'],
   // ── Khắc phục gối ──────────────────────────────────────────────────
   [/align the knee directly over the ankle and hip,?\s*avoid excessive inward bending of the knee\.?/gi, 'giữ đầu gối thẳng hàng với mắt cá chân và hông, tránh cong vào trong quá mức'],
-  [/straighten the left knee to match the (?:model'?s?|standard) posture\.?/gi,  'duỗi thẳng gối trái theo đúng tư thế chuẩn'],
+  [/straighten the left knee to match the (?:model'?s?|standard) posture\.?/gi, 'duỗi thẳng gối trái theo đúng tư thế chuẩn'],
   [/straighten the right knee to match the (?:model'?s?|standard) posture\.?/gi, 'duỗi thẳng gối phải theo đúng tư thế chuẩn'],
-  [/straighten the left knee/gi,  'duỗi thẳng gối trái'],
+  [/straighten the left knee/gi, 'duỗi thẳng gối trái'],
   [/straighten the right knee/gi, 'duỗi thẳng gối phải'],
-  [/straighten (?:the )?knee/gi,  'duỗi thẳng đầu gối'],
+  [/straighten (?:the )?knee/gi, 'duỗi thẳng đầu gối'],
   // ── Hông / khuỷu / chung ───────────────────────────────────────────
-  [/keep (?:the )?hips? level/gi,      'giữ hông ngang bằng'],
-  [/rotate (?:the )?hip/gi,            'xoay hông'],
-  [/extend (?:the )?elbow/gi,          'duỗi thẳng khuỷu tay'],
-  [/bend (?:the )?elbow/gi,            'cong khuỷu tay'],
-  [/maintain (?:proper )?posture/gi,   'duy trì tư thế đúng'],
-  [/correct (?:your )?posture/gi,      'chỉnh lại tư thế'],
-  [/for better posture/gi,             'để có tư thế tốt hơn'],
-  [/with the standard posture/gi,      'theo tư thế chuẩn'],
-  [/with standard/gi,                  'so với chuẩn'],
+  [/keep (?:the )?hips? level/gi, 'giữ hông ngang bằng'],
+  [/rotate (?:the )?hip/gi, 'xoay hông'],
+  [/extend (?:the )?elbow/gi, 'duỗi thẳng khuỷu tay'],
+  [/bend (?:the )?elbow/gi, 'cong khuỷu tay'],
+  [/maintain (?:proper )?posture/gi, 'duy trì tư thế đúng'],
+  [/correct (?:your )?posture/gi, 'chỉnh lại tư thế'],
+  [/for better posture/gi, 'để có tư thế tốt hơn'],
+  [/with the standard posture/gi, 'theo tư thế chuẩn'],
+  [/with standard/gi, 'so với chuẩn'],
   // ── Tên khớp (snake_case → tiếng Việt) ────────────────────────────
-  [/left_shoulder/gi,  'Vai trái'],
+  [/left_shoulder/gi, 'Vai trái'],
   [/right_shoulder/gi, 'Vai phải'],
-  [/left_elbow/gi,     'Khuỷu trái'],
-  [/right_elbow/gi,    'Khuỷu phải'],
-  [/left_hip/gi,       'Hông trái'],
-  [/right_hip/gi,      'Hông phải'],
-  [/left_knee/gi,      'Gối trái'],
-  [/right_knee/gi,     'Gối phải'],
+  [/left_elbow/gi, 'Khuỷu trái'],
+  [/right_elbow/gi, 'Khuỷu phải'],
+  [/left_hip/gi, 'Hông trái'],
+  [/right_hip/gi, 'Hông phải'],
+  [/left_knee/gi, 'Gối trái'],
+  [/right_knee/gi, 'Gối phải'],
 ];
 
 function _translateToVi(text) {
@@ -2152,20 +2152,20 @@ function _renderComparePoseResult(data) {
   let maxDiffJoint = '';
   let totalDiff = 0;
   let count = 0;
-  
+
   const JOINTS = Object.keys(JOINT_NAMES_VI);
-  
+
   JOINTS.forEach(joint => {
-     const s = scores[joint] ?? 100;
-     const diff = 45 * (1 - s / 100);
-     totalDiff += diff;
-     count++;
-     if (diff > maxDiff) {
-       maxDiff = diff;
-       maxDiffJoint = joint;
-     }
+    const s = scores[joint] ?? 100;
+    const diff = 45 * (1 - s / 100);
+    totalDiff += diff;
+    count++;
+    if (diff > maxDiff) {
+      maxDiff = diff;
+      maxDiffJoint = joint;
+    }
   });
-  
+
   const avgDiff = count > 0 ? totalDiff / count : 0;
 
   // ---- Cập nhật banner ----
@@ -2210,7 +2210,7 @@ function _renderComparePoseResult(data) {
   // ---- Nhận xét tổng thể bằng AI ----
   const feedbackBox = document.getElementById('cpose-feedback-box');
   const feedbackEl = document.getElementById('cpose-feedback-text');
-  
+
   if (evaluation && (evaluation.comment || evaluation.suggestions?.length > 0)) {
     let html = '';
     if (evaluation.comment) {
@@ -2265,9 +2265,9 @@ function _renderComparePoseResult(data) {
         const chartWrapper = document.createElement('div');
         chartWrapper.className = 'cpose-chart-card';
         chartWrapper.innerHTML = '<div class="cpose-chart-title">' + (chartData.label || JOINT_NAMES_VI[jointKey]) + '</div>' +
-                                 '<div style="position: relative; height: 200px; width: 100%;">' +
-                                   '<canvas id="chart-' + jointKey + '"></canvas>' +
-                                 '</div>';
+          '<div style="position: relative; height: 200px; width: 100%;">' +
+          '<canvas id="chart-' + jointKey + '"></canvas>' +
+          '</div>';
         chartsGrid.appendChild(chartWrapper);
 
         const ctx = document.getElementById('chart-' + jointKey).getContext('2d');
@@ -2471,9 +2471,9 @@ async function openJointFrameModal(jointKey, score, avgDiff, allScores, targetTi
         stdVid.style.display = 'none';
         document.body.appendChild(stdVid);
       }
-      
+
       const drawStdVideo = async () => {
-         await _drawVideoFrameToCanvas(stdVid, standardCanvas, bestStandardTime, jointKey, bestStandardFrame, '#16a34a');
+        await _drawVideoFrameToCanvas(stdVid, standardCanvas, bestStandardTime, jointKey, bestStandardFrame, '#16a34a');
       };
 
       if (stdVid.src !== standardVideoUrl) {
@@ -2488,22 +2488,22 @@ async function openJointFrameModal(jointKey, score, avgDiff, allScores, targetTi
         _drawPlaceholderCanvas(standardCanvas, 'Đang tải video mẫu...', '#16a34a');
         await new Promise(resolve => {
           const onLoaded = async () => {
-             stdVid.removeEventListener('loadedmetadata', onLoaded);
-             await drawStdVideo();
-             resolve();
+            stdVid.removeEventListener('loadedmetadata', onLoaded);
+            await drawStdVideo();
+            resolve();
           };
           stdVid.addEventListener('loadedmetadata', onLoaded);
           setTimeout(() => {
-             stdVid.removeEventListener('loadedmetadata', onLoaded);
-             _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
-             resolve();
+            stdVid.removeEventListener('loadedmetadata', onLoaded);
+            _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
+            resolve();
           }, 4000);
         });
       }
     } else {
       _drawSkeletonFrameToCanvas(standardCanvas, bestStandardFrame, '#16a34a', jointKey);
     }
-    
+
     standardTimeBadge.textContent = '⏱ t=' + formatTime(Math.round(bestStandardTime));
     standardDesc.textContent = '✅ Frame chuẩn (tham chiếu)';
   } else if (standardFrames.length === 0) {
@@ -2565,16 +2565,16 @@ async function _drawVideoFrameToCanvas(vid, canvas, seekTime, highlightJoint, fr
 
       // Không tua lại prevTime để video "nằm ở frame đó" giúp người dùng xem chi tiết
       if (!wasPaused) {
-        vid.play().catch(()=>{});
+        vid.play().catch(() => { });
       }
-      
+
       // Đồng bộ state để UI (thanh progress, thời gian) cập nhật đúng với frame hiện tại
       if (typeof window.state !== 'undefined') {
-          window.state.currentTime = seekTime;
-          if (typeof updateTimeDisplay === 'function') updateTimeDisplay();
-          if (typeof updateProgressBar === 'function') updateProgressBar();
+        window.state.currentTime = seekTime;
+        if (typeof updateTimeDisplay === 'function') updateTimeDisplay();
+        if (typeof updateProgressBar === 'function') updateProgressBar();
       }
-      
+
       resolve();
     }
 
@@ -2654,22 +2654,22 @@ function _drawPlaceholderCanvas(canvas, text, color) {
 
 // Ánh xạ tên khớp → keypoint index (theo chuẩn MediaPipe/MoveNet pose 17 keypoints)
 const JOINT_KP_IDX = {
-  left_shoulder:  5,
+  left_shoulder: 5,
   right_shoulder: 6,
-  left_elbow:     7,
-  right_elbow:    8,
-  left_hip:       11,
-  right_hip:      12,
-  left_knee:      13,
-  right_knee:     14,
+  left_elbow: 7,
+  right_elbow: 8,
+  left_hip: 11,
+  right_hip: 12,
+  left_knee: 13,
+  right_knee: 14,
 };
 
 // Các cạnh skeleton để vẽ
 const POSE_CONNECTIONS = [
-  [5,6],[5,7],[7,9],[6,8],[8,10],    // arms
-  [5,11],[6,12],[11,12],              // torso
-  [11,13],[13,15],[12,14],[14,16],   // legs
-  [0,1],[0,2],[1,3],[2,4],           // face
+  [5, 6], [5, 7], [7, 9], [6, 8], [8, 10],    // arms
+  [5, 11], [6, 12], [11, 12],              // torso
+  [11, 13], [13, 15], [12, 14], [14, 16],   // legs
+  [0, 1], [0, 2], [1, 3], [2, 4],           // face
 ];
 
 // Vẽ skeleton overlay lên ctx từ frameData
@@ -2680,26 +2680,26 @@ function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
   let kps = frameData.keypoints || frameData.joints || frameData.landmarks || frameData.pose || frameData.poseLandmarks || null;
   if (!kps && Array.isArray(frameData)) kps = frameData;
   if (!kps && typeof frameData === 'object') {
-     // Thử tìm bất kỳ mảng nào có vẻ là tọa độ (ít nhất 10 phần tử)
-     for (const k in frameData) {
-         if (Array.isArray(frameData[k]) && frameData[k].length >= 10) {
-             kps = frameData[k];
-             break;
-         }
-     }
+    // Thử tìm bất kỳ mảng nào có vẻ là tọa độ (ít nhất 10 phần tử)
+    for (const k in frameData) {
+      if (Array.isArray(frameData[k]) && frameData[k].length >= 10) {
+        kps = frameData[k];
+        break;
+      }
+    }
   }
-  
+
   if (!kps) {
-      // Có thể frameData chính là một object dictionary chứa tọa độ (VD: {"left_shoulder": {x, y}, ...})
-      kps = frameData;
+    // Có thể frameData chính là một object dictionary chứa tọa độ (VD: {"left_shoulder": {x, y}, ...})
+    kps = frameData;
   }
 
   // Normalize keypoints thành [{x, y, score}] để phù hợp với POSE_CONNECTIONS (chuẩn MoveNet 17 keypoints)
   const normalized = [];
-  
+
   // Khởi tạo mảng trống 33 phần tử để đảm bảo index đúng nếu dùng object dictionary
   for (let i = 0; i < 33; i++) {
-      normalized.push({ x: 0, y: 0, score: 0 });
+    normalized.push({ x: 0, y: 0, score: 0 });
   }
 
   if (Array.isArray(kps)) {
@@ -2712,51 +2712,51 @@ function _drawSkeletonOverlay(ctx, frameData, W, H, color, highlightJoint) {
       // Dạng [{x, y, score}, ...]
       kps.forEach((kp, i) => {
         if (i < 33) {
-            normalized[i] = { 
-              x: kp.x ?? kp.px ?? 0, 
-              y: kp.y ?? kp.py ?? 0, 
-              score: kp.score ?? kp.confidence ?? kp.visibility ?? 1 
-            };
+          normalized[i] = {
+            x: kp.x ?? kp.px ?? 0,
+            y: kp.y ?? kp.py ?? 0,
+            score: kp.score ?? kp.confidence ?? kp.visibility ?? 1
+          };
         }
       });
     }
   } else if (typeof kps === 'object') {
     // Dạng dictionary mapping tên khớp -> tọa độ
     for (const [key, kp] of Object.entries(kps)) {
-        if (!kp || typeof kp !== 'object') continue;
-        
-        let idx = -1;
-        if (!isNaN(parseInt(key))) {
-            idx = parseInt(key);
-        } else if (JOINT_KP_IDX[key] !== undefined) {
-            idx = JOINT_KP_IDX[key];
-        } else {
-            // Fallback mapping cho MediaPipe / MoveNet names
-            const keymap = {
-                'nose': 0, 'left_eye_inner': 1, 'left_eye': 2, 'left_eye_outer': 3,
-                'right_eye_inner': 4, 'right_eye': 5, 'right_eye_outer': 6,
-                'left_ear': 7, 'right_ear': 8, 'mouth_left': 9, 'mouth_right': 10,
-                'left_shoulder': 5, 'right_shoulder': 6, 'left_elbow': 7, 'right_elbow': 8,
-                'left_wrist': 9, 'right_wrist': 10, 'left_hip': 11, 'right_hip': 12, 
-                'left_knee': 13, 'right_knee': 14, 'left_ankle': 15, 'right_ankle': 16
-            };
-            if (keymap[key] !== undefined) idx = keymap[key];
-        }
-        
-        if (idx >= 0 && idx < 33) {
-            normalized[idx] = {
-                x: kp.x ?? kp.px ?? 0,
-                y: kp.y ?? kp.py ?? 0,
-                score: kp.score ?? kp.confidence ?? kp.visibility ?? 1
-            };
-        }
+      if (!kp || typeof kp !== 'object') continue;
+
+      let idx = -1;
+      if (!isNaN(parseInt(key))) {
+        idx = parseInt(key);
+      } else if (JOINT_KP_IDX[key] !== undefined) {
+        idx = JOINT_KP_IDX[key];
+      } else {
+        // Fallback mapping cho MediaPipe / MoveNet names
+        const keymap = {
+          'nose': 0, 'left_eye_inner': 1, 'left_eye': 2, 'left_eye_outer': 3,
+          'right_eye_inner': 4, 'right_eye': 5, 'right_eye_outer': 6,
+          'left_ear': 7, 'right_ear': 8, 'mouth_left': 9, 'mouth_right': 10,
+          'left_shoulder': 5, 'right_shoulder': 6, 'left_elbow': 7, 'right_elbow': 8,
+          'left_wrist': 9, 'right_wrist': 10, 'left_hip': 11, 'right_hip': 12,
+          'left_knee': 13, 'right_knee': 14, 'left_ankle': 15, 'right_ankle': 16
+        };
+        if (keymap[key] !== undefined) idx = keymap[key];
+      }
+
+      if (idx >= 0 && idx < 33) {
+        normalized[idx] = {
+          x: kp.x ?? kp.px ?? 0,
+          y: kp.y ?? kp.py ?? 0,
+          score: kp.score ?? kp.confidence ?? kp.visibility ?? 1
+        };
+      }
     }
   }
 
   // Bỏ qua nếu không có keypoints hợp lệ
   const validKps = normalized.filter(k => k.score > 0.1);
   if (validKps.length === 0) {
-      return;
+    return;
   }
 
   // Xác định bounding box để scale
@@ -2855,12 +2855,12 @@ function _renderJointDiffDetail(allScores, highlightJoint) {
 function _renderJointSuggestion(jointKey, avgDiff) {
   const suggestion = document.getElementById('jfm-suggestion');
   const suggestionText = document.getElementById('jfm-suggestion-text');
-  
+
   // Lấy gợi ý từ evaluation nếu có
   let tipText = JOINT_TIPS[jointKey] || 'Luyện tập thêm để cải thiện khớp này.';
-  
+
   if (_lastEvaluation?.suggestions?.length > 0) {
-    const evalSuggestion = _lastEvaluation.suggestions.find(s => 
+    const evalSuggestion = _lastEvaluation.suggestions.find(s =>
       s.joint && s.joint.toLowerCase().includes(JOINT_NAMES_VI[jointKey]?.toLowerCase().split(' ')[0] || '')
     );
     if (evalSuggestion) {
