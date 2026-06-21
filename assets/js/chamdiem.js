@@ -1996,11 +1996,18 @@ async function runComparePose() {
 
   try {
     const sessionObj = JSON.parse(sessionStorage.getItem('gradingSession') || '{}');
+    
+    // Lấy chiều cao từ input (nếu có), mặc định 175 và 170
+    const refHeightInput = document.getElementById('cpose-ref-height');
+    const stuHeightInput = document.getElementById('cpose-stu-height');
+    const refHeight = refHeightInput ? refHeightInput.value : "175";
+    const stuHeight = stuHeightInput ? stuHeightInput.value : "170";
+
     const payload = {
       ref_url: standardVideoUrl,
-      ref_height: "175",
+      ref_height: refHeight,
       stu_url: videoUrl,
-      stu_height: "170",
+      stu_height: stuHeight,
       submission_data: {
         code: 200,
         message: "Vào lại phiên chấm hiện tại",

@@ -343,6 +343,16 @@
           <div class="cpose-empty-icon">📹</div>
           <div class="cpose-empty-title">Chưa có dữ liệu tư thế</div>
           <div class="cpose-empty-desc">Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.</div>
+          <div style="margin: 15px 0; display: flex; gap: 10px; justify-content: center;">
+            <div style="display: flex; flex-direction: column; text-align: left;">
+              <label for="cpose-ref-height" style="font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--txt2);">Chiều cao chuẩn (cm):</label>
+              <input type="number" id="cpose-ref-height" value="175" style="padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 150px; font-size: 14px;">
+            </div>
+            <div style="display: flex; flex-direction: column; text-align: left;">
+              <label for="cpose-stu-height" style="font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--txt2);">Chiều cao học viên (cm):</label>
+              <input type="number" id="cpose-stu-height" value="170" style="padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 150px; font-size: 14px;">
+            </div>
+          </div>
           <button class="btn-confirm cpose-run-btn" id="btnRunComparePose" onclick="runComparePose()">
             🔍 Trích Xuất &amp; So Sánh Ngay
           </button>
