@@ -2008,8 +2008,7 @@ async function runComparePose() {
       }
     };
     console.log('[compare-pose] PAYLOAD TO SEND:', payload);
-    const newApiUrl = AI_BASE_URL.replace('/runpod-ai', '/runpod-compare/compare-pose');
-    const res = await fetch(newApiUrl, {
+    const res = await fetch(`${AI_BASE_URL}/compare-pose`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
