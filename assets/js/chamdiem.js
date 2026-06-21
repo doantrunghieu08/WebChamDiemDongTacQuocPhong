@@ -1995,8 +1995,21 @@ async function runComparePose() {
   document.getElementById('cpose-loading-text').textContent = 'Đang so sánh tư thế với chuẩn...';
 
   try {
-    const payload = { studentData: stuData, standardData: stdData };
-    const res = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
+    const sessionObj = JSON.parse(sessionStorage.getItem('gradingSession') || '{}');
+    const payload = {
+      ref_url: standardVideoUrl,
+      ref_height: "175",
+      stu_url: videoUrl,
+      stu_height: "170",
+      submission_data: {
+        code: 200,
+        message: "Vào lại phiên chấm hiện tại",
+        data: sessionObj
+      }
+    };
+    console.log('[compare-pose] PAYLOAD TO SEND:', payload);
+    const newApiUrl = AI_BASE_URL.replace('/runpod-ai', '/runpod-compare/compare-pose');
+    const res = await fetch(newApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
