@@ -53,7 +53,7 @@ const studentData = {
 async function test() {
     try {
         const payload = { studentData, standardData: JSON.stringify(standardData) };
-        const res = await fetch('http://103.75.182.246/runpod-ai/api/ai/compare-pose', {
+        const res = await fetch('http://103.75.182.246/runpod-ai/compare-pose', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
