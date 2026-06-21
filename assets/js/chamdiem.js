@@ -2021,10 +2021,20 @@ async function runComparePose() {
 
     const htmlContent = await res.text();
     
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.compareReportUrl = url;
+
     const resultState = document.getElementById('cpose-result-state');
     resultState.innerHTML = `
-      <div style="width:100%; height:75vh; overflow:hidden; border-radius:8px;">
-        <iframe style="width:100%; height:100%; border:none;" srcdoc="${htmlContent.replace(/"/g, '&quot;')}"></iframe>
+      <div style="text-align:center; padding: 40px 20px;">
+        <div style="font-size:18px; color:var(--green); margin-bottom:20px; font-weight:bold;">
+          <i class="fas fa-check-circle" style="font-size:24px; vertical-align:middle; margin-right:8px;"></i>
+          Phân tích tư thế hoàn tất!
+        </div>
+        <button class="btn-confirm" onclick="window.open(window.compareReportUrl, '_blank')" style="font-size:15px; padding: 12px 24px; cursor:pointer;">
+          📄 Xem báo cáo chi tiết
+        </button>
       </div>
       <div style="text-align:center; margin-top:16px;">
         <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại</button>
