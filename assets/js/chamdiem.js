@@ -2013,36 +2013,25 @@ async function runComparePose() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const json = await res.json().catch(() => null);
-    console.log('[compare-pose] scores:', JSON.stringify(json?.scores));
-
-    if (!res.ok || !json?.scores) {
+    if (!res.ok) {
       _setCposeState('empty');
       showToast('So sánh tư thế thất bại: HTTP ' + res.status, true);
       return;
     }
 
-    // Bước 4: Gọi evaluate để lấy nhận xét
-    document.getElementById('cpose-loading-text').textContent = 'Đang phân tích chuyên sâu bằng AI...';
+    const htmlContent = await res.text();
+    
+    const resultState = document.getElementById('cpose-result-state');
+    resultState.innerHTML = `
+      <div style="width:100%; height:75vh; overflow:hidden; border-radius:8px;">
+        <iframe style="width:100%; height:100%; border:none;" srcdoc="${htmlContent.replace(/"/g, '&quot;')}"></iframe>
+      </div>
+      <div style="text-align:center; margin-top:16px;">
+        <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại</button>
+      </div>
+    `;
 
-    const evalPayload = {
-      standardData: { ...stdData, video_url: standardVideoUrl },
-      studentData: { ...stuData, video_url: videoUrl },
-      scores: json.scores
-    };
-
-    const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate-pairwise-vlm`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(evalPayload)
-    });
-    const evalJson = await evalRes.json().catch(() => null);
-
-    _renderComparePoseResult({
-      scores: json.scores,
-      evaluation: evalJson?.evaluation,
-      charts: evalJson?.charts
-    });
+    _setCposeState('result');
   } catch (err) {
     _setCposeState('empty');
     showToast('Lỗi kết nối khi so sánh: ' + err.message, true);
