@@ -1992,16 +1992,19 @@ async function runComparePose() {
 
   // Bước 3: Gọi compare-pose
   _setCposeState('loading');
+  
+  // Reset K-Means UI
+  const reportActions = document.getElementById('kmeans-report-actions');
+  const btnGenerateKmeans = document.getElementById('btn-generate-kmeans');
+  const loadingText = document.getElementById('kmeans-loading-text');
+  if (reportActions) reportActions.style.display = 'none';
+  if (btnGenerateKmeans) btnGenerateKmeans.style.display = 'inline-block';
+  if (loadingText) loadingText.style.display = 'none';
+  
   document.getElementById('cpose-loading-text').textContent = 'Đang so sánh tư thế với chuẩn...';
 
   try {
     const sessionObj = JSON.parse(sessionStorage.getItem('gradingSession') || '{}');
-    
-    // Lấy chiều cao từ input (nếu có), mặc định 175 và 170
-    const refHeightInput = document.getElementById('cpose-ref-height');
-    const stuHeightInput = document.getElementById('cpose-stu-height');
-    const refHeight = refHeightInput ? refHeightInput.value : "175";
-    const stuHeight = stuHeightInput ? stuHeightInput.value : "170";
 
     // --- GỌI API CŨ ĐỂ VẼ ĐỘ TƯƠNG ĐỒNG ---
     const oldPayload = {
@@ -2035,39 +2038,6 @@ async function runComparePose() {
     });
     const evalJson = await evalRes.json().catch(() => null);
 
-    // --- GỌI API MỚI ĐỂ LẤY BÁO CÁO CHI TIẾT ---
-    document.getElementById('cpose-loading-text').textContent = 'Đang tạo báo cáo chi tiết...';
-    const newPayload = {
-      ref_url: standardVideoUrl,
-      ref_height: refHeight,
-      stu_url: videoUrl,
-      stu_height: stuHeight,
-      submission_data: {
-        code: 200,
-        message: "Vào lại phiên chấm hiện tại",
-        data: sessionObj
-      }
-    };
-    
-    const newRes = await fetch(`${AI_BASE_URL}/compare-pose`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPayload)
-    });
-
-    if (newRes.ok) {
-      const htmlContent = await newRes.text();
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      window.compareReportUrl = url;
-      
-      const btnView = document.getElementById('btn-view-report');
-      const btnPdf = document.getElementById('btn-export-pdf');
-      if (btnView) btnView.style.display = 'inline-block';
-      if (btnPdf) btnPdf.style.display = 'inline-block';
-    } else {
-      console.warn('Không thể tạo báo cáo chi tiết: HTTP ' + newRes.status);
-    }
 
     _renderComparePoseResult({
       scores: oldJson.scores,
@@ -2093,6 +2063,76 @@ function exportReportToPDF() {
     };
   } else {
     showToast('Trình duyệt đã chặn popup. Vui lòng cho phép popup để xuất PDF.', true);
+  }
+}
+
+async function generateKMeansReport() {
+  const gradingExam = JSON.parse(sessionStorage.getItem('gradingExam') || '{}');
+  const sessionObj = JSON.parse(sessionStorage.getItem('gradingSession') || '{}');
+  
+  const videoUrl = state.videoUrls[state.currentVideo - 1] || state.videoUrls[0] || '';
+  
+  let stdData = state.standardPoseData;
+  if (stdData && stdData.standardData) stdData = stdData.standardData;
+  else if (stdData && stdData.data) stdData = stdData.data;
+
+  const standardVideoUrl = gradingExam.sampleVideoUrl
+    || (gradingExam.videos && gradingExam.videos[0]?.url)
+    || stdData?.video_url
+    || null;
+
+  if (!videoUrl || !standardVideoUrl) {
+    showToast('Thiếu URL video để tạo báo cáo.', true);
+    return;
+  }
+
+  const refHeightInput = document.getElementById('cpose-ref-height');
+  const stuHeightInput = document.getElementById('cpose-stu-height');
+  const refHeight = refHeightInput ? refHeightInput.value : "175";
+  const stuHeight = stuHeightInput ? stuHeightInput.value : "170";
+
+  const btnGenerateKmeans = document.getElementById('btn-generate-kmeans');
+  const loadingText = document.getElementById('kmeans-loading-text');
+  if (btnGenerateKmeans) btnGenerateKmeans.style.display = 'none';
+  if (loadingText) loadingText.style.display = 'block';
+
+  try {
+    const payloadHtml = {
+      ref_url: standardVideoUrl,
+      ref_height: refHeight,
+      stu_url: videoUrl,
+      stu_height: stuHeight,
+      submission_data: {
+        code: 200,
+        message: "Vào lại phiên chấm hiện tại",
+        data: sessionObj
+      }
+    };
+    
+    const newRes = await fetch(`${AI_BASE_URL}/compare-pose`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payloadHtml)
+    });
+    
+    if (newRes.ok) {
+      const htmlContent = await newRes.text();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.compareReportUrl = url;
+      
+      if (loadingText) loadingText.style.display = 'none';
+      const reportActions = document.getElementById('kmeans-report-actions');
+      if (reportActions) reportActions.style.display = 'block';
+    } else {
+      showToast('Không thể tạo báo cáo chi tiết: HTTP ' + newRes.status, true);
+      if (btnGenerateKmeans) btnGenerateKmeans.style.display = 'inline-block';
+      if (loadingText) loadingText.style.display = 'none';
+    }
+  } catch (err) {
+    showToast('Lỗi kết nối khi tạo báo cáo: ' + err.message, true);
+    if (btnGenerateKmeans) btnGenerateKmeans.style.display = 'inline-block';
+    if (loadingText) loadingText.style.display = 'none';
   }
 }
 
@@ -2122,6 +2162,14 @@ function _diffLabel(deg) {
 
 function resetComparePoseResult() {
   _setCposeState('empty');
+  
+  const reportActions = document.getElementById('kmeans-report-actions');
+  const btnGenerateKmeans = document.getElementById('btn-generate-kmeans');
+  const loadingText = document.getElementById('kmeans-loading-text');
+  if (reportActions) reportActions.style.display = 'none';
+  if (btnGenerateKmeans) btnGenerateKmeans.style.display = 'inline-block';
+  if (loadingText) loadingText.style.display = 'none';
+
   const desc = document.querySelector('.cpose-empty-desc');
   if (state.studentPoseData && state.standardPoseData) {
     if (desc) desc.textContent = 'Dữ liệu tư thế của học sinh và dữ liệu chuẩn đã sẵn sàng. Nhấn bên dưới để bắt đầu so sánh.';
@@ -2339,6 +2387,39 @@ function _renderComparePoseResult(data) {
       window._cposeChartInstances.forEach(c => c.destroy());
     }
     window._cposeChartInstances = [];
+
+    // Nếu API không trả về charts, tự build từ dữ liệu thô (raw frames)
+    if (!data.charts || Object.keys(data.charts).length === 0) {
+      const stuFrames = state.studentPoseData?.frames || [];
+      const stdFrames = state.standardPoseData?.frames || [];
+      
+      if (stuFrames.length > 0 && stdFrames.length > 0) {
+        data.charts = {};
+        Object.keys(JOINT_NAMES_VI).forEach(joint => {
+          data.charts[joint] = {
+            label: JOINT_NAMES_VI[joint],
+            standard: { labels: [], values: [] },
+            student: { labels: [], values: [] }
+          };
+          
+          stdFrames.forEach((f, i) => {
+            if (f.angles && f.angles[joint] !== undefined) {
+              const t = f.timestamp ?? f.time ?? (i / 30);
+              data.charts[joint].standard.labels.push(t);
+              data.charts[joint].standard.values.push(f.angles[joint]);
+            }
+          });
+          
+          stuFrames.forEach((f, i) => {
+            if (f.angles && f.angles[joint] !== undefined) {
+              const t = f.timestamp ?? f.time ?? (i / 30);
+              data.charts[joint].student.labels.push(t);
+              data.charts[joint].student.values.push(f.angles[joint]);
+            }
+          });
+        });
+      }
+    }
 
     if (data.charts && Object.keys(data.charts).length > 0) {
       chartsTitle.style.display = 'block';

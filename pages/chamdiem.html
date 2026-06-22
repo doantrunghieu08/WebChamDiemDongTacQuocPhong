@@ -343,16 +343,6 @@
           <div class="cpose-empty-icon">📹</div>
           <div class="cpose-empty-title">Chưa có dữ liệu tư thế</div>
           <div class="cpose-empty-desc">Tải video bài thi lên và xác nhận nộp bài để hệ thống tự động trích xuất dữ liệu tư thế học sinh, sau đó nhấn nút bên dưới để so sánh.</div>
-          <div style="margin: 15px 0; display: flex; gap: 10px; justify-content: center;">
-            <div style="display: flex; flex-direction: column; text-align: left;">
-              <label for="cpose-ref-height" style="font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--txt2);">Chiều cao chuẩn (cm):</label>
-              <input type="number" id="cpose-ref-height" value="175" style="padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 150px; font-size: 14px;">
-            </div>
-            <div style="display: flex; flex-direction: column; text-align: left;">
-              <label for="cpose-stu-height" style="font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--txt2);">Chiều cao học viên (cm):</label>
-              <input type="number" id="cpose-stu-height" value="170" style="padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 150px; font-size: 14px;">
-            </div>
-          </div>
           <button class="btn-confirm cpose-run-btn" id="btnRunComparePose" onclick="runComparePose()">
             🔍 Trích Xuất &amp; So Sánh Ngay
           </button>
@@ -433,11 +423,32 @@
           <div class="cpose-section-title" id="cpose-charts-title" style="margin-top:20px; display:none">📈 Biểu Đồ Góc Khớp</div>
           <div class="cpose-charts-grid" id="cpose-charts-grid"></div>
 
+          <!-- K-Means Report Section -->
+          <div class="cpose-section-title" style="margin-top:30px; border-top: 1px solid var(--border); padding-top: 20px;">📑 Báo Cáo K-Means (Tóm Tắt 30 Frame)</div>
+          <div id="kmeans-report-config" style="text-align:center; margin-bottom: 16px;">
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+              <div style="display: flex; flex-direction: column; text-align: left;">
+                <label for="cpose-ref-height" style="font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--txt2);">Chiều cao chuẩn (cm):</label>
+                <input type="number" id="cpose-ref-height" value="175" style="padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 150px; font-size: 14px;">
+              </div>
+              <div style="display: flex; flex-direction: column; text-align: left;">
+                <label for="cpose-stu-height" style="font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--txt2);">Chiều cao học viên (cm):</label>
+                <input type="number" id="cpose-stu-height" value="170" style="padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 150px; font-size: 14px;">
+              </div>
+            </div>
+            <button class="btn-confirm" id="btn-generate-kmeans" onclick="generateKMeansReport()" style="font-size:14px; padding: 10px 20px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);">⚙️ Tạo báo cáo K-Means</button>
+            <div id="kmeans-loading-text" style="display:none; color: var(--txt2); font-size: 14px; margin-top: 10px;">⏳ Đang tạo báo cáo, vui lòng đợi...</div>
+          </div>
+          
+          <div id="kmeans-report-actions" style="text-align:center; display:none; margin-bottom: 20px;">
+            <div style="color: var(--green); margin-bottom: 15px; font-weight: bold;"><i class="fas fa-check-circle"></i> Đã tạo báo cáo K-Means thành công!</div>
+            <button class="btn-confirm" id="btn-view-report" onclick="window.open(window.compareReportUrl, '_blank')" style="font-size:13px; margin-right:8px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">📄 Xem báo cáo</button>
+            <button class="btn-confirm" id="btn-export-pdf" onclick="exportReportToPDF()" style="font-size:13px; margin-right:8px; background: linear-gradient(135deg, #16a34a, #15803d);">🖨 Xuất PDF</button>
+          </div>
+
           <!-- Re-run button -->
-          <div style="text-align:center; margin-top:16px">
-            <button class="btn-confirm" id="btn-view-report" onclick="window.open(window.compareReportUrl, '_blank')" style="font-size:13px; margin-right:8px; display:none; background: linear-gradient(135deg, #2563eb, #1d4ed8);">📄 Xem báo cáo chi tiết</button>
-            <button class="btn-confirm" id="btn-export-pdf" onclick="exportReportToPDF()" style="font-size:13px; margin-right:8px; display:none; background: linear-gradient(135deg, #16a34a, #15803d);">🖨 Xuất PDF</button>
-            <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại</button>
+          <div style="text-align:center; margin-top:16px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại Đánh Giá</button>
           </div>
         </div>
       </div>

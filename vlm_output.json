@@ -1,0 +1,154 @@
+{
+  "status": "success",
+  "evaluation": {
+    "rating": "Trung bình",
+    "priority": "left_hip",
+    "comment": "Angle score=60.0, visual score=99.0, final=71.7",
+    "suggestions": [
+      {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía sau",
+        "fix": "Đảm bảo hông thẳng và cân đối với thân thể",
+        "severity": 1,
+        "confidence": 0.85,
+        "std_timestamp": 0,
+        "stu_timestamp": 0
+      },
+      {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía trước",
+        "fix": "giữ hông thẳng và cân đối với hai bên",
+        "severity": 1,
+        "confidence": 0.95,
+        "std_timestamp": 0.033,
+        "stu_timestamp": 0.033
+      },
+      {
+        "joint": "left_hip",
+        "issue": "vượt quá chuẩn",
+        "fix": "giữ hông thẳng và cố định",
+        "severity": 1,
+        "confidence": 0.95,
+        "std_timestamp": 0.067,
+        "stu_timestamp": 0.067
+      },
+      {
+        "joint": "left_hip",
+        "issue": "hông hơi lồi ra",
+        "fix": "giữ hông thẳng",
+        "severity": 1,
+        "confidence": 0.95,
+        "std_timestamp": 0.1,
+        "stu_timestamp": 0.1
+      },
+      {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía sau so với mẫu",
+        "fix": "Đảm bảo hông thẳng và cân đối với mẫu",
+        "severity": 1,
+        "confidence": 0.85,
+        "std_timestamp": 0.133,
+        "stu_timestamp": 0.133
+      }
+    ]
+  },
+  "scores": {
+    "left_shoulder": 90,
+    "right_shoulder": 80,
+    "left_elbow": 70,
+    "right_elbow": 60,
+    "left_hip": 50,
+    "right_hip": 40,
+    "left_knee": 30,
+    "right_knee": 20,
+    "overall": 60,
+    "vlm_visual": 99,
+    "final_overall": 71.7
+  },
+  "pair_findings": [
+    {
+      "std_index": 0,
+      "stu_index": 0,
+      "std_timestamp": 0,
+      "stu_timestamp": 0,
+      "mean_angle_error": 0,
+      "vlm": {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía sau",
+        "severity": 1,
+        "fix": "Đảm bảo hông thẳng và cân đối với thân thể",
+        "confidence": 0.85
+      }
+    },
+    {
+      "std_index": 1,
+      "stu_index": 1,
+      "std_timestamp": 0.033,
+      "stu_timestamp": 0.033,
+      "mean_angle_error": 0,
+      "vlm": {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía trước",
+        "severity": 1,
+        "fix": "giữ hông thẳng và cân đối với hai bên",
+        "confidence": 0.95
+      }
+    },
+    {
+      "std_index": 2,
+      "stu_index": 2,
+      "std_timestamp": 0.067,
+      "stu_timestamp": 0.067,
+      "mean_angle_error": 0,
+      "vlm": {
+        "joint": "left_hip",
+        "issue": "vượt quá chuẩn",
+        "severity": 1,
+        "fix": "giữ hông thẳng và cố định",
+        "confidence": 0.95
+      }
+    },
+    {
+      "std_index": 3,
+      "stu_index": 3,
+      "std_timestamp": 0.1,
+      "stu_timestamp": 0.1,
+      "mean_angle_error": 0,
+      "vlm": {
+        "joint": "left_hip",
+        "issue": "hông hơi lồi ra",
+        "severity": 1,
+        "fix": "giữ hông thẳng",
+        "confidence": 0.95
+      }
+    },
+    {
+      "std_index": 4,
+      "stu_index": 4,
+      "std_timestamp": 0.133,
+      "stu_timestamp": 0.133,
+      "mean_angle_error": 0,
+      "vlm": {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía sau so với mẫu",
+        "severity": 1,
+        "fix": "Đảm bảo hông thẳng và cân đối với mẫu",
+        "confidence": 0.85
+      }
+    },
+    {
+      "std_index": 5,
+      "stu_index": 5,
+      "std_timestamp": 0.167,
+      "stu_timestamp": 0.167,
+      "mean_angle_error": 0,
+      "vlm": {
+        "joint": "left_hip",
+        "issue": "hông hơi lệch về phía trước",
+        "severity": 1,
+        "fix": "giữ hông thẳng và cân đối với hai bên chân",
+        "confidence": 0.85
+      }
+    }
+  ]
+}
