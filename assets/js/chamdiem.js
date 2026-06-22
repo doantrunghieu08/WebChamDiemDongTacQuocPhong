@@ -2003,7 +2003,41 @@ async function runComparePose() {
     const refHeight = refHeightInput ? refHeightInput.value : "175";
     const stuHeight = stuHeightInput ? stuHeightInput.value : "170";
 
-    const payload = {
+    // --- GỌI API CŨ ĐỂ VẼ ĐỘ TƯƠNG ĐỒNG ---
+    const oldPayload = {
+      standardData: stdData,
+      studentData: stuData
+    };
+    const oldRes = await fetch(`${AI_BASE_URL}/api/ai/compare-pose`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(oldPayload)
+    });
+    const oldJson = await oldRes.json().catch(() => null);
+
+    if (!oldRes.ok || !oldJson?.scores) {
+      _setCposeState('empty');
+      showToast('So sánh tư thế thất bại: HTTP ' + oldRes.status, true);
+      return;
+    }
+
+    // --- GỌI API VLM ĐỂ LẤY NHẬN XÉT VÀ CHARTS ---
+    document.getElementById('cpose-loading-text').textContent = 'Đang phân tích chuyên sâu bằng AI...';
+    const evalPayload = {
+      standardData: { ...stdData, video_url: standardVideoUrl },
+      studentData: { ...stuData, video_url: videoUrl },
+      scores: oldJson.scores
+    };
+    const evalRes = await fetch(`${AI_BASE_URL}/api/ai/evaluate-pairwise-vlm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(evalPayload)
+    });
+    const evalJson = await evalRes.json().catch(() => null);
+
+    // --- GỌI API MỚI ĐỂ LẤY BÁO CÁO CHI TIẾT ---
+    document.getElementById('cpose-loading-text').textContent = 'Đang tạo báo cáo chi tiết...';
+    const newPayload = {
       ref_url: standardVideoUrl,
       ref_height: refHeight,
       stu_url: videoUrl,
@@ -2014,44 +2048,51 @@ async function runComparePose() {
         data: sessionObj
       }
     };
-    console.log('[compare-pose] PAYLOAD TO SEND:', payload);
-    const res = await fetch(`${AI_BASE_URL}/compare-pose`, {
+    
+    const newRes = await fetch(`${AI_BASE_URL}/compare-pose`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(newPayload)
     });
-    if (!res.ok) {
-      _setCposeState('empty');
-      showToast('So sánh tư thế thất bại: HTTP ' + res.status, true);
-      return;
+
+    if (newRes.ok) {
+      const htmlContent = await newRes.text();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.compareReportUrl = url;
+      
+      const btnView = document.getElementById('btn-view-report');
+      const btnPdf = document.getElementById('btn-export-pdf');
+      if (btnView) btnView.style.display = 'inline-block';
+      if (btnPdf) btnPdf.style.display = 'inline-block';
+    } else {
+      console.warn('Không thể tạo báo cáo chi tiết: HTTP ' + newRes.status);
     }
 
-    const htmlContent = await res.text();
-    
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.compareReportUrl = url;
+    _renderComparePoseResult({
+      scores: oldJson.scores,
+      evaluation: evalJson?.evaluation,
+      charts: evalJson?.charts
+    });
 
-    const resultState = document.getElementById('cpose-result-state');
-    resultState.innerHTML = `
-      <div style="text-align:center; padding: 40px 20px;">
-        <div style="font-size:18px; color:var(--green); margin-bottom:20px; font-weight:bold;">
-          <i class="fas fa-check-circle" style="font-size:24px; vertical-align:middle; margin-right:8px;"></i>
-          Phân tích tư thế hoàn tất!
-        </div>
-        <button class="btn-confirm" onclick="window.open(window.compareReportUrl, '_blank')" style="font-size:15px; padding: 12px 24px; cursor:pointer;">
-          📄 Xem báo cáo chi tiết
-        </button>
-      </div>
-      <div style="text-align:center; margin-top:16px;">
-        <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại</button>
-      </div>
-    `;
-
-    _setCposeState('result');
   } catch (err) {
     _setCposeState('empty');
     showToast('Lỗi kết nối khi so sánh: ' + err.message, true);
+  }
+}
+
+function exportReportToPDF() {
+  if (!window.compareReportUrl) {
+    showToast('Chưa có báo cáo để xuất.', true);
+    return;
+  }
+  const printWindow = window.open(window.compareReportUrl, '_blank');
+  if (printWindow) {
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  } else {
+    showToast('Trình duyệt đã chặn popup. Vui lòng cho phép popup để xuất PDF.', true);
   }
 }
 

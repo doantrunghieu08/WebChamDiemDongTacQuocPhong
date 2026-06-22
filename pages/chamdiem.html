@@ -435,6 +435,8 @@
 
           <!-- Re-run button -->
           <div style="text-align:center; margin-top:16px">
+            <button class="btn-confirm" id="btn-view-report" onclick="window.open(window.compareReportUrl, '_blank')" style="font-size:13px; margin-right:8px; display:none; background: linear-gradient(135deg, #2563eb, #1d4ed8);">📄 Xem báo cáo chi tiết</button>
+            <button class="btn-confirm" id="btn-export-pdf" onclick="exportReportToPDF()" style="font-size:13px; margin-right:8px; display:none; background: linear-gradient(135deg, #16a34a, #15803d);">🖨 Xuất PDF</button>
             <button class="btn-cancel" onclick="resetComparePoseResult()" style="font-size:13px">↩ Chạy Lại</button>
           </div>
         </div>
