@@ -2011,8 +2011,14 @@ async function runComparePose() {
     if (cachedResultStr) {
       try {
         const cachedResult = JSON.parse(cachedResultStr);
-        _renderComparePoseResult(cachedResult);
-        return; // Dừng tại đây, không gọi API nữa
+        const currentStudentCode = state.currentStudent?.code || state.currentStudent?.studentId || state.currentStudent?.name;
+        if (cachedResult.studentCode === currentStudentCode) {
+          _renderComparePoseResult(cachedResult);
+          return; // Dừng tại đây, không gọi API nữa
+        } else {
+          // Xóa cache nếu đã chuyển sang sinh viên khác
+          sessionStorage.removeItem('comparePoseResult');
+        }
       } catch (e) {
         console.warn('Lỗi parse comparePoseResult:', e);
       }
@@ -2050,7 +2056,9 @@ async function runComparePose() {
     });
     const evalJson = await evalRes.json().catch(() => null);
 
+    const currentStudentCode = state.currentStudent?.code || state.currentStudent?.studentId || state.currentStudent?.name;
     const finalResult = {
+      studentCode: currentStudentCode,
       scores: oldJson.scores,
       evaluation: evalJson?.evaluation,
       charts: evalJson?.charts
