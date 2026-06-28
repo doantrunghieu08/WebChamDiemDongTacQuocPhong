@@ -460,6 +460,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     initTasks.push(fetchClassStudentsFromServer(classData.classId));
   } else {
     studentsData = cachedStudents;
+    // Hiển thị ngay khung giao diện và danh sách sinh viên bằng cache để người dùng không phải chờ
+    renderBanner();
+    renderStudents(studentsData);
   }
 
   // Tải song song: bài thi, bảng điểm (và sinh viên nếu chưa có cache) từ server
