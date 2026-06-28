@@ -449,21 +449,19 @@ document.addEventListener('DOMContentLoaded', async function () {
     return;
   }
 
-  // Kiểm tra cache sinh viên trước
+  // Kiểm tra cache sinh viên trước để hiển thị ngay (Optimistic Rendering)
   const cachedStudents = getClassStudents(classData.classId);
-  const initTasks = [
-    fetchClassExamsFromAPI(classData.classId),
-    fetchClassGradeBoard(classData.classId)
-  ];
-
-  if (!cachedStudents || cachedStudents.length === 0) {
-    initTasks.push(fetchClassStudentsFromServer(classData.classId));
-  } else {
+  if (cachedStudents && cachedStudents.length > 0) {
     studentsData = cachedStudents;
-    // Hiển thị ngay khung giao diện và danh sách sinh viên bằng cache để người dùng không phải chờ
     renderBanner();
     renderStudents(studentsData);
   }
+
+  const initTasks = [
+    fetchClassStudentsFromServer(classData.classId), // Luôn gọi API để cập nhật dữ liệu mới nhất ngầm
+    fetchClassExamsFromAPI(classData.classId),
+    fetchClassGradeBoard(classData.classId)
+  ];
 
   // Tải song song: bài thi, bảng điểm (và sinh viên nếu chưa có cache) từ server
   await Promise.allSettled(initTasks);
