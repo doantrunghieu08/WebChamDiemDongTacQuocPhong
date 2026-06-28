@@ -449,12 +449,21 @@ document.addEventListener('DOMContentLoaded', async function () {
     return;
   }
 
-  // Tải song song: sinh viên, bài thi và bảng điểm từ server
-  await Promise.allSettled([
-    fetchClassStudentsFromServer(classData.classId),
+  // Kiểm tra cache sinh viên trước
+  const cachedStudents = getClassStudents(classData.classId);
+  const initTasks = [
     fetchClassExamsFromAPI(classData.classId),
-    fetchClassGradeBoard(classData.classId),
-  ]);
+    fetchClassGradeBoard(classData.classId)
+  ];
+
+  if (!cachedStudents || cachedStudents.length === 0) {
+    initTasks.push(fetchClassStudentsFromServer(classData.classId));
+  } else {
+    studentsData = cachedStudents;
+  }
+
+  // Tải song song: bài thi, bảng điểm (và sinh viên nếu chưa có cache) từ server
+  await Promise.allSettled(initTasks);
 
   // Tải danh sách bài nộp sau khi đã có exams
   await fetchSubmissionsForAllExams();
