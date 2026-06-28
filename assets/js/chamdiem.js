@@ -2006,6 +2006,18 @@ async function runComparePose() {
   try {
     const sessionObj = JSON.parse(sessionStorage.getItem('gradingSession') || '{}');
 
+    // Kiểm tra cache trong sessionStorage trước
+    const cachedResultStr = sessionStorage.getItem('comparePoseResult');
+    if (cachedResultStr) {
+      try {
+        const cachedResult = JSON.parse(cachedResultStr);
+        _renderComparePoseResult(cachedResult);
+        return; // Dừng tại đây, không gọi API nữa
+      } catch (e) {
+        console.warn('Lỗi parse comparePoseResult:', e);
+      }
+    }
+
     // --- GỌI API CŨ ĐỂ VẼ ĐỘ TƯƠNG ĐỒNG ---
     const oldPayload = {
       standardData: stdData,
@@ -2038,12 +2050,16 @@ async function runComparePose() {
     });
     const evalJson = await evalRes.json().catch(() => null);
 
-
-    _renderComparePoseResult({
+    const finalResult = {
       scores: oldJson.scores,
       evaluation: evalJson?.evaluation,
       charts: evalJson?.charts
-    });
+    };
+    
+    // Lưu kết quả vào sessionStorage
+    sessionStorage.setItem('comparePoseResult', JSON.stringify(finalResult));
+
+    _renderComparePoseResult(finalResult);
 
   } catch (err) {
     _setCposeState('empty');
@@ -2161,6 +2177,7 @@ function _diffLabel(deg) {
 
 
 function resetComparePoseResult() {
+  sessionStorage.removeItem('comparePoseResult');
   _setCposeState('empty');
   
   const reportActions = document.getElementById('kmeans-report-actions');
