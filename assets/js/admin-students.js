@@ -199,14 +199,14 @@ function normalizeRole(role) {
 }
 
 async function checkAdminStudentsAccess() {
-  const storedUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
   if (!storedUser) {
     window.location.href = '/index.html';
     return null;
   }
 
-  let sessionRole = sessionStorage.getItem('currentUserRole');
+  let sessionRole = localStorage.getItem('currentUserRole');
 
   // Nếu role không có trong sessionStorage, thử lấy từ server qua cookie
   if (!sessionRole) {

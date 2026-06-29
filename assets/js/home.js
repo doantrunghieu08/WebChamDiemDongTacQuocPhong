@@ -67,7 +67,7 @@ function normalizeRole(role) {
 }
 
 function getCurrentRoleFromStorage(user) {
-  return normalizeRole(sessionStorage.getItem('currentUserRole') || user?.role);
+  return normalizeRole(localStorage.getItem('currentUserRole') || user?.role);
 }
 
 function getCurrentUserDisplayName(user) {
@@ -75,7 +75,7 @@ function getCurrentUserDisplayName(user) {
 }
 
 function checkLoginStatus() {
-  const user = JSON.parse(sessionStorage.getItem('currentUser'));
+  const user = JSON.parse(localStorage.getItem('currentUser'));
   if (!user) {
     window.location.href = '/index.html';
     return null;
@@ -1671,8 +1671,6 @@ function deleteExam(examId) {
       const headers = {};
       const csrfToken = typeof _getCsrfToken === 'function' ? _getCsrfToken() : null;
       if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
-      const accessToken = typeof TokenManager !== 'undefined' ? TokenManager.getAccessToken() : null;
-      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
       const response = await fetch(url, { method: 'DELETE', credentials: 'include', headers });
       if (!response.ok) {
@@ -3107,7 +3105,7 @@ async function handleProfileAvatarChange(event) {
       if (!saveRes.ok) throw new Error(`Lỗi lưu avatar (${saveRes.status})`);
 
       currentUser.avatarImage = imageUrl;
-      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
       // Cập nhật ảnh trên header nếu có
       const headerAvatar = document.getElementById('headerAvatar');
       if (headerAvatar) {
@@ -3298,6 +3296,9 @@ async function _doLoadStudentExams() {
       // Tra điểm từ map my-exam (chỉ có nếu sinh viên đã nộp và đã chấm)
       const scoreEntry  = submissionId != null ? (myExamScoresMap[String(submissionId)] || null) : null;
 
+      const isPracticeDone = scoreEntry && (scoreEntry.practiceStatus === 'COMPLETED' || scoreEntry.practiceStatus === 'FINALIZED');
+      const isOfficialDone = scoreEntry && (scoreEntry.officialStatus === 'COMPLETED' || scoreEntry.officialStatus === 'FINALIZED');
+
       const isSubmitted = submission?.status === 'SUBMITTED' || localExam?.isSubmitted || false;
       const isDraft     = !isSubmitted && (submission?.status === 'DRAFT' || localExam?.isDraft || false);
 
@@ -3306,9 +3307,9 @@ async function _doLoadStudentExams() {
         id: examId,
         classExamId: examType.classExamId ?? null,
         submissionId: submissionId,
-        practiceScore:  scoreEntry?.practiceScore  ?? localExam?.practiceScore  ?? null,
+        practiceScore:  isPracticeDone ? scoreEntry.practiceScore : null,
         practiceStatus: scoreEntry?.practiceStatus ?? null,
-        officialScore:  scoreEntry?.officialScore  ?? localExam?.officialScore  ?? null,
+        officialScore:  isOfficialDone ? scoreEntry.officialScore : null,
         officialStatus: scoreEntry?.officialStatus ?? null,
         isSubmitted,
         isDraft,

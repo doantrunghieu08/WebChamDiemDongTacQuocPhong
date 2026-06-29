@@ -128,7 +128,7 @@ function saveClassStudents(classId, students) {
   }
 
   // Cập nhật trong danh sách lớp của giảng viên
-  const user = JSON.parse(sessionStorage.getItem('currentUser'));
+  const user = JSON.parse(localStorage.getItem('currentUser'));
   if (user) {
     const key = `classes_${user.studentId || user.username}`;
     const classes = JSON.parse(sessionStorage.getItem(key) || '[]');
@@ -436,7 +436,7 @@ async function fetchClassStudentsFromServer(classId) {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-  const user = JSON.parse(sessionStorage.getItem('currentUser'));
+  const user = JSON.parse(localStorage.getItem('currentUser'));
   if (!user) {
     window.location.href = '/index.html';
     return;
@@ -1132,7 +1132,7 @@ function startGrading(mode) {
   }
 
   const gradingApiMode = mode === 'official' ? 'OFFICIAL' : 'PRACTICE';
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const teacherId = currentUser?.id || currentUser?.studentId || null;
   const classExamId = selectedExam.classExamId ?? selectedExam.id;
   const studentCode = selectedStudent.code;
@@ -1214,7 +1214,7 @@ function handleExcelFile() {
 
 async function refreshExamCatalogFromServer() {
   try {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
     const teacherId = currentUser?.id || currentUser?.studentId || null;
     if (!teacherId || typeof ExamsService?.getTeacherExams !== 'function') return;
 

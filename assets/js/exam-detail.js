@@ -340,8 +340,8 @@ async function renderGradingDetails() {
   if (!container) return;
 
   // Xác định role
-  const _currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
-  const _role = ((sessionStorage.getItem('currentUserRole') || _currentUser?.role || '')).toLowerCase().replace('role_', '');
+  const _currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const _role = ((localStorage.getItem('currentUserRole') || _currentUser?.role || '')).toLowerCase().replace('role_', '');
   const isStudent = _role === 'student';
 
   // ---- STUDENT VIEW: chỉ hiển thị chế độ chấm OFFICIAL ----
@@ -1122,8 +1122,8 @@ function confirmDeleteVideo() {
 
 // ---- NAVIGATION ----
 function goBack() {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
-  const role = ((sessionStorage.getItem('currentUserRole') || currentUser?.role || '')).toLowerCase().replace('role_', '');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const role = ((localStorage.getItem('currentUserRole') || currentUser?.role || '')).toLowerCase().replace('role_', '');
   if (role === 'student') {
     sessionStorage.setItem('homeActiveTab', 'st-exams');
   }
@@ -1155,7 +1155,7 @@ function formatFileSize(bytes) {
 async function fetchAndUpdateScores() {
   if (!currentExam) return;
 
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const studentId = currentExam?.studentCode
     || currentUser?.studentId
     || currentUser?.id
@@ -1207,7 +1207,7 @@ async function fetchAndRestoreSubmissionStatus() {
   if (!currentExam) return;
 
   const classExamId = currentExam?.classExamId ?? currentExam?.id;
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const studentId = currentExam?.studentCode
     || currentUser?.studentId
     || currentUser?.id
@@ -1284,7 +1284,7 @@ async function fetchAndRestoreSubmissionStatus() {
 
 // ---- SUBMISSION API ----
 function buildSubmissionPayload(status) {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   // idStudent: ưu tiên studentCode lưu trong currentExam (set bởi openExamDetail),
   // fallback về currentUser.studentId / id / username
   const idStudent = currentExam?.studentCode

@@ -10,7 +10,7 @@ let currentClassId = '';
 
 // Check if user is logged in and class is selected
 function checkSessionStatus() {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const selectedClass = JSON.parse(sessionStorage.getItem('selectedClass'));
   
   if (!currentUser || !selectedClass) {

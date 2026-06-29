@@ -2,7 +2,7 @@
 
 // Check if user is logged in and student is selected
 function checkSessionStatus() {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const selectedStudent = JSON.parse(sessionStorage.getItem('selectedStudent'));
   
   if (!currentUser || !selectedStudent) {
@@ -37,7 +37,7 @@ function closeLogoutModal() {
 }
 
 function confirmLogout() {
-  sessionStorage.removeItem('currentUser');
+  localStorage.removeItem('currentUser');
   sessionStorage.removeItem('selectedClass');
   sessionStorage.removeItem('selectedClassId');
   sessionStorage.removeItem('selectedStudent');

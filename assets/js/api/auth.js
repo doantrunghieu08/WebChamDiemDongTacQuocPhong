@@ -42,11 +42,7 @@ const AuthService = {
 
         let userData = response?.data || response || {};
 
-        // Lấy accessToken và refreshToken từ body (hỗ trợ cross-origin khi không dùng HttpOnly cookie)
-        // accessToken cũng có thể được BE set vào HttpOnly cookie — browser tự lưu nếu same-origin
-        const accessToken = userData.accessToken || userData.access_token || null;
-        const refreshToken = userData.refreshToken || userData.refresh_token || null;
-        if (accessToken || refreshToken) TokenManager.setTokens(accessToken, refreshToken);
+        // Không cần lưu token ở Frontend (chống XSS) - BE đã tự set qua HttpOnly Cookie
 
         // Chuẩn hoá role từ body trả về
         let role = userData.role || userData.userRole || userData.roles || null;
@@ -97,8 +93,8 @@ const AuthService = {
             }
         } catch {}
 
-        if (role) sessionStorage.setItem('currentUserRole', role);
-        sessionStorage.setItem('currentUser', JSON.stringify(minimal));
+        if (role) localStorage.setItem('currentUserRole', role);
+        localStorage.setItem('currentUser', JSON.stringify(minimal));
 
         // accessToken được BE set vào HttpOnly cookie khi login — browser tự lưu
         // Không cần đọc hay lưu thủ công ở frontend
@@ -135,8 +131,8 @@ const AuthService = {
             // ignore
         } finally {
             TokenManager.clearTokens();
-            sessionStorage.removeItem('currentUser');
-            sessionStorage.removeItem('currentUserRole');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUserRole');
             sessionStorage.setItem('logoutSuccess', '1');
             window.location.href = '/index.html';
         }
@@ -171,7 +167,7 @@ const AuthService = {
      * @returns {object|null}
      */
     getCurrentUser() {
-        const user = sessionStorage.getItem('currentUser');
+        const user = localStorage.getItem('currentUser');
         return user ? JSON.parse(user) : null;
     },
 
@@ -179,7 +175,7 @@ const AuthService = {
      * Kiểm tra đã đăng nhập chưa
      */
     isLoggedIn() {
-        // Đăng nhập khi có thông tin user trong sessionStorage
+        // Đăng nhập khi có thông tin user trong localStorage
         return !!this.getCurrentUser();
     },
 
@@ -211,7 +207,7 @@ const AuthService = {
                 else if (r === 'TEACHER' || r === 'ROLE_TEACHER') r = 'teacher';
                 else if (r === 'STUDENT' || r === 'ROLE_STUDENT') r = 'student';
                 else r = r.toLowerCase();
-                sessionStorage.setItem('currentUserRole', r);
+                localStorage.setItem('currentUserRole', r);
                 profile.role = r;
             }
             return profile;

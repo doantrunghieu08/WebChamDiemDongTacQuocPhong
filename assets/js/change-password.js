@@ -61,7 +61,7 @@ async function handleChangePasswordSubmit(event) {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.querySelector('span').textContent = 'Đang lưu...'; }
 
   try {
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
     const username = currentUser?.username || currentUser?.id || null;
     if (!username) {
       showFormError('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.');
@@ -72,7 +72,7 @@ async function handleChangePasswordSubmit(event) {
     await AuthService.changePassword(username, oldPass, newPass);
 
     TokenManager.clearTokens();
-    sessionStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUser');
 
     document.getElementById('cp-modal').style.display = 'flex';
   } catch (err) {

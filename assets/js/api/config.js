@@ -131,24 +131,19 @@ const API_CONFIG = {
 
 const TokenManager = {
     getAccessToken() {
-        // Ưu tiên đọc từ sessionStorage (khi BE trả token trong body — cross-origin)
-        return sessionStorage.getItem('accessToken') || null;
+        return null;
     },
     getRefreshToken() {
-        return sessionStorage.getItem('refreshToken');
+        return null;
     },
     setTokens(accessToken, refreshToken) {
-        if (accessToken) sessionStorage.setItem('accessToken', accessToken);
-        if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken);
+        // Token được quản lý tự động bởi HttpOnly Cookie từ Backend
     },
     clearTokens() {
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        // Backend sẽ clear cookie qua endpoint logout
     },
     isAuthenticated() {
-        return !!JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        return !!JSON.parse(localStorage.getItem('currentUser') || 'null');
     }
 };
 
@@ -177,8 +172,8 @@ let _pendingRefreshPromise = null;
 // Khi refresh token hết hạn / không hợp lệ → xoá session và chuyển về trang login
 function _handleSessionExpired() {
     TokenManager.clearTokens();
-    sessionStorage.removeItem('currentUser');
-    sessionStorage.removeItem('currentUserRole');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUserRole');
     sessionStorage.setItem('sessionExpired', '1');
     window.location.href = '/index.html';
 }
@@ -196,11 +191,8 @@ const ApiClient = {
             delete headers['Content-Type'];
         }
 
-        // Gửi access token qua Authorization header nếu có (hỗ trợ cross-origin)
-        const _accessToken = TokenManager.getAccessToken();
-        if (_accessToken && !headers['Authorization']) {
-            headers['Authorization'] = `Bearer ${_accessToken}`;
-        }
+        // Token đã nằm trong HttpOnly Cookie nên trình duyệt sẽ tự động đính kèm
+        // không cần đưa vào Authorization header nữa.
 
         // Thêm CSRF token header cho các request thay đổi dữ liệu (POST/PUT/DELETE)
         // Spring Security CookieCsrfTokenRepository gửi XSRF-TOKEN (không HttpOnly) — JS đọc được
@@ -275,19 +267,12 @@ const ApiClient = {
                 const headers = {};
                 if (csrfToken) headers['X-XSRF-TOKEN'] = csrfToken;
 
-                // refreshToken được lưu trong sessionStorage sau khi đăng nhập
-                // Gửi trong body để backend xác thực
-                const storedRefreshToken = TokenManager.getRefreshToken();
-                const body = storedRefreshToken ? JSON.stringify({ refreshToken: storedRefreshToken }) : null;
-                if (body) headers['Content-Type'] = 'application/json';
-
                 const response = await fetch(
                     `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REFRESH_TOKEN}`,
                     {
                         method: 'POST',
                         headers,
-                        credentials: 'include',
-                        ...(body ? { body } : {}),
+                        credentials: 'include'
                     }
                 );
 
@@ -299,12 +284,7 @@ const ApiClient = {
                     return false;
                 }
 
-                // BE trả accessToken qua HttpOnly cookie và/hoặc trong body, refreshToken mới qua body
-                const refreshData = await response.json().catch(() => null);
-                const newAccessToken = refreshData?.data?.accessToken || refreshData?.accessToken || refreshData?.data?.access_token || refreshData?.access_token || null;
-                const newRefreshToken = refreshData?.data?.refreshToken || refreshData?.refreshToken || refreshData?.data?.refresh_token || refreshData?.refresh_token || null;
-                if (newAccessToken || newRefreshToken) TokenManager.setTokens(newAccessToken, newRefreshToken);
-
+                // BE trả accessToken qua HttpOnly cookie, trình duyệt sẽ tự quản lý.
                 return true;
             } catch (e) {
                 console.warn('[_refreshToken] lỗi mạng:', e);
@@ -325,12 +305,10 @@ const ApiClient = {
      * @returns {Promise<Response>}
      */
     async fetchWithAuth(url, options = {}) {
-        const _accessToken = TokenManager.getAccessToken();
-        const authHeaders = _accessToken ? { 'Authorization': `Bearer ${_accessToken}` } : {};
         const opts = {
             credentials: 'include',
             ...options,
-            headers: { ...authHeaders, ...(options.headers || {}) },
+            headers: { ...(options.headers || {}) },
         };
         const response = await fetch(url, opts);
         if (response.status !== 401) return response;
@@ -341,10 +319,8 @@ const ApiClient = {
             // _refreshToken đã gọi _handleSessionExpired() nếu token thực sự hết hạn
             return response;
         }
-        // Retry với token mới sau refresh
-        const _newToken = TokenManager.getAccessToken();
-        const retryHeaders = _newToken ? { 'Authorization': `Bearer ${_newToken}` } : {};
-        return fetch(url, { ...opts, headers: { ...retryHeaders, ...(options.headers || {}) } });
+        // Retry với token mới sau refresh (nằm trong HttpOnly Cookie)
+        return fetch(url, { ...opts, headers: { ...(options.headers || {}) } });
     },
 
     // Shorthand methods

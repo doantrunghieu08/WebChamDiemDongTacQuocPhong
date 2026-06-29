@@ -394,7 +394,7 @@ function syncStateErrorTypesFromCatalog() {
 }
 
 async function fetchAndSyncTeacherErrors() {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const teacherId = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
   if (!teacherId) return;
 
@@ -1024,7 +1024,7 @@ async function submitExamScore() {
   const idSubmission = state.submissionId
     || JSON.parse(sessionStorage.getItem('gradingSession') || '{}')?.studentSubmissionResponse?.id
     || '';
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
   const gradingModeApi = state.gradingMode === 'official' ? 'OFFICIAL' : 'PRACTICE';
 
@@ -1080,7 +1080,7 @@ async function submitExamScore() {
     scores[key] = finalScore;
     sessionStorage.setItem('examScores', JSON.stringify(scores));
 
-    const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
     const videoStorageKey = `examVideos_${classId}_${studentCode}_${examId}`;
     const gradingHistory = JSON.parse(localStorage.getItem('gradingHistoryRecords') || '[]');
     gradingHistory.unshift({
@@ -1417,8 +1417,6 @@ function _uploadOneVideo(apiUrl, file, studentName, examTitle, progressBar, star
 
     const csrfMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
     if (csrfMatch) xhr.setRequestHeader('X-XSRF-TOKEN', decodeURIComponent(csrfMatch.split('=')[1]));
-    const token = sessionStorage.getItem('accessToken');
-    if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 
     xhr.upload.addEventListener('progress', e => {
       if (e.lengthComputable && progressBar) {
@@ -1569,8 +1567,6 @@ async function doConfirmSubmission() {
     const headers = { 'Content-Type': 'application/json' };
     const csrfMatch = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
     if (csrfMatch) headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfMatch.split('=')[1]);
-    const token = sessionStorage.getItem('accessToken');
-    if (token) headers['Authorization'] = 'Bearer ' + token;
 
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -1601,7 +1597,7 @@ async function doConfirmSubmission() {
 
       // Khởi tạo phiên chấm ngay sau khi nộp bài thành công
       if (newSubmissionId) {
-        const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
         const idTeacher = currentUser?.id ?? currentUser?.userId ?? null;
         const rawMode = sessionStorage.getItem('gradingMode') || 'official';
         const gradingMode = rawMode.toUpperCase() === 'OFFICIAL' ? 'OFFICIAL' : 'PRACTICE';
@@ -1684,7 +1680,7 @@ async function addNewErrorType() {
 
   const severityApiMap = { 'cao': 'HIGH', 'trung-binh': 'MEDIUM', 'thap': 'LOW' };
   const severityType = severityApiMap[severity] || 'MEDIUM';
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
 
   let newId = Math.max(...catalog.map(e => e.id || 0), 0) + 1;
@@ -1731,7 +1727,7 @@ async function addNewErrorType() {
 
 // ---- AI GRADING SUGGESTION ----
 async function callAIGrading() {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const idTeacher = currentUser?.studentId || currentUser?.id || currentUser?.username || '';
   const videoUrl = state.videoUrls[state.currentVideo - 1] || state.videoUrls[0] || '';
 

@@ -58,9 +58,9 @@ function performLogin(userData) {
     return;
   }
   // Role may be in userData or in sessionStorage (fallback when /auth/me not available)
-  const role = userData?.role || sessionStorage.getItem('currentUserRole') || '';
+  const role = userData?.role || localStorage.getItem('currentUserRole') || '';
   const redirectPath = getRedirectByRole(role);
-  const displayName = (userData && (userData.fullName || userData.username)) || JSON.parse(sessionStorage.getItem('currentUser') || 'null')?.fullName || 'Người dùng';
+  const displayName = (userData && (userData.fullName || userData.username)) || JSON.parse(localStorage.getItem('currentUser') || 'null')?.fullName || 'Người dùng';
   showSuccess(`Đăng nhập thành công! Xin chào ${displayName}`, redirectPath);
 }
 

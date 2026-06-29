@@ -468,14 +468,14 @@ function normalizeRole(role) {
 
 // Kiểm tra quyền admin bằng cách đọc sessionStorage (nhanh, không cần gọi server).
 async function checkAdminAccess() {
-  const storedUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
   if (!storedUser) {
     window.location.href = '/index.html';
     return null;
   }
 
-  let sessionRole = sessionStorage.getItem('currentUserRole');
+  let sessionRole = localStorage.getItem('currentUserRole');
 
   // Nếu role không có trong sessionStorage (BE không trả trong body login),
   // thử lấy từ server qua cookie đã được set
@@ -1913,7 +1913,7 @@ function attachAdminEvents() {
       renderAssignments();
 
       // Nếu đang sửa username của tài khoản đang đăng nhập → logout bắt buộc
-      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
       const isSelf = currentUser && (currentUser.id === id || currentUser.username === originalUsername);
       if (usernameChanged && isSelf) {
         showAdminNotice('Đổi username thành công', 'Username đã thay đổi. Vui lòng đăng nhập lại bằng username mới.', 'success');
