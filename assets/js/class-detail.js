@@ -1019,13 +1019,15 @@ function renderStudentPagination(total, totalPages) {
 
   pag.innerHTML = `
     <div class="cd-pagination">
-      <button class="cd-page-btn cd-page-nav" onclick="goStudentPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      ${btns}
-      <button class="cd-page-btn cd-page-nav" onclick="goStudentPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>
-        <i class="fas fa-chevron-right"></i>
-      </button>
+      <div class="cd-pagination-controls">
+        <button class="cd-page-btn cd-page-nav" onclick="goStudentPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        ${btns}
+        <button class="cd-page-btn cd-page-nav" onclick="goStudentPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
       <span class="cd-page-info">${total} sinh viên · Trang ${page}/${totalPages}</span>
     </div>`;
 }

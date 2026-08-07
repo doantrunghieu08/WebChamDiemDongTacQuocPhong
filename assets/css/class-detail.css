@@ -888,6 +888,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   border-top: 1px solid rgba(74, 93, 35, 0.08);
 }
 
+.cd-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .cd-page-info {
   font-size: 0.8rem;
   color: #64748b;
