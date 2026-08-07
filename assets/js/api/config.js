@@ -1,6 +1,35 @@
-// ============================================
-//  API Configuration — HACTECH Grading System
-// ============================================
+// Disable global fetch rate limiting (429 Too Many Requests) with transparent retries
+(function() {
+    const originalFetch = window.fetch;
+    window.fetch = async function(resource, init) {
+        let retries = 0;
+        const maxRetries = 5;
+        while (true) {
+            try {
+                const response = await originalFetch(resource, init);
+                if (response.status === 429 && retries < maxRetries) {
+                    retries++;
+                    const delay = retries * 750 + Math.random() * 250; // progressive delay with jitter
+                    console.warn(`[API] Gặp lỗi 429 (Too Many Requests). Đang thử lại lần ${retries}/${maxRetries} sau ${Math.round(delay)}ms...`, resource);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+                return response;
+            } catch (error) {
+                if (init && init.signal && init.signal.aborted) {
+                    throw error;
+                }
+                if (retries < maxRetries) {
+                    retries++;
+                    const delay = retries * 750 + Math.random() * 250;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+                throw error;
+            }
+        }
+    };
+})();
 
 const API_CONFIG = {
     BASE_URL: 'http://103.75.182.246:8080/public/api',
