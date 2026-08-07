@@ -1,4 +1,4 @@
-/* ===== REDESIGNED HOME PAGE STYLES (Tailwind & Premium B2B SaaS Dashboard Fallbacks) ===== */
+/* ===== REDESIGNED HOME PAGE STYLES (Tailwind & Premium B2B SaaS Dashboard - Olive Green Theme) ===== */
 * {
   margin: 0;
   padding: 0;
@@ -25,9 +25,9 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #b42318 !important;
+  outline: 2px solid #4A5D23 !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(180, 35, 24, 0.15) !important;
+  box-shadow: 0 0 0 4px rgba(74, 93, 35, 0.15) !important;
 }
 
 /* Sidebar Link active states */
@@ -53,8 +53,8 @@ textarea:focus-visible {
 }
 .menu-link.active {
   color: #ffffff !important;
-  background-color: #b42318 !important; /* brand-700 */
-  box-shadow: 0 4px 12px rgba(180, 35, 24, 0.25);
+  background-color: #4A5D23 !important; /* brand olive */
+  box-shadow: 0 4px 12px rgba(74, 93, 35, 0.25);
 }
 .menu-link.active i {
   color: #ffffff !important;
@@ -111,8 +111,8 @@ textarea:focus-visible {
   font-weight: 500;
 }
 .class-badge {
-  background-color: #fee2e2;
-  color: #b42318;
+  background-color: #F4F6F0; /* brand light olive backdrop */
+  color: #4A5D23;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -159,12 +159,12 @@ textarea:focus-visible {
   transition: all 0.2s;
 }
 .btn-class-action.btn-details {
-  background-color: #b42318;
+  background-color: #4A5D23; /* olive */
   color: #ffffff;
 }
 .btn-class-action.btn-details:hover {
-  background-color: #991b1b;
-  box-shadow: 0 4px 12px rgba(180, 35, 24, 0.2);
+  background-color: #38471A;
+  box-shadow: 0 4px 12px rgba(74, 93, 35, 0.2);
 }
 
 /* Exam Grid and Cards */
@@ -250,11 +250,11 @@ textarea:focus-visible {
   background-color: #e2e8f0;
 }
 .btn-exam-delete {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #F4F6F0; /* light olive backdrop */
+  color: #38471A;
 }
 .btn-exam-delete:hover {
-  background-color: #fecaca;
+  background-color: #e2e8d8;
 }
 .btn-exam-restore {
   background-color: #dcfce7;
@@ -314,7 +314,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   font-size: 3rem;
-  color: #b42318;
+  color: #4A5D23;
   overflow: hidden;
 }
 .profile-avatar-edit-btn {
@@ -337,7 +337,7 @@ textarea:focus-visible {
 }
 .profile-avatar-edit-btn:hover {
   transform: scale(1.1);
-  background-color: #b42318;
+  background-color: #4A5D23;
 }
 .profile-name {
   font-size: 1.5rem;
@@ -348,7 +348,7 @@ textarea:focus-visible {
 .profile-role {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #b42318;
+  color: #4A5D23;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.75rem;
@@ -380,7 +380,7 @@ textarea:focus-visible {
   gap: 0.5rem;
 }
 .profile-card-title i {
-  color: #b42318;
+  color: #4A5D23;
 }
 .profile-field {
   display: flex;
@@ -446,22 +446,22 @@ textarea:focus-visible {
   color: #0f172a;
 }
 .summary-high {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid #4A5D23; /* High severity gets Brand color */
 }
 .summary-high .summary-label i {
-  color: #ef4444;
+  color: #4A5D23;
 }
 .summary-medium {
-  border-left: 4px solid #f97316;
+  border-left: 4px solid #5A732D;
 }
 .summary-medium .summary-label i {
-  color: #f97316;
+  color: #5A732D;
 }
 .summary-low {
-  border-left: 4px solid #eab308;
+  border-left: 4px solid #8A9D68;
 }
 .summary-low .summary-label i {
-  color: #eab308;
+  color: #8A9D68;
 }
 
 .error-type-list {
@@ -509,8 +509,8 @@ textarea:focus-visible {
   line-height: 1.4;
 }
 .error-deduction-badge {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #F4F6F0;
+  color: #4A5D23;
   padding: 0.375rem 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.8rem;
@@ -528,7 +528,7 @@ textarea:focus-visible {
 }
 .error-type-severity.cao {
   background-color: #fee2e2;
-  color: #b42318;
+  color: #b91c1c;
 }
 .error-type-severity.trung-binh {
   background-color: #ffedd5;
@@ -609,8 +609,8 @@ textarea:focus-visible {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 9999px;
-  background-color: #fee2e2;
-  color: #b42318;
+  background-color: #F4F6F0;
+  color: #4A5D23;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -664,8 +664,8 @@ textarea:focus-visible {
   background-color: #f8fafc;
 }
 .grading-history-item.active {
-  border-color: #b42318;
-  background-color: #fef2f2;
+  border-color: #4A5D23;
+  background-color: #F4F6F0;
 }
 .grading-history-item-top {
   display: flex;
@@ -720,7 +720,7 @@ textarea:focus-visible {
   font-weight: 700;
 }
 .grading-history-item.active .grading-history-footer strong {
-  color: #b42318;
+  color: #4A5D23;
 }
 
 .grading-history-detail {
@@ -827,7 +827,7 @@ textarea:focus-visible {
   padding-bottom: 0.75rem;
 }
 .chart-title i {
-  color: #b42318;
+  color: #4A5D23;
 }
 
 /* Pagination components */
@@ -880,9 +880,9 @@ textarea:focus-visible {
   border-color: #cbd5e1;
 }
 .home-page-btn.active {
-  background-color: #b42318 !important;
+  background-color: #4A5D23 !important;
   color: #ffffff !important;
-  border-color: #b42318 !important;
+  border-color: #4A5D23 !important;
 }
 .home-page-btn:disabled {
   opacity: 0.4;
@@ -983,8 +983,8 @@ textarea:focus-visible {
 .class-modal-body input:focus,
 .class-modal-body select:focus,
 .class-modal-body textarea:focus {
-  border-color: #b42318;
-  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.1);
+  border-color: #4A5D23;
+  box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.1);
 }
 .class-modal-body textarea {
   min-height: 100px;
@@ -998,8 +998,8 @@ textarea:focus-visible {
 }
 .logout-modal-icon {
   font-size: 2.5rem;
-  color: #b42318;
-  background-color: #fee2e2;
+  color: #4A5D23;
+  background-color: #F4F6F0;
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 9999px;
@@ -1046,10 +1046,10 @@ textarea:focus-visible {
   background-color: #f8fafc;
 }
 .logout-btn-confirm {
-  color: #b42318;
+  color: #4A5D23;
 }
 .logout-btn-confirm:hover {
-  background-color: #fee2e2;
+  background-color: #F4F6F0;
 }
 
 /* Toast notifications */
@@ -1112,7 +1112,7 @@ textarea:focus-visible {
 }
 .cpose-progress-bar-inner {
   height: 100%;
-  background-color: #b42318;
+  background-color: #4A5D23;
   width: 0;
   transition: width 0.3s ease;
 }
@@ -1189,8 +1189,8 @@ textarea:focus-visible {
   transition: all 0.2s;
 }
 .exam-upload-box:hover {
-  border-color: #b42318;
-  background-color: #fef2f2;
+  border-color: #4A5D23;
+  background-color: #F4F6F0;
 }
 
 /* Student Tables inside modal */
@@ -1255,11 +1255,11 @@ textarea:focus-visible {
   transition: all 0.2s ease;
 }
 .admin-subtab:hover {
-  color: #b42318 !important;
+  color: #4A5D23 !important;
 }
 .admin-subtab.active {
-  color: #b42318 !important;
-  border-color: #b42318 !important;
+  color: #4A5D23 !important;
+  border-color: #4A5D23 !important;
 }
 .admin-exam-subtabs,
 .admin-error-subtabs {

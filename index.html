@@ -3,75 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đăng Nhập – Chấm Điểm Đi Đều</title>
+  <title>Đăng Nhập – HACTECH Bách Khoa Hà Nội</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#F4F6F0',
+              100: '#E8ECD9',
+              600: '#4A5D23',
+              700: '#38471A',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="assets/css/login.css" />
 </head>
-<body>
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <div class="login-logo">HACTECH</div>
-        
-        <p class="login-subtitle">Trường Cao đẳng Nghề Bách Khoa Hà Nội</p>
+<body class="bg-brand-50 min-h-screen flex items-center justify-center p-4">
+  <div class="login-container w-full max-w-[420px]">
+    <div class="login-card w-full bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+      <!-- Card Header -->
+      <div class="login-header bg-brand-600 p-8 text-center text-white flex flex-col items-center justify-center gap-3">
+        <div class="flex items-center gap-3">
+          <img src="assets/images/logo.svg" alt="HACTECH Bách Khoa Hà Nội" class="h-12 w-auto filter drop-shadow-md">
+          <div class="login-logo text-2xl font-extrabold tracking-wide m-0">HACTECH</div>
+        </div>
+        <p class="login-subtitle text-xs text-white/80 font-medium tracking-wide">Trường Cao đẳng Nghề Bách Khoa Hà Nội</p>
       </div>
 
-      <form class="login-form" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label class="form-label">Tên đăng nhập</label>
+      <!-- Card Body / Form -->
+      <form class="login-form p-8 flex flex-col gap-5" onsubmit="handleLogin(event)">
+        <div class="form-group flex flex-col gap-2">
+          <label class="form-label text-xs font-bold text-slate-600 uppercase tracking-wider">Tên đăng nhập</label>
           <input 
             type="text" 
             id="student-id" 
-            class="form-input" 
-            placeholder="Nhập tên đăng nhập..." 
+            class="form-input w-full px-4 py-3 rounded-lg border border-slate-300 bg-slate-50 text-slate-800 text-sm focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none transition" 
+            placeholder="Nhập MSSV hoặc tên đăng nhập..." 
             required
           />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Mật Khẩu</label>
+        <div class="form-group flex flex-col gap-2">
+          <label class="form-label text-xs font-bold text-slate-600 uppercase tracking-wider">Mật Khẩu</label>
           <input 
             type="password" 
             id="password" 
-            class="form-input" 
+            class="form-input w-full px-4 py-3 rounded-lg border border-slate-300 bg-slate-50 text-slate-800 text-sm focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none transition" 
             placeholder="Nhập mật khẩu..." 
             required
           />
         </div>
 
-        <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
+        <button type="submit" class="btn-login w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-bold tracking-wider hover:shadow-lg hover:shadow-brand-600/20 active:scale-[0.98] transition mt-2">
+          ĐĂNG NHẬP
+        </button>
       </form>
 
-      <div class="login-footer">
-        <a href="/pages/forgot-password.html" class="forgot-password-link">Quên mật khẩu?</a>
+      <!-- Card Footer -->
+      <div class="login-footer p-6 border-t border-slate-100 text-center">
+        <a href="/pages/forgot-password.html" class="forgot-password-link text-sm font-semibold text-brand-600 hover:text-brand-700 hover:underline">Quên mật khẩu?</a>
       </div>
     </div>
   </div>
 
   <!-- Modal Popup -->
-  <div id="resultModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-result-container">
+  <div id="resultModal" class="modal fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="modal-content w-full max-w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden scale-95 opacity-0 transition duration-300">
+      <div class="modal-result-container flex justify-center pt-8 pb-2">
         <!-- Success Icon -->
-        <div id="successIcon" class="result-icon success-icon" style="display: none;">
-          <svg viewBox="0 0 52 52" width="80" height="80">
-            <circle cx="26" cy="26" r="25" style="fill: none; stroke: #28a745; stroke-width: 2;"/>
-            <path class="checkmark" d="M 14 27 L 24 37 L 38 15" style="fill: none; stroke: #28a745; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;"/>
+        <div id="successIcon" class="result-icon success-icon hidden">
+          <svg viewBox="0 0 52 52" width="64" height="64">
+            <circle cx="26" cy="26" r="25" class="fill-none stroke-emerald-500 stroke-[2]"/>
+            <path class="checkmark fill-none stroke-emerald-500 stroke-[3] stroke-linecap-round stroke-linejoin-round" d="M 14 27 L 24 37 L 38 15"/>
           </svg>
         </div>
         <!-- Failure Icon -->
-        <div id="failureIcon" class="result-icon failure-icon" style="display: none;">
-          <svg viewBox="0 0 52 52" width="80" height="80">
-            <circle cx="26" cy="26" r="25" style="fill: none; stroke: #dc3545; stroke-width: 2;"/>
-            <line x1="16" y1="16" x2="36" y2="36" style="stroke: #dc3545; stroke-width: 3; stroke-linecap: round;"/>
-            <line x1="36" y1="16" x2="16" y2="36" style="stroke: #dc3545; stroke-width: 3; stroke-linecap: round;"/>
+        <div id="failureIcon" class="result-icon failure-icon hidden">
+          <svg viewBox="0 0 52 52" width="64" height="64">
+            <circle cx="26" cy="26" r="25" class="fill-none stroke-rose-500 stroke-[2]"/>
+            <line x1="16" y1="16" x2="36" y2="36" class="stroke-rose-500 stroke-[3] stroke-linecap-round"/>
+            <line x1="36" y1="16" x2="16" y2="36" class="stroke-rose-500 stroke-[3] stroke-linecap-round"/>
           </svg>
         </div>
       </div>
-      <div class="modal-body">
+      <div class="modal-body p-6 text-center text-slate-800 text-sm font-medium">
         <p id="resultMessage"></p>
       </div>
-      <div class="modal-footer">
-        <button id="closeModalBtn" class="modal-btn" style="display: none;">Đóng</button>
+      <div class="modal-footer p-4 border-t border-slate-50 flex justify-center">
+        <button id="closeModalBtn" class="modal-btn hidden px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold tracking-wider active:scale-[0.98] transition">
+          Đóng
+        </button>
       </div>
     </div>
   </div>
