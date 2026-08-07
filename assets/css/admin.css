@@ -538,6 +538,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   background: #f8fafc;
   outline: none;
   transition: all 0.2s;
+  box-sizing: border-box !important;
+}
+
+.admin-form-row input,
+.admin-form-row select {
+  height: 2.75rem !important;
+  line-height: normal !important;
 }
 .admin-form-row input:focus,
 .admin-form-row select:focus,
@@ -551,49 +558,194 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 /* ===================================================
    ASSIGNMENT & CLASSES PANELS
    =================================================== */
-.admin-class-list {
+/* ===================================================
+   CLASSES & ASSIGNMENTS GRID CARDS
+   =================================================== */
+.admin-class-grid,
+.admin-assignment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin: 1rem 0;
+}
+
+.admin-class-card,
+.admin-assignment-card {
+  background: #ffffff;
+  border: 1px solid rgba(74,93,35,0.10);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.02);
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.admin-class-card:hover,
+.admin-assignment-card:hover {
+  border-color: rgba(74,93,35,0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(74,93,35,0.08), 0 8px 16px -6px rgba(74,93,35,0.04);
+}
+
+.admin-class-top,
+.admin-assignment-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 0.75rem;
 }
 
-.admin-class-item {
-  background: #ffffff;
-  border: 1px solid rgba(74,93,35,0.10);
-  border-radius: 1rem;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  transition: all 0.18s;
-}
-.admin-class-item:hover {
-  border-color: rgba(74,93,35,0.18);
-  box-shadow: 0 4px 14px rgba(74,93,35,0.06);
-}
-
-.admin-class-name {
-  font-size: 1rem;
-  font-weight: 700;
+.admin-class-title,
+.admin-assignment-title {
+  font-size: 1.05rem;
+  font-weight: 800;
   color: #1a1f0e;
   letter-spacing: -0.01em;
 }
 
-.admin-class-meta {
+.admin-class-subtitle,
+.admin-assignment-subtitle {
   font-size: 0.78rem;
   color: #64748b;
+  font-weight: 600;
   margin-top: 2px;
+}
+
+.admin-assigned-badge {
+  font-size: 0.68rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.admin-assigned-badge.assigned {
+  background: rgba(74,93,35,0.08);
+  color: #4A5D23;
+}
+.admin-assigned-badge.unassigned {
+  background: rgba(100,116,139,0.08);
+  color: #64748b;
+}
+
+.admin-class-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #475569;
   font-weight: 500;
+  border-top: 1px dashed rgba(74,93,35,0.08);
+  border-bottom: 1px dashed rgba(74,93,35,0.08);
+  padding: 0.75rem 0;
+  margin: 0.25rem 0;
+}
+.admin-class-meta span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-class-meta span i {
+  color: #4A5D23;
+  width: 14px;
+  text-align: center;
 }
 
 .admin-class-actions {
   display: flex;
   gap: 0.5rem;
-  flex-shrink: 0;
+  margin-top: auto;
   flex-wrap: wrap;
-  justify-content: flex-end;
+}
+.admin-class-actions .admin-update-btn,
+.admin-class-actions .admin-secondary-btn,
+.admin-class-actions .admin-delete-btn {
+  flex: 1;
+  min-width: calc(50% - 0.25rem);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.18s;
+}
+
+.admin-class-actions .admin-update-btn {
+  background: rgba(74, 93, 35, 0.08);
+  color: #4A5D23;
+}
+.admin-class-actions .admin-update-btn:hover {
+  background: #4A5D23;
+  color: #fff;
+}
+
+.admin-class-actions .admin-secondary-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.admin-class-actions .admin-secondary-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.admin-class-actions .admin-delete-btn {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+.admin-class-actions .admin-delete-btn:hover:not(.disabled) {
+  background: #ef4444;
+  color: #fff;
+}
+.admin-class-actions .admin-delete-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-assignment-select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  background: #f8fafc;
+  color: #1e293b;
+  transition: all 0.2s;
+  margin-bottom: 0.25rem;
+}
+.admin-assignment-select:focus {
+  border-color: #4A5D23;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.1);
+}
+
+.admin-assign-btn {
+  width: 100%;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4A5D23, #38471A);
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-assign-btn:hover {
+  box-shadow: 0 4px 12px rgba(74, 93, 35, 0.2);
+  transform: translateY(-1px);
 }
 
 /* ===================================================
