@@ -379,7 +379,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 /* ===================================================
    ACCOUNT / DATA TABLES
    =================================================== */
-.admin-account-table-wrap {
+.admin-table-wrap {
   background: #ffffff;
   border: 1px solid rgba(74,93,35,0.10);
   border-radius: 1.25rem;
@@ -387,17 +387,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.02);
 }
 
-.admin-account-table {
+.admin-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.admin-account-table thead {
+.admin-table thead {
   background: #F4F6F0;
   border-bottom: 1.5px solid rgba(74,93,35,0.10);
 }
 
-.admin-account-table th {
+.admin-table th {
   padding: 0.875rem 1rem;
   text-align: left;
   font-size: 0.7rem;
@@ -408,7 +408,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   white-space: nowrap;
 }
 
-.admin-account-table td {
+.admin-table td {
   padding: 0.875rem 1rem;
   border-bottom: 1px solid rgba(74,93,35,0.06);
   font-size: 0.85rem;
@@ -416,8 +416,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   vertical-align: middle;
 }
 
-.admin-account-table tbody tr:hover { background: #F4F6F0; }
-.admin-account-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover { background: #F4F6F0; }
+.admin-table tbody tr:last-child td { border-bottom: none; }
 
 /* ── Account List Item (JS-injected cards) ── */
 .admin-account-item {
