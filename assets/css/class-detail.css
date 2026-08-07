@@ -456,6 +456,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   padding: 0.75rem 1.5rem;
   display: flex;
   flex-direction: column;
+  max-height: 540px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for student list */
+.cd-student-list::-webkit-scrollbar {
+  width: 6px;
+}
+.cd-student-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cd-student-list::-webkit-scrollbar-thumb {
+  background: rgba(74, 93, 35, 0.2);
+  border-radius: 999px;
+}
+.cd-student-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 93, 35, 0.4);
 }
 
 .cd-student-row { border-bottom: 1px solid rgba(74,93,35,0.07); }
@@ -856,4 +873,65 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 @media (max-width: 768px) {
   .cd-class-banner { flex-direction: column; }
   .cd-exam-grid { grid-template-columns: 1fr; }
+}
+
+/* ===================================================
+   PAGINATION
+   =================================================== */
+.cd-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid rgba(74, 93, 35, 0.08);
+}
+
+.cd-page-info {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.cd-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 700;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.cd-page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #4A5D23;
+}
+
+.cd-page-btn.active {
+  background: linear-gradient(135deg, #4A5D23, #38471A) !important;
+  color: #fff !important;
+  border-color: #4A5D23 !important;
+  box-shadow: 0 2px 8px rgba(74, 93, 35, 0.22);
+}
+
+.cd-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cd-page-ellipsis {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  padding: 0 4px;
 }
