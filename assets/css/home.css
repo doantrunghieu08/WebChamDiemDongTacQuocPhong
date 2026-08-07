@@ -1529,12 +1529,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   border-radius: 0.5rem;
 }
 
-.st-exam-tab-panel {
-  display: none;
-}
-.st-exam-tab-panel.active {
-  display: block;
-}
 
 /* Exam Card List inside panels */
 .st-exam-list {
