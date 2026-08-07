@@ -6,6 +6,27 @@
 
 body { min-height: 100dvh; }
 
+/* Force styling for all input fields in the student manager form */
+.admin-students-form input[type="text"] {
+  height: 2.75rem !important;
+  padding: 0.65rem 0.875rem !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 0.625rem !important;
+  font-size: 0.875rem !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+.admin-students-form input[type="text"]:focus {
+  background: #fff !important;
+  border-color: #4A5D23 !important;
+  box-shadow: 0 0 0 3.5px rgba(74,93,35,0.12) !important;
+  outline: none !important;
+}
+
 /* ── Shell ── */
 .admin-students-shell {
   width: min(1520px, calc(100% - 48px));

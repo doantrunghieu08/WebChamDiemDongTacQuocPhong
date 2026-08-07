@@ -269,13 +269,11 @@ function _makeAccountRow(account) {
   return `
     <tr class="${account.status === 'locked' ? 'locked' : ''}">
       <td><strong>${account.id}</strong></td>
+      <td>${avatarHtml}</td>
       <td>
-        <div class="admin-member-cell">
-          ${avatarHtml}
-          <div>
-            <div class="admin-member-name">${account.name}</div>
-            <div class="admin-member-email">${account.email || ''}</div>
-          </div>
+        <div style="display: flex; flex-direction: column; text-align: left;">
+          <div class="admin-member-name">${account.name}</div>
+          <div class="admin-member-email">${account.email || ''}</div>
         </div>
       </td>
       <td>${account.username}</td>
@@ -299,7 +297,7 @@ function _renderTableRows(accounts) {
   const tbody = document.getElementById('accountTableBody');
   if (!tbody) return;
   tbody.innerHTML = accounts.length === 0
-    ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:#94a3b8">Không có tài khoản nào</td></tr>`
+    ? `<tr><td colspan="8" style="text-align:center;padding:24px;color:#94a3b8">Không có tài khoản nào</td></tr>`
     : accounts.map(_makeAccountRow).join('');
 }
 
@@ -826,6 +824,7 @@ function _renderAccountsSkeleton(container) {
         <thead>
           <tr>
             <th>Mã</th>
+            <th>Ảnh</th>
             <th>Thành viên</th>
             <th>Username</th>
             <th>Vai trò</th>
