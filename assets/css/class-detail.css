@@ -251,9 +251,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   background: #fff;
   flex-wrap: wrap;
   gap: 12px;
-  position: sticky;
-  top: 4.5rem;
-  z-index: 100;
 }
 
 .cd-section-header h2 {
