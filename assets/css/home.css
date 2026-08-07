@@ -1437,3 +1437,286 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   .report-grid { grid-template-columns: 1fr; }
   .error-summary { grid-template-columns: 1fr; }
 }
+
+/* ===================================================
+   STUDENT DASHBOARD STYLE SYSTEM (st- prefixed)
+   =================================================== */
+.st-exam-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.st-summary-card {
+  background: #ffffff;
+  border: 1px solid rgba(74, 93, 35, 0.1);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.01);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: all 0.2s;
+}
+.st-summary-card:hover {
+  border-color: rgba(74, 93, 35, 0.18);
+  transform: translateY(-2px);
+}
+
+.st-summary-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.st-summary-value {
+  font-size: 1.625rem;
+  font-weight: 800;
+  color: #1a1f0e;
+  letter-spacing: -0.02em;
+}
+
+.st-summary-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.st-exam-tabs {
+  display: flex;
+  gap: 1.25rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.st-exam-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.st-exam-tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+.st-exam-tab-btn:hover {
+  color: #4A5D23;
+}
+.st-exam-tab-btn.active {
+  color: #4A5D23;
+  border-bottom-color: #4A5D23;
+}
+
+.st-tab-count {
+  background: rgba(74, 93, 35, 0.08);
+  color: #4A5D23;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.5rem;
+}
+
+.st-exam-tab-panel {
+  display: none;
+}
+.st-exam-tab-panel.active {
+  display: block;
+}
+
+/* Exam Card List inside panels */
+.st-exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.st-exam-card {
+  background: #ffffff;
+  border: 1px solid rgba(74, 93, 35, 0.09);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: all 0.18s;
+  text-align: left;
+}
+.st-exam-card:hover {
+  border-color: rgba(74, 93, 35, 0.2);
+  transform: translateX(3px);
+  box-shadow: 0 4px 16px rgba(74, 93, 35, 0.05);
+}
+
+.st-exam-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.st-exam-icon.official {
+  background: rgba(74, 93, 35, 0.08);
+  color: #4A5D23;
+}
+.st-exam-icon.practice {
+  background: rgba(59, 130, 246, 0.08);
+  color: #2563eb;
+}
+.st-exam-icon.no-score {
+  background: rgba(100, 116, 139, 0.08);
+  color: #64748b;
+}
+
+.st-exam-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.st-exam-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.st-exam-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a1f0e;
+  letter-spacing: -0.01em;
+}
+
+.st-exam-submitted-badge,
+.st-exam-draft-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+}
+.st-exam-submitted-badge {
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d;
+}
+.st-exam-draft-badge {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+}
+
+.st-exam-meta {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.st-exam-deadlines {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.st-exam-deadline-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.375rem;
+}
+.st-exam-deadline-badge.open {
+  background: rgba(22, 163, 74, 0.08);
+  color: #16a34a;
+}
+.st-exam-deadline-badge.closed {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+.st-exam-deadline-badge.none {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.st-exam-scores {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.st-score-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  min-width: 70px;
+}
+.st-score-badge.official {
+  background: rgba(74, 93, 35, 0.06);
+  border-color: rgba(74, 93, 35, 0.15);
+  color: #4A5D23;
+}
+.st-score-badge.practice {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+}
+
+.st-score-type {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.st-score-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.st-score-none {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #f8fafc;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px dashed #e2e8f0;
+}
+
+/* Empty student state */
+.st-exam-empty {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  background: #ffffff;
+  border: 1.5px dashed rgba(74,93,35,0.15);
+  border-radius: 1.25rem;
+  color: #64748b;
+}
+
+.st-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.875rem;
+}
