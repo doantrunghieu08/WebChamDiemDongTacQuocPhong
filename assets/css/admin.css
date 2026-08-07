@@ -926,6 +926,73 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   fill: #fff !important;
 }
 
+/* Account table action buttons styling */
+.admin-action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.admin-action-group button {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.admin-action-group .admin-update-btn {
+  background: rgba(74, 93, 35, 0.08);
+  color: #4A5D23;
+  border-color: rgba(74, 93, 35, 0.15);
+}
+.admin-action-group .admin-update-btn:hover {
+  background: #4A5D23;
+  color: #ffffff;
+  border-color: #4A5D23;
+}
+
+.admin-action-group .admin-lock-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+.admin-action-group .admin-lock-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.admin-action-group .admin-lock-btn.lock {
+  background: rgba(239, 68, 68, 0.06);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.18);
+}
+.admin-action-group .admin-lock-btn.lock:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.admin-action-group .admin-lock-btn.unlock {
+  background: rgba(22, 163, 74, 0.06);
+  color: #16a34a;
+  border-color: rgba(22, 163, 74, 0.18);
+}
+.admin-action-group .admin-lock-btn.unlock:hover {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
 /* ===================================================
    RESPONSIVE
    =================================================== */
