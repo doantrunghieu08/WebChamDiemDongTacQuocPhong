@@ -209,8 +209,6 @@ async function refreshUserList(page = 0) {
   const role   = activeRoleFilter || '';
 
   if (page === 0) {
-    // Reset toàn bộ: dữ liệu + render skeleton
-    adminAccounts = [];
     const container = document.getElementById('accountsContent');
     if (container) _renderAccountsSkeleton(container);
     _updateSummaryCards();
@@ -225,23 +223,11 @@ async function refreshUserList(page = 0) {
   userTotalPages    = result.totalPages;
   userTotalElements = result.totalElements;
 
-  if (page === 0) {
-    adminAccounts = result.users;
-    _updateSummaryCards();
-    _renderTableRows(adminAccounts); // render toàn bộ lần đầu
-  } else {
-    adminAccounts = [...adminAccounts, ...result.users];
-    _appendTableRows(result.users);  // chỉ append thêm
-  }
+  adminAccounts = result.users;
+  _renderTableRows(adminAccounts);
 
   sessionStorage.setItem('adminAccounts', JSON.stringify(adminAccounts));
-  _updateAccountFooter();
-
-  if (page === 0) {
-    _attachWrapScrollListener(); // gắn scroll listener một lần duy nhất
-  }
-  // Nếu nội dung chưa lấp đầy wrap → tự động tải thêm
-  requestAnimationFrame(_checkAutoFill);
+  _buildUserPagination();
 }
 
 function _updateSummaryCards() {
@@ -301,53 +287,7 @@ function _renderTableRows(accounts) {
     : accounts.map(_makeAccountRow).join('');
 }
 
-function _appendTableRows(accounts) {
-  const tbody = document.getElementById('accountTableBody');
-  if (!tbody || !accounts.length) return;
-  tbody.insertAdjacentHTML('beforeend', accounts.map(_makeAccountRow).join(''));
-}
-
-function _updateAccountFooter() {
-  const shown = adminAccounts.length;
-  const total = userTotalElements || shown;
-  const loader = document.getElementById('userLoadingMore');
-  if (loader) loader.style.display = 'none';
-}
-
-/** Gắn scroll listener trên wrap (chỉ gắn 1 lần, tự dọn khi skeleton mới) */
-function _attachWrapScrollListener() {
-  if (_userObserver) { _userObserver.disconnect(); _userObserver = null; }
-  const wrap = document.querySelector('.admin-table-wrap');
-  if (!wrap || wrap._scrollBound) return;
-
-  wrap._scrollBound = true;
-  wrap.addEventListener('scroll', function () {
-    if (userIsLoading) return;
-    if (userCurrentPage + 1 >= userTotalPages) return;
-    // Chỉ trigger khi gần đáy (scroll xuống)
-    if (wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 160) {
-      _loadMoreAccounts();
-    }
-  });
-}
-
-/** Kiểm tra sau mỗi lần render: nếu wrap chưa tràn → tải thêm để lấp đầy */
-function _checkAutoFill() {
-  if (userIsLoading) return;
-  if (userCurrentPage + 1 >= userTotalPages) return;
-  const wrap = document.querySelector('.admin-table-wrap');
-  if (!wrap) return;
-  if (wrap.scrollHeight > wrap.clientHeight) return; // đã có scroll bar → dừng lại
-  _loadMoreAccounts();
-}
-
-async function _loadMoreAccounts() {
-  if (userIsLoading) return;
-  if (userCurrentPage + 1 >= userTotalPages) return;
-  const loader = document.getElementById('userLoadingMore');
-  if (loader) loader.style.display = 'flex';
-  await refreshUserList(userCurrentPage + 1);
-}
+// Pagination handled via _buildUserPagination() button controls
 
 // Load classes from admin API with pagination.
 async function loadClassesFromApi(page = 0, size = classPageSize) {
@@ -807,19 +747,15 @@ function renderAccounts() {
   if (!container) return;
   if (!document.getElementById('accountTableBody')) {
     _renderAccountsSkeleton(container);
-    // Lần đầu tạo skeleton → hiển thị số liệu đang có
     _updateSummaryCards();
   }
-  // Không gọi _updateSummaryCards() ở đây — chỉ cập nhật tbody + footer
   _renderTableRows(adminAccounts);
-  _updateAccountFooter();
-  _attachWrapScrollListener();
-  requestAnimationFrame(_checkAutoFill);
+  _buildUserPagination();
 }
 
 function _renderAccountsSkeleton(container) {
   container.innerHTML = `
-    <div class="admin-table-wrap">
+    <div class="admin-table-wrap" style="margin-bottom: 1rem;">
       <table class="admin-table">
         <thead>
           <tr>
@@ -835,11 +771,54 @@ function _renderAccountsSkeleton(container) {
         </thead>
         <tbody id="accountTableBody"></tbody>
       </table>
-      <div id="userLoadingMore" class="admin-loading-more" style="display:none;padding:12px;justify-content:center">
-        <i class="fas fa-spinner fa-spin"></i>&nbsp; Đang tải thêm…
-      </div>
     </div>
+    <div id="accountsPagination"></div>
   `;
+}
+
+function _buildUserPagination() {
+  const container = document.getElementById('accountsPagination');
+  if (!container) return;
+
+  const total = userTotalElements;
+  if (total === 0 && userCurrentPage === 0 && userTotalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const start = userCurrentPage * userPageSize + 1;
+  const end   = Math.min(start + adminAccounts.length - 1, total || (start + adminAccounts.length - 1));
+  const isLastPage = userCurrentPage + 1 >= userTotalPages;
+
+  let btns = '';
+  // Nút Trước
+  btns += `<button class="admin-page-btn" onclick="refreshUserList(${userCurrentPage - 1})" ${userCurrentPage === 0 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+  // Số trang
+  const winSize = 2;
+  for (let i = 0; i < userTotalPages; i++) {
+    const showBtn = i === 0 || i === userTotalPages - 1 ||
+                    (i >= userCurrentPage - winSize && i <= userCurrentPage + winSize);
+    const showEllipsis = i === userCurrentPage - winSize - 1 || i === userCurrentPage + winSize + 1;
+    if (showBtn) {
+      btns += `<button class="admin-page-btn${i === userCurrentPage ? ' active' : ''}" onclick="refreshUserList(${i})">${i + 1}</button>`;
+    } else if (showEllipsis) {
+      btns += `<span class="admin-page-ellipsis">…</span>`;
+    }
+  }
+
+  // Nút Sau
+  btns += `<button class="admin-page-btn" onclick="refreshUserList(${userCurrentPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+
+  const infoText = total > 0
+    ? `Hiển thị ${start}–${end} trong tổng số ${total} tài khoản`
+    : `Trang ${userCurrentPage + 1} / ${userTotalPages}`;
+
+  container.innerHTML = `
+    <div class="admin-pagination">
+      <span class="admin-page-info">${infoText}</span>
+      <div class="admin-page-controls">${btns}</div>
+    </div>`;
 }
 
 function renderClasses() {
