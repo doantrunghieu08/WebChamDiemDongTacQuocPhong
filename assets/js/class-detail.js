@@ -728,9 +728,13 @@ function buildExamPanelHTML(s) {
           </div>
         </div>
         ${deadlineHTML}
-        ${submissionStatusHTML}
-        ${scoreHTML}
-        ${btnHTML}
+        <div class="cd-exam-footer">
+          <div class="cd-exam-footer-left">
+            ${submissionStatusHTML}
+            ${scoreHTML}
+          </div>
+          ${btnHTML}
+        </div>
       </div>
     `;
   });

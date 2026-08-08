@@ -673,10 +673,24 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   transition: all 0.18s;
   text-align: center;
   box-shadow: 0 2px 6px rgba(74,93,35,0.18);
+  white-space: nowrap;
 }
 .cd-exam-btn:hover {
   box-shadow: 0 6px 16px rgba(74,93,35,0.28);
   transform: translateY(-1px);
+}
+
+.cd-exam-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.cd-exam-footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
 }
 
 .cd-exam-btn-locked {
