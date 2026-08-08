@@ -561,6 +561,79 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   gap: 12px;
 }
 
+/* ===================================================
+   EXAM SLIDER
+   =================================================== */
+.cd-exam-slider-wrapper {
+  position: relative;
+  width: 100%;
+}
+.cd-exam-slider {
+  overflow: hidden;
+  width: 100%;
+}
+.cd-exam-slide {
+  display: none;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+  animation: slideFadeIn 0.3s ease-in-out;
+}
+.cd-exam-slide.active {
+  display: grid;
+}
+@keyframes slideFadeIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.cd-exam-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+.cd-exam-nav:hover {
+  background: #f8fafc;
+  color: #4A5D23;
+  border-color: #4A5D23;
+}
+.cd-exam-nav-prev { left: -16px; }
+.cd-exam-nav-next { right: -16px; }
+
+.cd-exam-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.cd-exam-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cd-exam-dot.active {
+  background: #4A5D23;
+  width: 20px;
+  border-radius: 4px;
+}
+
 .cd-exam-card {
   background: #f8fafc;
   border: 1px solid rgba(74,93,35,0.09);
@@ -839,6 +912,133 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .cd-modal-close:hover { background: #e2e8f0; color: #0f172a; }
 
 .cd-modal-body { padding: 1.25rem; }
+
+/* ===================================================
+   ADD EXAM MODAL TABS
+   =================================================== */
+.cd-modal-tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+.cd-modal-tab {
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.cd-modal-tab:hover {
+  background: #f1f5f9;
+  color: #1a1f0e;
+}
+.cd-modal-tab--active {
+  background: #F4F6F0;
+  color: #4A5D23;
+  box-shadow: 0 1px 2px rgba(74,93,35,0.06);
+}
+
+/* ===================================================
+   ADD EXAM MODAL LIST
+   =================================================== */
+.cd-assigned-exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.cd-assigned-exam-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+.cd-assigned-exam-item:hover {
+  border-color: #cbd5e1;
+}
+.cd-assigned-exam-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+.cd-assigned-exam-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+.cd-assigned-exam-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1f0e;
+  margin-bottom: 2px;
+}
+.cd-assigned-exam-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.cd-assigned-exam-time {
+  font-size: 0.75rem;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-weight: 500;
+}
+.cd-assigned-exam-remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.cd-assigned-exam-remove i {
+  font-size: 1.1rem;
+}
+.cd-assigned-exam-remove:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.cd-deadline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 1.25rem;
+}
 
 /* Import modal */
 .cd-import-desc {
