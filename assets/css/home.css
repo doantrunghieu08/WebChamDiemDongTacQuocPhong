@@ -1714,3 +1714,265 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   font-size: 2.5rem;
   margin-bottom: 0.875rem;
 }
+
+/* ===================================================
+   GRADING HISTORY DETAIL PANEL STYLES
+   =================================================== */
+.history-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(74, 93, 35, 0.08);
+  gap: 1rem;
+}
+
+.history-detail-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1a1f0e;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.history-detail-header p {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+}
+
+.history-detail-score {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #4A5D23;
+  background: rgba(74, 93, 35, 0.06);
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid rgba(74, 93, 35, 0.12);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.history-score-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.history-score-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.history-score-badge.practice {
+  background: rgba(59, 130, 246, 0.08);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.history-score-badge.official {
+  background: rgba(22, 163, 74, 0.08);
+  color: #16a34a;
+  border: 1px solid rgba(22, 163, 74, 0.15);
+}
+
+.history-detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .history-detail-meta-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.history-detail-meta {
+  background: #f8fafc;
+  border: 1px solid rgba(74, 93, 35, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-detail-meta span {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.history-detail-meta strong {
+  font-size: 1rem;
+  color: #1a1f0e;
+  font-weight: 800;
+}
+
+.history-detail-block {
+  margin-top: 1.5rem;
+}
+
+.history-block-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1f0e;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.history-block-title i {
+  color: #4A5D23;
+}
+
+.history-frame-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.history-frame-card {
+  background: #ffffff;
+  border: 1px solid rgba(74, 93, 35, 0.09);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-frame-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.history-frame-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #1a1f0e;
+}
+
+.history-frame-meta {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.history-frame-score {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #fee2e2;
+}
+
+.history-frame-img {
+  width: 100%;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+  max-height: 200px;
+  border: 1px solid #e2e8f0;
+}
+
+.history-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.history-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38471A;
+  background: rgba(74, 93, 35, 0.06);
+  border: 1px solid rgba(74, 93, 35, 0.12);
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  line-height: 1.4;
+}
+
+/* ===================================================
+   GRADING HISTORY VIDEO PANEL STYLES
+   =================================================== */
+.history-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.history-video-card {
+  background: #ffffff;
+  border: 1px solid rgba(74, 93, 35, 0.09);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-video-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-video-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #1a1f0e;
+}
+
+.history-video-file {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-video-player {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  aspect-ratio: 16/9;
+  background: #000;
+}
+
+.history-video-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border-radius: 0.5rem;
+  border: 1px dashed #cbd5e1;
+}
+
+.history-video-meta {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
