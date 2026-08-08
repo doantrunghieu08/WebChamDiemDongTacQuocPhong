@@ -1040,6 +1040,82 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   margin-bottom: 1.25rem;
 }
 
+.cd-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cd-form-group label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cd-form-group input {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #1a1f0e;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+.cd-form-group input:focus {
+  background: #fff;
+  border-color: #4A5D23;
+  box-shadow: 0 0 0 3px rgba(74,93,35,0.1);
+}
+
+.cd-exam-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 1.25rem;
+}
+.cd-exam-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+.cd-exam-checkbox:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+.cd-exam-checkbox input[type="radio"] {
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+  accent-color: #4A5D23;
+  cursor: pointer;
+}
+.cd-exam-check-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cd-exam-check-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1f0e;
+}
+.cd-exam-check-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
 /* Import modal */
 .cd-import-desc {
   font-size: 0.85rem;
@@ -1304,4 +1380,98 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   font-size: 0.82rem;
   color: #64748b;
   font-weight: 500;
+}
+
+/* ===================================================
+   DELETE / RESTORE MODALS
+   =================================================== */
+.cd-delete-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.cd-delete-modal-content {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+  animation: modalRise 0.25s ease-out forwards;
+}
+.cd-delete-modal-icon {
+  width: 56px;
+  height: 56px;
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 1.25rem;
+}
+.cd-delete-modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1a1f0e;
+  margin-bottom: 0.75rem;
+}
+.cd-delete-modal-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+.cd-delete-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+.cd-delete-btn-cancel,
+.cd-delete-btn-confirm,
+.cd-restore-btn-confirm {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.cd-delete-btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.cd-delete-btn-cancel:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.cd-delete-btn-confirm {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+}
+.cd-delete-btn-confirm:hover {
+  background: #dc2626;
+}
+.cd-restore-btn-confirm {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #ffffff;
+  border: none;
+}
+.cd-restore-btn-confirm:hover {
+  background: linear-gradient(135deg, #15803d, #166534);
 }
