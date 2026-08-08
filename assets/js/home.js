@@ -67,7 +67,7 @@ function normalizeRole(role) {
 }
 
 function getCurrentRoleFromStorage(user) {
-  return normalizeRole(localStorage.getItem('currentUserRole') || user?.role);
+  return normalizeRole(sessionStorage.getItem('currentUserRole') || user?.role);
 }
 
 function getCurrentUserDisplayName(user) {
@@ -75,7 +75,7 @@ function getCurrentUserDisplayName(user) {
 }
 
 function checkLoginStatus() {
-  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const user = JSON.parse(sessionStorage.getItem('currentUser'));
   if (!user) {
     window.location.href = '/index.html';
     return null;
@@ -3105,7 +3105,7 @@ async function handleProfileAvatarChange(event) {
       if (!saveRes.ok) throw new Error(`Lỗi lưu avatar (${saveRes.status})`);
 
       currentUser.avatarImage = imageUrl;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
       // Cập nhật ảnh trên header nếu có
       const headerAvatar = document.getElementById('headerAvatar');
       if (headerAvatar) {
@@ -3770,9 +3770,9 @@ function initializePage() {
     loadReportContent();
 
     // Chuyển tab tự động nếu có yêu cầu từ breadcrumb/link khác
-    const autoTab = localStorage.getItem('autoTab');
+    const autoTab = sessionStorage.getItem('autoTab');
     if (autoTab) {
-      localStorage.removeItem('autoTab');
+      sessionStorage.removeItem('autoTab');
       switchTab(autoTab);
     }
 

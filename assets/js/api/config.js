@@ -172,7 +172,7 @@ const TokenManager = {
         // Backend sẽ clear cookie qua endpoint logout
     },
     isAuthenticated() {
-        return !!JSON.parse(localStorage.getItem('currentUser') || 'null');
+        return !!JSON.parse(sessionStorage.getItem('currentUser') || 'null');
     }
 };
 
@@ -201,8 +201,8 @@ let _pendingRefreshPromise = null;
 // Khi refresh token hết hạn / không hợp lệ → xoá session và chuyển về trang login
 function _handleSessionExpired() {
     TokenManager.clearTokens();
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('currentUserRole');
+    sessionStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUserRole');
     sessionStorage.setItem('sessionExpired', '1');
     window.location.href = '/index.html';
 }

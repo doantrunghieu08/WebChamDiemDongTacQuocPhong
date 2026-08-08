@@ -93,8 +93,8 @@ const AuthService = {
             }
         } catch {}
 
-        if (role) localStorage.setItem('currentUserRole', role);
-        localStorage.setItem('currentUser', JSON.stringify(minimal));
+        if (role) sessionStorage.setItem('currentUserRole', role);
+        sessionStorage.setItem('currentUser', JSON.stringify(minimal));
 
         // accessToken được BE set vào HttpOnly cookie khi login — browser tự lưu
         // Không cần đọc hay lưu thủ công ở frontend
@@ -131,8 +131,8 @@ const AuthService = {
             // ignore
         } finally {
             TokenManager.clearTokens();
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('currentUserRole');
+            sessionStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUserRole');
             sessionStorage.setItem('logoutSuccess', '1');
             window.location.href = '/index.html';
         }
@@ -167,7 +167,7 @@ const AuthService = {
      * @returns {object|null}
      */
     getCurrentUser() {
-        const user = localStorage.getItem('currentUser');
+        const user = sessionStorage.getItem('currentUser');
         return user ? JSON.parse(user) : null;
     },
 
@@ -207,7 +207,7 @@ const AuthService = {
                 else if (r === 'TEACHER' || r === 'ROLE_TEACHER') r = 'teacher';
                 else if (r === 'STUDENT' || r === 'ROLE_STUDENT') r = 'student';
                 else r = r.toLowerCase();
-                localStorage.setItem('currentUserRole', r);
+                sessionStorage.setItem('currentUserRole', r);
                 profile.role = r;
             }
             return profile;
