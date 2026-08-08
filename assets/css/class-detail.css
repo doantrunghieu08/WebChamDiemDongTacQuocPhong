@@ -601,7 +601,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .cd-exam-title { font-size: 0.875rem; font-weight: 700; color: #1a1f0e; }
 .cd-exam-sub   { font-size: 0.75rem; color: #64748b; }
 
-.cd-exam-deadlines { display: flex; flex-direction: column; gap: 4px; }
+.cd-exam-deadlines { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; }
 .cd-exam-deadline {
   font-size: 0.75rem;
   color: #475569;
@@ -1026,6 +1026,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   font-size: 0.85rem;
   color: #1a1f0e;
   line-height: 1.5;
+}
+.grading-exam-info-cols {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+.grading-exam-info-text {
+  flex: 1;
+}
+.grading-exam-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  flex-shrink: 0;
 }
 .grading-modes {
   display: flex;
