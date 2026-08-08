@@ -938,3 +938,139 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   color: #94a3b8;
   padding: 0 4px;
 }
+
+/* ===================================================
+   MODALS
+   =================================================== */
+.cd-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.cd-modal-content {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 520px;
+  box-shadow:
+    0 25px 50px -12px rgba(0,0,0,0.12),
+    0 0 0 1px rgba(0,0,0,0.04);
+  border: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: cdModalPop 0.25s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+@keyframes cdModalPop {
+  from { opacity:0; transform: scale(0.94); }
+  to   { opacity:1; transform: scale(1); }
+}
+
+.cd-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+.cd-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1a1f0e;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.cd-modal-close {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  font-size: 1.2rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.18s;
+  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cd-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+
+.cd-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===================================================
+   GRADING MODE MODAL
+   =================================================== */
+.grading-exam-info {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  border: 1px dashed rgba(74,93,35,0.25);
+  font-size: 0.85rem;
+  color: #1a1f0e;
+  line-height: 1.5;
+}
+.grading-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.grading-mode-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.grading-mode-card:hover {
+  border-color: #4A5D23;
+  background: #F4F6F0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74,93,35,0.08);
+}
+.gm-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 0.75rem;
+}
+.grading-mode-card:hover .gm-icon {
+  background: #ffffff;
+}
+.gm-info h4 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1a1f0e;
+  margin-bottom: 0.25rem;
+}
+.gm-info p {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}

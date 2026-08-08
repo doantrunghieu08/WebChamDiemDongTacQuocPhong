@@ -1289,10 +1289,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 .exam-video-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  align-items: end;
 }
 
 .exam-video-file {
@@ -1303,20 +1302,102 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   height: 0;
 }
 
-.exam-upload-box {
+.class-modal-body label.exam-upload-box {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
-  padding: 0.875rem;
+  text-align: center;
+  text-transform: none;
+  letter-spacing: normal;
+  margin-bottom: 0;
+  gap: 8px;
+  padding: 1.5rem;
   border: 1.5px dashed rgba(74,93,35,0.25);
   border-radius: 0.625rem;
   background: #ffffff;
   cursor: pointer;
   transition: all 0.2s;
 }
-.exam-upload-box:hover {
+.class-modal-body label.exam-upload-box:hover {
   border-color: #4A5D23;
   background: #F4F6F0;
+}
+
+.exam-upload-icon {
+  font-size: 24px;
+  color: #4A5D23;
+}
+
+.exam-upload-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exam-upload-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1f0e;
+}
+
+.exam-upload-subtitle {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.exam-upload-button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  color: #0f172a;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.class-modal-body label.exam-upload-box:hover .exam-upload-button {
+  background: #e2e8f0;
+}
+
+.exam-video-file-name {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.exam-video-file-name.has-file {
+  color: #4A5D23;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.exam-video-preview-empty {
+  font-size: 0.85rem;
+  color: #ca8a04;
+  margin-top: 8px;
+  padding: 10px;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 6px;
+}
+
+.exam-video-preview {
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+.exam-video-preview-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* ===================================================

@@ -293,6 +293,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
 .video-area {
   width: 100%;
+  aspect-ratio: 16/9;
   background: #0a0e06;
   position: relative;
   display: flex;
@@ -302,6 +303,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   cursor: pointer;
   user-select: none;
   border-bottom: 1px solid #000;
+}
+.video-area video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .play-icon {
