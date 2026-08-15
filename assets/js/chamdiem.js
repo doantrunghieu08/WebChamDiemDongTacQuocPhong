@@ -2712,7 +2712,8 @@ function closeJointFrameModal(e) {
 // Vẽ frame từ video element vào canvas + overlay skeleton
 async function _drawVideoFrameToCanvas(vid, canvas, seekTime, highlightJoint, frameData, skeletonColor) {
   return new Promise(resolve => {
-    const W = 480, H = 270;
+    const W = vid.videoWidth || 480;
+    const H = vid.videoHeight || 270;
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d');
