@@ -1557,10 +1557,15 @@ function saveExam(event) {
     const newFilesCount = videoDrafts.filter(d => d.selectedFile).length;
     if (newFilesCount > 0) {
       showHomeToast(`Đang tải lên ${newFilesCount} video mẫu...`);
+      _startExamSaveProgress('Đang tải lên video mẫu lên máy chủ...');
+    } else {
+      _startExamSaveProgress('Đang xử lý dữ liệu bài thi...');
     }
-    const videos = await buildExamVideoPayloads(videoDrafts, targetExamId);
 
-    let updatedExams;
+    try {
+      const videos = await buildExamVideoPayloads(videoDrafts, targetExamId);
+
+      let updatedExams;
     if (id) {
       const previousExam = exams.find(exam => exam.id === id);
       const preservedKeys = new Set(videos.map(video => video.storageKey).filter(Boolean));
@@ -1583,8 +1588,6 @@ function saveExam(event) {
               standardData = await ExamsService.extractTemplate(sampleVideoUrl);
             } catch (extractErr) {
               console.warn('Trích xuất dữ liệu chuẩn thất bại, tiếp tục cập nhật bài thi:', extractErr);
-            } finally {
-              _stopExamSaveProgress();
             }
           }
           await ExamsService.updateTeacherExam(id, {
@@ -1621,8 +1624,6 @@ function saveExam(event) {
               standardData = await ExamsService.extractTemplate(sampleVideoUrl);
             } catch (extractErr) {
               console.warn('Trích xuất dữ liệu chuẩn thất bại, tiếp tục tạo bài thi:', extractErr);
-            } finally {
-              _stopExamSaveProgress();
             }
           }
           const created = await ExamsService.createTeacherExam(name, description, sampleVideoUrl, teacherId, examTypeId, standardData);
@@ -1648,11 +1649,16 @@ function saveExam(event) {
       ];
     }
 
-    saveExamCatalog(updatedExams);
-    loadExamsContent();
-    closeExamModal();
-    showHomeToast(successMessage);
-    _stopExamSaveProgress();
+      saveExamCatalog(updatedExams);
+      loadExamsContent();
+      closeExamModal();
+      showHomeToast(successMessage);
+    } catch (err) {
+      console.error('Lỗi khi lưu bài thi:', err);
+      showHomeToast('Đã có lỗi xảy ra khi lưu bài thi. Vui lòng thử lại.');
+    } finally {
+      _stopExamSaveProgress();
+    }
   });
 }
 
