@@ -801,6 +801,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   box-shadow: 0 25px 50px -12px rgba(0,0,0,0.12);
   width: 100%;
   max-width: 440px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid #e9ecef;
   animation: modalRise 0.28s cubic-bezier(0.16,1,0.3,1) both;
@@ -816,6 +819,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   align-items: center;
   padding: 1.1rem 1.25rem;
   border-bottom: 1px solid rgba(74,93,35,0.09);
+  flex-shrink: 0;
 }
 .modal-header span {
   font-size: 1.05rem;
@@ -847,6 +851,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   flex-direction: column;
   gap: 1rem;
   text-align: left;
+  overflow-y: auto;
 }
 
 .modal-label {
@@ -884,6 +889,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .btn-cancel {
