@@ -1016,6 +1016,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   padding: 1rem;
 }
 
+.logout-modal {
+  z-index: 1050; /* Ensure confirmation modals appear above normal modals */
+}
+
 .logout-modal-content,
 .class-modal-content {
   background: #ffffff;
