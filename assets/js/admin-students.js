@@ -425,14 +425,32 @@ function renderStudentManagerListFromData(students) {
 function renderStudentListPagination() {
   const container = document.getElementById('studentListPagination');
   if (!container) return;
-  if (studentListTotalPages <= 1) { container.innerHTML = ''; return; }
+  if (studentListTotalPages <= 1 && studentListPage === 0) { container.innerHTML = ''; return; }
   let btns = '';
   btns += `<button class="admin-page-btn" onclick="loadStudentListPage(${studentListPage - 1})" ${studentListPage === 0 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
   for (let i = 0; i < studentListTotalPages; i++) {
     btns += `<button class="admin-page-btn${i === studentListPage ? ' active' : ''}" onclick="loadStudentListPage(${i})">${i + 1}</button>`;
   }
   btns += `<button class="admin-page-btn" onclick="loadStudentListPage(${studentListPage + 1})" ${studentListPage + 1 >= studentListTotalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
-  container.innerHTML = `<div class="admin-pagination" style="margin-top:12px"><div class="admin-page-controls">${btns}</div></div>`;
+
+  const infoText = `
+    <span class="admin-page-info" style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 8px;">
+      <select class="page-size-select" onchange="changeStudentListPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${studentListPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="10" ${studentListPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${studentListPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${studentListPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+    </span>
+  `;
+
+  container.innerHTML = `<div class="admin-pagination" style="margin-top:12px; display:flex; flex-direction:column;">${infoText}<div class="admin-page-controls">${btns}</div></div>`;
+}
+
+async function changeStudentListPageSize(newSize) {
+  studentListPageSize = parseInt(newSize, 10);
+  studentListPage = 0;
+  await loadStudentListPage(0);
 }
 
 async function loadClassStudentsFromServer(classId) {

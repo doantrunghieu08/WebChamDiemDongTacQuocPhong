@@ -602,14 +602,38 @@ function _renderClassPagination() {
   btns += `<button class="home-page-btn" onclick="loadClassPage(${classPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
 
   const infoText = total > 0
-    ? `Hiển thị ${start}–${end} trong tổng số ${total} lớp`
-    : `Trang ${classPage + 1} / ${classTotalPages}`;
+    ? `
+      <select class="page-size-select" onchange="changeClassPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${classPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="9" ${classPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+        <option value="10" ${classPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${classPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${classPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Hiển thị ${start}–${end} trong tổng số ${total} lớp
+    `
+    : `
+      <select class="page-size-select" onchange="changeClassPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${classPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="9" ${classPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+        <option value="10" ${classPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${classPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${classPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Trang ${classPage + 1} / ${classTotalPages}
+    `;
 
   container.innerHTML = `
     <div class="home-pagination">
-      <span class="home-page-info">${infoText}</span>
+      <span class="home-page-info" style="display: flex; align-items: center;">${infoText}</span>
       <div class="home-page-controls">${btns}</div>
     </div>`;
+}
+
+async function changeClassPageSize(newSize) {
+  classPageSize = parseInt(newSize, 10);
+  classPage = 0;
+  await loadClassPage(0);
 }
 
 async function loadClassPage(page) {
@@ -901,9 +925,24 @@ function _renderExamPagination(page, totalPages, totalElements) {
 
   container.innerHTML = `
     <div class="home-pagination">
-      <span class="home-page-info">Hiển thị ${start}–${end} trong tổng số ${totalElements} bài thi</span>
+      <span class="home-page-info" style="display: flex; align-items: center;">
+        <select class="page-size-select" onchange="changeExamPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+          <option value="5" ${examPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+          <option value="9" ${examPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+          <option value="10" ${examPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+          <option value="20" ${examPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+          <option value="40" ${examPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+        </select>
+        Hiển thị ${start}–${end} trong tổng số ${totalElements} bài thi
+      </span>
       <div class="home-page-controls">${btns}</div>
     </div>`;
+}
+
+async function changeExamPageSize(newSize) {
+  examPageSize = parseInt(newSize, 10);
+  examPage = 0;
+  await loadExamPageFromAPI(0);
 }
 
 function goToExamPage(page) {
@@ -1960,9 +1999,23 @@ function _renderErrorPagination(page, totalPages, totalElements) {
 
   container.innerHTML = `
     <div class="home-pagination">
-      <span class="home-page-info">Hiển thị ${start}–${end} trong tổng số ${totalElements} lỗi</span>
+      <span class="home-page-info" style="display: flex; align-items: center;">
+        <select class="page-size-select" onchange="changeErrorPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+          <option value="5" ${errorPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+          <option value="10" ${errorPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+          <option value="20" ${errorPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+          <option value="40" ${errorPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+        </select>
+        Hiển thị ${start}–${end} trong tổng số ${totalElements} lỗi
+      </span>
       <div class="home-page-controls">${btns}</div>
     </div>`;
+}
+
+function changeErrorPageSize(newSize) {
+  errorPageSize = parseInt(newSize, 10);
+  errorPage = 0;
+  renderErrors();
 }
 
 function goToErrorPage(page) {
@@ -2655,14 +2708,38 @@ function _renderHistoryPagination() {
   btns += `<button class="home-page-btn" onclick="loadHistoryPage(${historyPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
 
   const infoText = historyTotalElements > 0
-    ? `Hiển thị ${start}–${end} trong tổng số ${historyTotalElements} lần chấm`
-    : `Trang ${historyPage + 1} / ${historyTotalPages}`;
+    ? `
+      <select class="page-size-select" onchange="changeHistoryPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${historyPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="9" ${historyPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+        <option value="10" ${historyPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${historyPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${historyPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Hiển thị ${start}–${end} / ${historyTotalElements} lần chấm
+    `
+    : `
+      <select class="page-size-select" onchange="changeHistoryPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${historyPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="9" ${historyPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+        <option value="10" ${historyPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${historyPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${historyPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Trang ${historyPage + 1} / ${historyTotalPages}
+    `;
 
   container.innerHTML = `
     <div class="home-pagination">
-      <span class="home-page-info">${infoText}</span>
+      <span class="home-page-info" style="display: flex; align-items: center;">${infoText}</span>
       <div class="home-page-controls">${btns}</div>
     </div>`;
+}
+
+async function changeHistoryPageSize(newSize) {
+  historyPageSize = parseInt(newSize, 10);
+  historyPage = 0;
+  await loadHistoryPage(0);
 }
 
 async function loadHistoryPage(page) {
@@ -3520,14 +3597,38 @@ function _renderMyExamPagination() {
   btns += `<button class="home-page-btn" onclick="loadMyExamPage(${myExamPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
 
   const infoText = myExamTotalElements > 0
-    ? `Hiển thị ${start}–${end} trong tổng số ${myExamTotalElements} bài thi`
-    : `Trang ${myExamPage + 1} / ${myExamTotalPages}`;
+    ? `
+      <select class="page-size-select" onchange="changeMyExamPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${myExamPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="9" ${myExamPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+        <option value="10" ${myExamPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${myExamPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${myExamPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Hiển thị ${start}–${end} trong tổng số ${myExamTotalElements} bài thi
+    `
+    : `
+      <select class="page-size-select" onchange="changeMyExamPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${myExamPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="9" ${myExamPageSize === 9 ? 'selected' : ''}>9 / trang</option>
+        <option value="10" ${myExamPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${myExamPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${myExamPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Trang ${myExamPage + 1} / ${myExamTotalPages}
+    `;
 
   container.innerHTML = `
     <div class="home-pagination">
-      <span class="home-page-info">${infoText}</span>
+      <span class="home-page-info" style="display: flex; align-items: center;">${infoText}</span>
       <div class="home-page-controls">${btns}</div>
     </div>`;
+}
+
+async function changeMyExamPageSize(newSize) {
+  myExamPageSize = parseInt(newSize, 10);
+  myExamPage = 0;
+  await loadMyExamPage(0);
 }
 
 async function loadMyExamPage(page) {

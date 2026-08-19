@@ -811,14 +811,36 @@ function _buildUserPagination() {
   btns += `<button class="admin-page-btn" onclick="refreshUserList(${userCurrentPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
 
   const infoText = total > 0
-    ? `Hiển thị ${start}–${end} trong tổng số ${total} tài khoản`
-    : `Trang ${userCurrentPage + 1} / ${userTotalPages}`;
+    ? `
+      <select class="page-size-select" onchange="changeUserPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${userPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="10" ${userPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${userPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${userPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Hiển thị ${start}–${end} trong tổng số ${total} tài khoản
+    `
+    : `
+      <select class="page-size-select" onchange="changeUserPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${userPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="10" ${userPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${userPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${userPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Trang ${userCurrentPage + 1} / ${userTotalPages}
+    `;
 
   container.innerHTML = `
     <div class="admin-pagination">
-      <span class="admin-page-info">${infoText}</span>
+      <span class="admin-page-info" style="display: flex; align-items: center;">${infoText}</span>
       <div class="admin-page-controls">${btns}</div>
     </div>`;
+}
+
+async function changeUserPageSize(newSize) {
+  userPageSize = parseInt(newSize, 10);
+  userCurrentPage = 0;
+  await refreshUserList(0);
 }
 
 function renderClasses() {
@@ -914,14 +936,38 @@ function _buildClassPagination() {
   btns += `<button class="admin-page-btn" onclick="refreshClassList(${classCurrentPage + 1})" ${isLastPage ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
 
   const infoText = total > 0
-    ? `Hiển thị ${start}–${end} trong tổng số ${total} lớp`
-    : `Trang ${classCurrentPage + 1} / ${classTotalPages}`;
+    ? `
+      <select class="page-size-select" onchange="changeClassPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${classPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="8" ${classPageSize === 8 ? 'selected' : ''}>8 / trang</option>
+        <option value="10" ${classPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${classPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${classPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Hiển thị ${start}–${end} trong tổng số ${total} lớp
+    `
+    : `
+      <select class="page-size-select" onchange="changeClassPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+        <option value="5" ${classPageSize === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="8" ${classPageSize === 8 ? 'selected' : ''}>8 / trang</option>
+        <option value="10" ${classPageSize === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${classPageSize === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${classPageSize === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
+      Trang ${classCurrentPage + 1} / ${classTotalPages}
+    `;
 
   return `
     <div class="admin-pagination">
-      <span class="admin-page-info">${infoText}</span>
+      <span class="admin-page-info" style="display: flex; align-items: center;">${infoText}</span>
       <div class="admin-page-controls">${btns}</div>
     </div>`;
+}
+
+async function changeClassPageSize(newSize) {
+  classPageSize = parseInt(newSize, 10);
+  classCurrentPage = 0;
+  await refreshClassList(0);
 }
 
 async function renderAssignments() {

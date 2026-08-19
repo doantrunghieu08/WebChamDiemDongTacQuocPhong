@@ -1,7 +1,7 @@
 // ===== SELECT STUDENT PAGE LOGIC =====
 
 // ---- Pagination state ----
-const PAGE_SIZE = 10;
+let PAGE_SIZE = 10;
 let currentPage = 0;
 let totalPages = 1;
 let totalElements = 0;
@@ -130,7 +130,7 @@ function renderPagination() {
   const container = document.getElementById('paginationContainer');
   if (!container) return;
 
-  if (totalPages <= 1) {
+  if (totalPages <= 1 && totalElements <= PAGE_SIZE) {
     container.innerHTML = '';
     return;
   }
@@ -150,7 +150,13 @@ function renderPagination() {
   }
 
   container.innerHTML = `
-    <div class="pagination-info">
+    <div class="pagination-info" style="display: flex; align-items: center; gap: 10px;">
+      <select class="page-size-select" onchange="changeSelectStudentPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer;">
+        <option value="5" ${PAGE_SIZE === 5 ? 'selected' : ''}>5 / trang</option>
+        <option value="10" ${PAGE_SIZE === 10 ? 'selected' : ''}>10 / trang</option>
+        <option value="20" ${PAGE_SIZE === 20 ? 'selected' : ''}>20 / trang</option>
+        <option value="40" ${PAGE_SIZE === 40 ? 'selected' : ''}>40 / trang</option>
+      </select>
       Hiển thị ${currentPage * PAGE_SIZE + 1}–${Math.min((currentPage + 1) * PAGE_SIZE, totalElements)} / ${totalElements} sinh viên
     </div>
     <div class="pagination-controls">
@@ -159,6 +165,12 @@ function renderPagination() {
       <button class="pagination-btn pagination-nav" onclick="goToPage(${currentPage + 1})" ${nextDisabled}>&#8250;</button>
     </div>
   `;
+}
+
+async function changeSelectStudentPageSize(newSize) {
+  PAGE_SIZE = parseInt(newSize, 10);
+  currentPage = 0;
+  await loadStudents();
 }
 
 // Navigate to a page

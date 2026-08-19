@@ -31,10 +31,16 @@
     };
 })();
 
+// ============================================
+// Cấu hình Base Host (Thay đổi IP/Domain tại đây khi chuyển VPS)
+// Có thể lấy từ biến window (nếu inject từ bên ngoài) hoặc dùng giá trị mặc định.
+// ============================================
+const API_HOST = window.API_HOST || 'http://103.75.182.246:8080';
+
 const API_CONFIG = {
-    BASE_URL: 'http://103.75.182.246:8080/public/api',
-    ADMIN_BASE_URL: 'http://103.75.182.246:8080/admin/api',
-    TEACHER_BASE_URL: 'http://103.75.182.246:8080/teacher/api',
+    BASE_URL: `${API_HOST}/public/api`,
+    ADMIN_BASE_URL: `${API_HOST}/admin/api`,
+    TEACHER_BASE_URL: `${API_HOST}/teacher/api`,
 
     // Timeout (ms)
     TIMEOUT: 15000,
@@ -70,17 +76,17 @@ const API_CONFIG = {
 
         // Exams
         EXAM_TYPES: '/exams/types',
-        ADMIN_CREATE_EXAM_TYPE: 'http://103.75.182.246:8080/api/admin/exam-type',
-        ADMIN_UPDATE_EXAM_TYPE: (id) => `http://103.75.182.246:8080/api/admin/exam-type/${id}`,
-        ADMIN_DELETE_EXAM_TYPE: (id) => `http://103.75.182.246:8080/api/admin/exam-type/${id}`,
-        ADMIN_RESTORE_EXAM_TYPE: (id) => `http://103.75.182.246:8080/api/admin/exam-type/${id}/restore`,
-        ADMIN_EXAM_TYPES_DELETED: 'http://103.75.182.246:8080/api/admin/exam-type/delete',
-        ADMIN_EXAM_USAGE_COUNTS: 'http://103.75.182.246:8080/api/admin/exam-type/exam',
-        TEACHER_EXAM_TYPES: 'http://103.75.182.246:8080/api/teacher/exam-type',
+        ADMIN_CREATE_EXAM_TYPE: `${API_HOST}/api/admin/exam-type`,
+        ADMIN_UPDATE_EXAM_TYPE: (id) => `${API_HOST}/api/admin/exam-type/${id}`,
+        ADMIN_DELETE_EXAM_TYPE: (id) => `${API_HOST}/api/admin/exam-type/${id}`,
+        ADMIN_RESTORE_EXAM_TYPE: (id) => `${API_HOST}/api/admin/exam-type/${id}/restore`,
+        ADMIN_EXAM_TYPES_DELETED: `${API_HOST}/api/admin/exam-type/delete`,
+        ADMIN_EXAM_USAGE_COUNTS: `${API_HOST}/api/admin/exam-type/exam`,
+        TEACHER_EXAM_TYPES: `${API_HOST}/api/teacher/exam-type`,
         CLASS_EXAMS: (classId, page = 0, size = 3) => `/public/exam/class/${encodeURIComponent(classId)}?page=${page}&size=${size}`,
         TEACHER_EXAMS: (teacherId, page = 0, size = 9) => `/api/exam/teacher/${teacherId}?page=${page}&size=${size}`,
         CREATE_TEACHER_EXAM: '/api/teacher/exam',
-        UPDATE_TEACHER_EXAM: (examId) => `http://103.75.182.246:8080/api/teacher/update-exam/${encodeURIComponent(examId)}`,
+        UPDATE_TEACHER_EXAM: (examId) => `${API_HOST}/api/teacher/update-exam/${encodeURIComponent(examId)}`,
         ASSIGN_EXAM_TO_CLASS: '/api/teacher/exam/class',
         REMOVE_EXAM_FROM_CLASS: (idClass, idExam) => `/api/teacher/exam/class?idClass=${encodeURIComponent(idClass)}&idExam=${encodeURIComponent(idExam)}`,
         DELETED_CLASS_EXAMS: (idClass, page = 0, size = 100) => `/api/teacher/exam/class/deleted?idClass=${encodeURIComponent(idClass)}&page=${page}&size=${size}`,
@@ -143,7 +149,7 @@ const API_CONFIG = {
         TEACHER_UPLOAD_SUBMISSION_VIDEO: '/teacher/submission/upload-video',
 
         // AI gợi ý chấm điểm
-        AI_GRADE: (idTeacher, videoUrl) => `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`,
+        AI_GRADE: (idTeacher, videoUrl) => `${API_HOST}/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`,
 
         // Trạng thái phiên chấm theo submissionId
         GRADING_SESSION_BY_SUBMISSION: (submissionId, page = 0, size = 3) => `/teacher/grading-session/submission/${encodeURIComponent(submissionId)}?page=${page}&size=${size}`,

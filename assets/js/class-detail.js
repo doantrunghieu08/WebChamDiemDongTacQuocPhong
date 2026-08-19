@@ -26,7 +26,7 @@ let classExamSize = 3;        // số bài thi mỗi trang (= CARDS_PER_PAGE)
 const classExamLoadedPages = new Set(); // các trang đã tải
 let submissionsMap = {}; // { classExamId: { studentId: submissionRecord } }
 let gradingSessionStatusMap = {}; // { submissionId: 'FINALIZED'|'IN_PROGRESS'|null }
-const STUDENTS_PER_PAGE = 20;
+let STUDENTS_PER_PAGE = 20;
 let currentStudentPage = 1;
 let currentDisplayedStudents = [];
 
@@ -1032,8 +1032,22 @@ function renderStudentPagination(total, totalPages) {
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
-      <span class="cd-page-info">${total} sinh viên · Trang ${page}/${totalPages}</span>
+      <span class="cd-page-info" style="display: flex; align-items: center;">
+        <select class="page-size-select" onchange="changeStudentPageSize(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; outline: none; background: white; cursor: pointer; margin-right: 10px;">
+          <option value="5" ${STUDENTS_PER_PAGE === 5 ? 'selected' : ''}>5 / trang</option>
+          <option value="10" ${STUDENTS_PER_PAGE === 10 ? 'selected' : ''}>10 / trang</option>
+          <option value="20" ${STUDENTS_PER_PAGE === 20 ? 'selected' : ''}>20 / trang</option>
+          <option value="40" ${STUDENTS_PER_PAGE === 40 ? 'selected' : ''}>40 / trang</option>
+        </select>
+        ${total} sinh viên · Trang ${page}/${totalPages}
+      </span>
     </div>`;
+}
+
+function changeStudentPageSize(newSize) {
+  STUDENTS_PER_PAGE = parseInt(newSize, 10);
+  currentStudentPage = 1;
+  renderStudents(currentDisplayedStudents);
 }
 
 function goStudentPage(page) {
