@@ -560,7 +560,7 @@ function renderClasses(classes) {
         </div>
       </div>
       <div class="class-action">
-        <button class="btn-class-action btn-details" onclick="viewClassDetails('${cls.classId}'); event.stopPropagation();">Vào lớp</button>
+        <button class="btn-class-action btn-details" onclick="viewClassDetails('${cls.classId}'); event.stopPropagation();" title="Xem danh sách sinh viên của lớp và chấm điểm">Vào lớp</button>
       </div>
     </div>
   `).join('');
@@ -880,9 +880,9 @@ function loadExamsContent() {
       </div>
       <div class="exam-card-actions">
         ${exam.deleted
-          ? `<button class="btn-exam-action btn-exam-restore" onclick="restoreExam('${exam.id}')">Khôi phục</button>`
-          : `<button class="btn-exam-action btn-exam-edit" onclick="openExamModal('${exam.id}')">Cập nhật</button>
-             <button class="btn-exam-action btn-exam-delete" onclick="deleteExam('${exam.id}')">Xóa</button>`
+          ? `<button class="btn-exam-action btn-exam-restore" onclick="restoreExam('${exam.id}')" title="Khôi phục lại bài thi đã xóa">Khôi phục</button>`
+          : `<button class="btn-exam-action btn-exam-edit" onclick="openExamModal('${exam.id}')" title="Chỉnh sửa thông tin bài thi">Cập nhật</button>
+             <button class="btn-exam-action btn-exam-delete" onclick="deleteExam('${exam.id}')" title="Xóa bài thi này">Xóa</button>`
         }
       </div>
     </div>
@@ -1931,8 +1931,8 @@ function renderErrors() {
             <div class="error-deduction-badge">-${error.deduction} điểm</div>
             <div class="error-type-severity ${error.severity}">${severityText(error.severity)}</div>
             ${error.deleted
-              ? `<button class="btn-restore-error" onclick="restoreError(${error.id})" title="Khôi phục lỗi"><i class="fas fa-undo"></i> Khôi phục</button>`
-              : `<button class="btn-delete-error" onclick="deleteError(${error.id})" title="Xóa lỗi"><i class="fas fa-trash-alt"></i></button>`
+              ? `<button class="btn-restore-error" onclick="restoreError(${error.id})" title="Khôi phục lại lỗi này"><i class="fas fa-undo"></i> Khôi phục</button>`
+              : `<button class="btn-delete-error" onclick="deleteError(${error.id})" title="Xóa lỗi này"><i class="fas fa-trash-alt"></i></button>`
             }
           </div>
         </div>

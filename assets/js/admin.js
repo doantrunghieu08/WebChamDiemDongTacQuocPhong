@@ -268,10 +268,10 @@ function _makeAccountRow(account) {
       <td><span class="admin-status-badge ${account.status}">${getStatusLabel(account.status)}</span></td>
       <td>
         <div class="admin-action-group">
-          <button class="admin-update-btn" onclick="openUpdateAccountModal('${account.id}')">
+          <button class="admin-update-btn" onclick="openUpdateAccountModal('${account.id}')" title="Chỉnh sửa thông tin tài khoản">
             <i class="fas fa-pen-to-square"></i> Cập nhật
           </button>
-          <button class="${account.status === 'locked' ? 'admin-lock-btn unlock' : 'admin-lock-btn lock'}" onclick="toggleAccountLock('${account.id}')">
+          <button class="${account.status === 'locked' ? 'admin-lock-btn unlock' : 'admin-lock-btn lock'}" onclick="toggleAccountLock('${account.id}')" title="${account.status === 'locked' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}">
             ${account.status === 'locked' ? '<i class="fas fa-lock-open"></i> Mở khóa' : '<i class="fas fa-lock"></i> Khóa'}
           </button>
         </div>
@@ -896,9 +896,9 @@ function renderClasses() {
             ${cls.assignedTeacherName ? `<span><i class="fas fa-user-tie"></i> Giảng viên: ${cls.assignedTeacherName}</span>` : ''}
           </div>
           <div class="admin-class-actions">
-            <button class="admin-update-btn" onclick="openEditClassModal('${cls.classId}')"><i class="fas fa-edit"></i> Cập nhật lớp</button>
-            <button class="admin-secondary-btn" onclick="openStudentManagerPage('${cls.classId}')"><i class="fas fa-users"></i> Quản lý sinh viên</button>
-            <button class="admin-delete-btn ${deleteDisabled ? 'disabled' : ''}" ${deleteBtnAttrs}>${deleteBtnLabel}</button>
+            <button class="admin-update-btn" onclick="openEditClassModal('${cls.classId}')" title="Sửa thông tin lớp học"><i class="fas fa-edit"></i> Cập nhật lớp</button>
+            <button class="admin-secondary-btn" onclick="openStudentManagerPage('${cls.classId}')" title="Xem và chỉnh sửa danh sách sinh viên của lớp"><i class="fas fa-users"></i> Quản lý sinh viên</button>
+            <button class="admin-delete-btn ${deleteDisabled ? 'disabled' : ''}" ${deleteBtnAttrs} title="${deleteDisabled ? 'Không thể xóa do lớp đang có sinh viên' : 'Xóa lớp học'}">${deleteBtnLabel}</button>
           </div>
         </div>
     `;
@@ -1048,7 +1048,7 @@ async function renderAssignments() {
         <select class="admin-assignment-select" id="assignTeacher-${cls.classId}">
           ${options}
         </select>
-        <button class="admin-assign-btn" onclick="saveAssignment('${cls.classId}')">Lưu phân công</button>
+        <button class="admin-assign-btn" onclick="saveAssignment('${cls.classId}')" title="Phân công lớp này cho giảng viên đã chọn">Lưu phân công</button>
       </div>
     `;
   }
@@ -2241,10 +2241,10 @@ function renderExams() {
               <td style="text-align: right; padding-right: 20px;">
                 <div class="admin-action-group" style="justify-content: flex-end; flex-wrap: nowrap;">
                   ${e.isDeleted ? `
-                    <button class="admin-primary-btn" style="padding: 7px 14px; font-size: 12px;" onclick="restoreAdminExam('${e.id}')"><i class="fas fa-undo"></i> Khôi phục</button>
+                    <button class="admin-primary-btn" style="padding: 7px 14px; font-size: 12px;" onclick="restoreAdminExam('${e.id}')" title="Khôi phục lại bài thi đã xóa"><i class="fas fa-undo"></i> Khôi phục</button>
                   ` : `
-                    <button class="admin-update-btn" onclick="openAdminExamModal('${e.id}')"><i class="fas fa-pen-to-square"></i> Cập nhật</button>
-                    <button class="admin-delete-btn" style="padding: 7px 14px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #f7c8c3; background: #fff2f0; color: #b42318; cursor: ${usageCount > 0 ? 'not-allowed' : 'pointer'}; opacity: ${usageCount > 0 ? '0.5' : '1'}; display: inline-flex; align-items: center; gap: 5px; transition: all 0.18s;" onclick="deleteAdminExam('${e.id}')" ${usageCount > 0 ? 'title="Không thể xóa do đang có bài thi sử dụng"' : ''} onmouseover="if(${usageCount === 0}) this.style.background='#fee4e2'" onmouseout="if(${usageCount === 0}) this.style.background='#fff2f0'"><i class="fas fa-trash"></i> Xóa</button>
+                    <button class="admin-update-btn" onclick="openAdminExamModal('${e.id}')" title="Sửa tên bài thi"><i class="fas fa-pen-to-square"></i> Cập nhật</button>
+                    <button class="admin-delete-btn" style="padding: 7px 14px; font-size: 12px; font-weight: 700; border-radius: 8px; border: 1px solid #f7c8c3; background: #fff2f0; color: #b42318; cursor: ${usageCount > 0 ? 'not-allowed' : 'pointer'}; opacity: ${usageCount > 0 ? '0.5' : '1'}; display: inline-flex; align-items: center; gap: 5px; transition: all 0.18s;" onclick="deleteAdminExam('${e.id}')" title="${usageCount > 0 ? 'Không thể xóa do đang có bài thi sử dụng' : 'Xóa bài thi này'}" onmouseover="if(${usageCount === 0}) this.style.background='#fee4e2'" onmouseout="if(${usageCount === 0}) this.style.background='#fff2f0'"><i class="fas fa-trash"></i> Xóa</button>
                   `}
                 </div>
               </td>

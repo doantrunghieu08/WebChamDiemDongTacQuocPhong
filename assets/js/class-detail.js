@@ -1308,7 +1308,7 @@ async function openAddExamModal() {
             </div>
           </div>
         </div>
-        <button type="button" class="cd-assigned-exam-remove" onclick="requestDeleteExam('${exam.id}')">
+        <button type="button" class="cd-assigned-exam-remove" onclick="requestDeleteExam('${exam.id}')" title="Xóa bài thi này khỏi danh sách">
           <i class="fas fa-trash-alt"></i> Xóa
         </button>
       </div>
@@ -1437,7 +1437,7 @@ function renderDeletedExamTab() {
           </div>
         </div>
       </div>
-      <button type="button" class="cd-assigned-exam-restore" onclick="openRestoreExamModal('${exam.id}')">
+      <button type="button" class="cd-assigned-exam-restore" onclick="openRestoreExamModal('${exam.id}')" title="Khôi phục lại bài thi đã xóa">
         <i class="fas fa-undo"></i> Khôi phục
       </button>
     </div>
