@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng Dẫn Sử Dụng - HUST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#F4F6F0',
+              100: '#E8ECD9',
+              200: '#D2D9C3',
+              300: '#BCC6AC',
+              400: '#9FB089',
+              500: '#798E5E',
+              600: '#4A5D23',
+              700: '#38471A',
+              800: '#2A3613',
+              900: '#1D250C',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar for better look */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #94a3b8;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    .manual-nav-link.active {
+      color: #4A5D23;
+      font-weight: 700;
+      border-left: 2px solid #4A5D23;
+      background-color: #F4F6F0;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 h-16 flex items-center justify-between px-6 shadow-sm">
+    <div class="flex items-center gap-3">
+      <img src="../assets/images/logo.svg" alt="HUST Logo" class="h-8 w-auto">
+      <div>
+        <h1 class="text-lg font-bold text-slate-800 leading-tight">HUST</h1>
+        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Hệ Thống Chấm Điểm Đội Ngũ</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="javascript:history.back()" class="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-brand-700 transition">
+        <i class="fas fa-arrow-left"></i>
+        <span>Quay lại</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden relative">
+    
+    <!-- Mobile Menu Toggle (Visible only on small screens) -->
+    <div class="md:hidden absolute top-4 left-4 z-50">
+      <button id="mobileMenuBtn" class="bg-white p-2 rounded-md shadow border border-slate-200 text-slate-600 hover:text-brand-700 focus:outline-none">
+        <i class="fas fa-bars"></i> Mục lục
+      </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="manualSidebar" class="w-72 bg-white border-r border-slate-200 overflow-y-auto hidden md:block flex-shrink-0 absolute md:static z-40 h-full shadow-lg md:shadow-none transition-transform duration-300">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-sm font-black uppercase tracking-wider text-slate-400">Mục lục</h2>
+          <button id="closeMobileMenuBtn" class="md:hidden text-slate-500 hover:text-slate-800">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <nav class="space-y-6">
+          <!-- Chung -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 mb-2 px-3">Giới thiệu chung</h3>
+            <ul class="space-y-1 text-sm font-medium text-slate-600">
+              <li>
+                <a href="#gioi-thieu" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Tổng quan hệ thống</a>
+              </li>
+              <li>
+                <a href="#dang-nhap" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Đăng nhập & Đăng xuất</a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Admin -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 mb-2 px-3">Dành cho Quản trị viên</h3>
+            <ul class="space-y-1 text-sm font-medium text-slate-600">
+              <li>
+                <a href="#admin-tai-khoan" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Quản lý Tài khoản</a>
+              </li>
+              <li>
+                <a href="#admin-don-vi" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Quản lý Đơn vị</a>
+              </li>
+              <li>
+                <a href="#admin-phan-cong" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Phân công Chỉ huy</a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Giảng viên -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 mb-2 px-3">Dành cho Giảng viên</h3>
+            <ul class="space-y-1 text-sm font-medium text-slate-600">
+              <li>
+                <a href="#gv-don-vi" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Xem Đơn vị được phân công</a>
+              </li>
+              <li>
+                <a href="#gv-bai-thi" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Tạo & Quản lý Bài thi</a>
+              </li>
+              <li>
+                <a href="#gv-cham-diem" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Hướng dẫn Chấm điểm bằng AI</a>
+              </li>
+              <li>
+                <a href="#gv-lich-su" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Lịch sử Chấm & Báo cáo</a>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Sinh viên -->
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 mb-2 px-3">Dành cho Sinh viên</h3>
+            <ul class="space-y-1 text-sm font-medium text-slate-600">
+              <li>
+                <a href="#sv-xem-diem" class="manual-nav-link block px-3 py-2 rounded-md hover:bg-slate-50 hover:text-brand-700 transition">Xem Điểm & Phản hồi</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-10 pt-16 md:pt-10 scroll-smooth" id="mainContent">
+      <div class="max-w-4xl mx-auto space-y-16 pb-20">
+        
+        <!-- HEADER TITLE -->
+        <div class="border-b border-slate-200 pb-8">
+          <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Hướng Dẫn Sử Dụng Hệ Thống</h1>
+          <p class="text-slate-500 text-lg">Tài liệu tham khảo chi tiết dành cho tất cả các vai trò tham gia sử dụng hệ thống chấm điểm đội ngũ đi đều đại học Bách khoa Hà Nội.</p>
+        </div>
+
+        <!-- GIỚI THIỆU -->
+        <section id="gioi-thieu" class="space-y-4">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xl shadow-sm">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800">Tổng quan hệ thống</h2>
+          </div>
+          <p class="text-slate-600 leading-relaxed">
+            Hệ thống <b>Chấm Điểm Đội Ngũ Đi Đều (HUST)</b> là một ứng dụng web áp dụng công nghệ trí tuệ nhân tạo (AI - Computer Vision) để tự động hóa và hỗ trợ quá trình chấm điểm môn học Giáo dục Quốc phòng và An ninh (Đội ngũ tay không, đi đều).
+          </p>
+          <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md mt-4">
+            <p class="text-sm text-blue-800 font-medium">Hệ thống phân quyền người dùng thành 3 vai trò chính:</p>
+            <ul class="list-disc list-inside text-sm text-blue-800 mt-2 space-y-1 ml-2">
+              <li><b>Quản trị viên (Admin):</b> Quản lý tài khoản, đơn vị và phân công nhiệm vụ.</li>
+              <li><b>Giảng viên:</b> Trực tiếp quản lý lớp, tải lên video mẫu, sử dụng AI để chấm điểm sinh viên.</li>
+              <li><b>Sinh viên:</b> Đăng nhập để xem điểm số, nhận xét và các lỗi vi phạm của mình (nếu có).</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="dang-nhap" class="space-y-4">
+          <h2 class="text-2xl font-bold text-slate-800 border-b border-slate-100 pb-2">Đăng nhập & Đăng xuất</h2>
+          <div class="space-y-3 text-slate-600 leading-relaxed">
+            <p><b>1. Đăng nhập:</b> Truy cập vào trang chủ. Điền <code>Tên đăng nhập</code> và <code>Mật khẩu</code> do trung tâm GDQP-AN cấp. Hệ thống sẽ tự động nhận diện vai trò và đưa bạn đến màn hình tương ứng.</p>
+            <p><b>2. Đăng xuất:</b> Click vào nút <b>Đăng xuất</b> ở góc trên cùng bên phải màn hình (hoặc góc dưới cùng nếu ở giao diện di động).</p>
+          </div>
+        </section>
+
+        <!-- ADMIN -->
+        <div class="relative py-4">
+          <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-slate-300"></div>
+          </div>
+          <div class="relative flex justify-center">
+            <span class="bg-slate-50 px-3 text-sm font-bold text-slate-400 uppercase tracking-widest">Dành cho Admin</span>
+          </div>
+        </div>
+
+        <section id="admin-tai-khoan" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-brand-700">1. Quản lý Tài khoản</h2>
+          <p class="text-slate-600">Quản trị viên có thể thêm, sửa, xóa, khóa và mở khóa tài khoản của cả hệ thống.</p>
+          <ul class="list-decimal list-inside space-y-2 text-slate-600 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <li>Truy cập tab <b>Quản lý tài khoản</b> ở menu bên trái.</li>
+            <li>Nhấn nút <button class="bg-brand-700 text-white px-2 py-1 rounded text-xs mx-1"><i class="fas fa-plus"></i></button> để tạo tài khoản mới (Giảng viên, Sinh viên, Quản trị).</li>
+            <li>Có thể sử dụng chức năng <b>Nhập từ Excel</b> <i class="fas fa-file-excel text-green-600 mx-1"></i> để tải lên hàng loạt tài khoản.</li>
+            <li>Trong danh sách, nhấn icon bút chì <i class="fas fa-edit text-blue-500 mx-1"></i> để sửa thông tin hoặc biểu tượng ổ khóa <i class="fas fa-lock text-slate-500 mx-1"></i> để tạm khóa tài khoản.</li>
+          </ul>
+        </section>
+
+        <section id="admin-don-vi" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-brand-700">2. Quản lý Đơn vị (Lớp học)</h2>
+          <p class="text-slate-600">Nơi khởi tạo các Đại đội / Trung đội và nạp danh sách sinh viên ban đầu.</p>
+          <ul class="list-decimal list-inside space-y-2 text-slate-600 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <li>Truy cập tab <b>Quản lý đơn vị</b>.</li>
+            <li>Nhấn nút <button class="bg-brand-700 text-white px-2 py-1 rounded text-xs mx-1"><i class="fas fa-plus"></i></button> để tạo lớp mới (Mã lớp, Tên lớp, Năm học, Học kỳ).</li>
+            <li>Nhấn nút <b>Quản lý sinh viên</b> trên mỗi thẻ lớp để vào trang chi tiết, từ đó bạn có thể thêm thủ công từng sinh viên hoặc nạp toàn bộ danh sách sinh viên của lớp đó từ file Excel.</li>
+          </ul>
+        </section>
+
+        <section id="admin-phan-cong" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-brand-700">3. Phân công Chỉ huy</h2>
+          <p class="text-slate-600">Giao nhiệm vụ giảng dạy/quản lý một đơn vị cho một Giảng viên cụ thể.</p>
+          <ul class="list-decimal list-inside space-y-2 text-slate-600 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <li>Truy cập tab <b>Phân công chỉ huy</b>.</li>
+            <li>Danh sách các lớp sẽ hiện ra. Ở mỗi lớp sẽ có một ô menu thả xuống danh sách các <b>Giảng viên đang hoạt động</b>.</li>
+            <li>Chọn Giảng viên mong muốn, sau đó nhấn nút <b>Lưu phân công</b>. Lớp đó sẽ lập tức xuất hiện trong màn hình của Giảng viên tương ứng.</li>
+          </ul>
+        </section>
+
+        <!-- TEACHER -->
+        <div class="relative py-4 mt-8">
+          <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-slate-300"></div>
+          </div>
+          <div class="relative flex justify-center">
+            <span class="bg-slate-50 px-3 text-sm font-bold text-slate-400 uppercase tracking-widest">Dành cho Giảng Viên</span>
+          </div>
+        </div>
+
+        <section id="gv-don-vi" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-blue-600">1. Xem Đơn vị được phân công</h2>
+          <div class="text-slate-600 leading-relaxed bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <p>Sau khi đăng nhập, tại menu <b>Đơn Vị</b>, bạn sẽ thấy danh sách các lớp học (đại đội/trung đội) mà Admin đã giao cho bạn.</p>
+            <p class="mt-2">Nhấn vào <b>Xem danh sách SV</b> trên thẻ của lớp để xem chi tiết tất cả sinh viên thuộc lớp đó.</p>
+          </div>
+        </section>
+
+        <section id="gv-bai-thi" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-blue-600">2. Tạo & Quản lý Bài thi</h2>
+          <p class="text-slate-600">Để chấm điểm cho sinh viên, bạn cần tạo các bài thi trước. Mỗi bài thi ứng với một nội dung thi (ví dụ: Đi đều bước, Đi nghiêm).</p>
+          <ul class="list-decimal list-inside space-y-2 text-slate-600 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <li>Truy cập tab <b>Bài Thi</b> từ menu chính.</li>
+            <li>Nhấn nút <button class="bg-brand-700 text-white px-2 py-1 rounded text-xs mx-1"><i class="fas fa-plus"></i></button> ở góc trên bên phải.</li>
+            <li>Nhập Tên bài thi, Mô tả và đặc biệt là <b>Tải lên Video mẫu (Video chuẩn)</b>. Video mẫu là video do chính giảng viên thực hiện động tác chuẩn để AI làm cơ sở so sánh.</li>
+            <li>Hệ thống sẽ mất khoảng 15-60 giây để trích xuất dữ liệu khung xương (Pose) từ video mẫu của bạn. Hãy kiên nhẫn chờ quá trình này hoàn tất.</li>
+          </ul>
+        </section>
+
+        <section id="gv-cham-diem" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-blue-600">3. Hướng dẫn Chấm điểm bằng AI</h2>
+          <p class="text-slate-600 font-medium">Đây là tính năng cốt lõi của hệ thống, giúp bạn chấm điểm hàng loạt sinh viên tự động qua camera.</p>
+          
+          <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-4">
+            <h4 class="font-bold text-slate-800">Quy trình thực hiện:</h4>
+            <ul class="list-decimal list-inside space-y-3 text-slate-600 ml-2">
+              <li>Từ trang chi tiết của một <b>Đơn vị</b>, cuộn xuống phần "Danh sách bài thi của lớp".</li>
+              <li>Chọn một bài thi và nhấn nút <b class="text-brand-700">Chấm điểm</b>. Màn hình Chấm điểm (Grading) sẽ hiện ra.</li>
+              <li>
+                <b>Bước 1: Chọn Sinh viên:</b> Nhấn nút "Chọn sinh viên thi". Một cửa sổ danh sách sinh viên hiện ra (có hỗ trợ phân trang). Chọn sinh viên đang bước vào khung hình camera.
+              </li>
+              <li>
+                <b>Bước 2: Ghi hình:</b> Bật Camera bằng nút <b>Start Camera</b>. Khi sinh viên bắt đầu thực hiện động tác, nhấn <b>Bắt đầu ghi</b>. Khi sinh viên thực hiện xong, nhấn <b>Dừng & Xử lý</b>.
+              </li>
+              <li>
+                <b>Bước 3: AI phân tích:</b> Hệ thống sẽ gửi video của sinh viên lên Server. Trí tuệ nhân tạo (MediaPipe Pose & DTW) sẽ so sánh từng khung hình của sinh viên với Video mẫu của giảng viên để tìm ra các lỗi sai (sai nhịp tay, chân cong, ...).
+              </li>
+              <li>
+                <b>Bước 4: Duyệt điểm:</b> AI sẽ trả về kết quả điểm số gợi ý và danh sách các frame ảnh lỗi. Bạn có thể xem lại, tùy chỉnh điểm (nếu muốn) và ghi chú thêm. Cuối cùng nhấn <b>Lưu kết quả</b>.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="gv-lich-su" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-blue-600">4. Lịch sử Chấm & Báo cáo</h2>
+          <ul class="list-disc list-inside space-y-2 text-slate-600 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <li><b>Lịch sử chấm:</b> Liệt kê tất cả các bài thi bạn đã chấm thành công. Bạn có thể xem lại video thực hành của sinh viên, xem lại các frame lỗi đã bị AI bắt, hoặc xóa kết quả nếu chấm sai.</li>
+            <li><b>Báo cáo:</b> Cung cấp các biểu đồ thống kê trực quan về tỷ lệ qua môn, điểm trung bình của lớp, và các lỗi vi phạm phổ biến nhất giúp giảng viên điều chỉnh phương pháp dạy.</li>
+          </ul>
+        </section>
+
+        <!-- STUDENT -->
+        <div class="relative py-4 mt-8">
+          <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-slate-300"></div>
+          </div>
+          <div class="relative flex justify-center">
+            <span class="bg-slate-50 px-3 text-sm font-bold text-slate-400 uppercase tracking-widest">Dành cho Sinh Viên</span>
+          </div>
+        </div>
+
+        <section id="sv-xem-diem" class="space-y-4">
+          <h2 class="text-xl font-bold text-slate-800 text-orange-600">1. Xem Điểm & Phản hồi</h2>
+          <p class="text-slate-600">Sinh viên được cung cấp tài khoản để theo dõi quá trình học tập của mình minh bạch và rõ ràng.</p>
+          <ul class="list-decimal list-inside space-y-3 text-slate-600 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+            <li>Sau khi đăng nhập, sinh viên sẽ vào thẳng giao diện cá nhân.</li>
+            <li>Tại tab <b>Hồ sơ</b>, sinh viên có thể xem thông tin cá nhân và lớp mình đang theo học. Cập nhật ảnh đại diện nếu cần.</li>
+            <li>Tại tab <b>Bài thi</b>, sinh viên có thể xem các điểm số đã được giảng viên chấm.</li>
+            <li>
+              <b>Đặc biệt:</b> Sinh viên có thể click vào nút <b>Chi tiết</b> ở một bài thi đã có điểm để xem lại chính xác các frame ảnh ghi lại khoảnh khắc bị bắt lỗi (kèm thời gian trong video).
+            </li>
+          </ul>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Smooth scrolling for sidebar links and highlight active link
+    document.addEventListener('DOMContentLoaded', () => {
+      const links = document.querySelectorAll('.manual-nav-link');
+      const sections = document.querySelectorAll('main section');
+      const mainContent = document.getElementById('mainContent');
+
+      // Add click event for smooth scroll
+      links.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href').substring(1);
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) {
+            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Close mobile menu if open
+            const sidebar = document.getElementById('manualSidebar');
+            if(!sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+              sidebar.classList.add('hidden');
+            }
+          }
+        });
+      });
+
+      // Highlight active link on scroll
+      mainContent.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop;
+          if (mainContent.scrollTop >= sectionTop - 100) {
+            current = section.getAttribute('id');
+          }
+        });
+
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href').substring(1) === current) {
+            link.classList.add('active');
+          }
+        });
+      });
+
+      // Mobile Menu Toggle
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const closeMobileMenuBtn = document.getElementById('closeMobileMenuBtn');
+      const sidebar = document.getElementById('manualSidebar');
+
+      if (mobileMenuBtn && sidebar) {
+        mobileMenuBtn.addEventListener('click', () => {
+          sidebar.classList.remove('hidden');
+        });
+      }
+
+      if (closeMobileMenuBtn && sidebar) {
+        closeMobileMenuBtn.addEventListener('click', () => {
+          sidebar.classList.add('hidden');
+        });
+      }
+    });
+  </script>
+</body>
+</html>
