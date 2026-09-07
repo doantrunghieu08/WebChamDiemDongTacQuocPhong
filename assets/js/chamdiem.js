@@ -1536,7 +1536,7 @@ async function doConfirmSubmission() {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       _startUploadExtractProgress();
       try {
-        const aiRes = await fetch('http://160.191.46.107/runpod-ai/api/ai/extract-student', {
+        const aiRes = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -1809,9 +1809,6 @@ function closeAIGradeModal(e) {
   if (e && e.target !== document.getElementById('ai-grade-modal')) return;
   document.getElementById('ai-grade-modal').style.display = 'none';
 }
-
-// ---- AI API ENDPOINTS ----
-const AI_BASE_URL = 'http://160.191.46.107/runpod-ai';
 
 // ---- COMPARE POSE ----
 

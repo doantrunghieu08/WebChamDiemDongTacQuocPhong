@@ -44,4 +44,4 @@ ssh ${VPS_USER}@${VPS_IP} "
 "
 
 echo ""
-echo "✅ Deploy hoàn thành! Truy cập: http://${VPS_IP}"
+echo "✅ Deploy hoàn thành! Truy cập: http://${VPS_IP}:8081"

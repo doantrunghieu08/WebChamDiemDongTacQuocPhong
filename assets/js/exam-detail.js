@@ -1320,7 +1320,7 @@ async function callSubmissionApi(status) {
     const aiVideoUrl = payload.videoUrl1 || payload.videoUrl2;
     if (aiVideoUrl) {
       try {
-        const aiRes = await fetch('http://160.191.46.107/runpod-ai/api/ai/extract-student', {
+        const aiRes = await fetch(`${AI_BASE_URL}/api/ai/extract-student`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'

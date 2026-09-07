@@ -36,6 +36,7 @@
 // Có thể lấy từ biến window (nếu inject từ bên ngoài) hoặc dùng giá trị mặc định.
 // ============================================
 const API_HOST = window.API_HOST || 'http://160.191.46.107:8080';
+const AI_BASE_URL = window.AI_BASE_URL || '/runpod-ai';
 
 const API_CONFIG = {
     BASE_URL: `${API_HOST}/public/api`,
