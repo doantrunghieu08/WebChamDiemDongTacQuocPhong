@@ -1674,7 +1674,7 @@ function attachAdminEvents() {
       // Tải mẫu Excel tài khoản
       document.getElementById('downloadAccountTemplateBtn')?.addEventListener('click', () => {
         const headers = ['ID', 'Họ và tên', 'Username', 'Mật khẩu', 'Vai trò (TEACHER/STUDENT/ADMIN)', 'Ngày sinh (yyyy-MM-dd)', 'Email', 'Giới tính (MALE/FEMALE)', 'Trạng thái (ACTIVE/LOCKED)'];
-        const sample = ['GV001', 'Nguyễn Văn A', 'nguyenvana', 'Password@123', 'TEACHER', '1990-01-15', 'gv001@hactech.edu.vn', 'MALE', 'ACTIVE'];
+        const sample = ['GV001', 'Nguyễn Văn A', 'nguyenvana', 'Password@123', 'TEACHER', '1990-01-15', 'gv001@sqkts.edu.vn', 'MALE', 'ACTIVE'];
         const ws = XLSX.utils.aoa_to_sheet([headers, sample]);
         ws['!cols'] = headers.map(() => ({ wch: 28 }));
         const wb = XLSX.utils.book_new();

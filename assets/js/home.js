@@ -479,7 +479,7 @@ function loadProfileContent() {
     ? `<img src="${currentUser.avatarImage}" alt="avatar" style="width:110px;height:110px;border-radius:50%;object-fit:cover;display:block">`
     : `<i class="fas fa-user-tie"></i>`;
 
-  const teacherEmail = currentUser.email || `${teacherId.toLowerCase()}@hactech.edu.vn`;
+  const teacherEmail = currentUser.email || `${teacherId.toLowerCase()}@sqkts.edu.vn`;
   const teacherBirthday = currentUser.birthday
     ? new Date(currentUser.birthday).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : 'Chưa cập nhật';
@@ -3077,7 +3077,7 @@ function getStudentSampleData() {
     code: studentId,
     gender: currentUser.gender || '',
     idClass: currentUser.idClass || null,
-    email: currentUser.email || studentId.toLowerCase() + '@student.hactech.edu.vn',
+    email: currentUser.email || studentId.toLowerCase() + '@student.sqkts.edu.vn',
     phone: 'Chưa cập nhật',
     birthday: birthday,
     department: 'Công nghệ thông tin',

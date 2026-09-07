@@ -197,7 +197,7 @@ function loadStudentInfo() {
     // Update page title
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${examName.toUpperCase()}`;
-    document.title = `Chấm Điểm ${examName} – HACTECH`;
+    document.title = `Chấm Điểm ${examName} – TSQKTS`;
 
     state.currentStudent = {
       name: gradingStudent.name,
@@ -214,7 +214,7 @@ function loadStudentInfo() {
     // Update page title
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${selectedStudent.subject.toUpperCase()}`;
-    document.title = `Chấm Điểm ${selectedStudent.subject} – HACTECH`;
+    document.title = `Chấm Điểm ${selectedStudent.subject} – TSQKTS`;
 
     state.currentStudent = selectedStudent;
   } else if (selectedClass) {
@@ -223,7 +223,7 @@ function loadStudentInfo() {
 
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${selectedClass.subject.toUpperCase()}`;
-    document.title = `Chấm Điểm ${selectedClass.subject} – HACTECH`;
+    document.title = `Chấm Điểm ${selectedClass.subject} – TSQKTS`;
 
     state.currentStudent = { className: selectedClass.className, name: 'Học sinh', subject: selectedClass.subject };
   }
