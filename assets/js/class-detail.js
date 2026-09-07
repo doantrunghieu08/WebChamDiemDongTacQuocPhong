@@ -272,7 +272,7 @@ async function fetchSubmissionsForAllExams() {
     try {
       const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS)
         ? API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS(classExamId)
-        : `http://103.75.182.246:8080/teacher/class/${encodeURIComponent(classExamId)}/submissions`;
+        : `http://160.191.46.107:8080/teacher/class/${encodeURIComponent(classExamId)}/submissions`;
 
       const response = await fetch(url, { credentials: 'include' });
       if (!response.ok) return;

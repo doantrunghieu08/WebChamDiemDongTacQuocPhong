@@ -930,7 +930,7 @@ async function uploadFileToServer(file) {
     const uploadHeaders = {};
     if (uploadCsrf) uploadHeaders['X-XSRF-TOKEN'] = uploadCsrf;
 
-    const response = await fetch('http://103.75.182.246:8080/public/upload-student-exam', {
+    const response = await fetch('http://160.191.46.107:8080/public/upload-student-exam', {
       method: 'POST',
       headers: uploadHeaders,
       credentials: 'include',
@@ -1218,7 +1218,7 @@ async function fetchAndRestoreSubmissionStatus() {
 
   const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT)
     ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSIONS_BY_STUDENT(studentId)
-    : `http://103.75.182.246:8080/student/submission/${encodeURIComponent(studentId)}`;
+    : `http://160.191.46.107:8080/student/submission/${encodeURIComponent(studentId)}`;
 
   try {
     const response = await fetch(url, { credentials: 'include' });
@@ -1313,14 +1313,14 @@ async function callSubmissionApi(status) {
   const payload = buildSubmissionPayload(status);
   const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.STUDENT_SUBMISSION)
     ? API_CONFIG.ENDPOINTS.STUDENT_SUBMISSION
-    : 'http://103.75.182.246:8080/student/submission';
+    : 'http://160.191.46.107:8080/student/submission';
 
   try {
     let studentDataStr = null;
     const aiVideoUrl = payload.videoUrl1 || payload.videoUrl2;
     if (aiVideoUrl) {
       try {
-        const aiRes = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-student', {
+        const aiRes = await fetch('http://160.191.46.107/runpod-ai/api/ai/extract-student', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'

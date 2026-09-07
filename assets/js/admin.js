@@ -234,7 +234,7 @@ function _updateSummaryCards() {
   const el = id => document.getElementById(id);
 
   // Lấy thống kê chính xác từ API
-  fetchWithAuth('http://103.75.182.246:8080/public/statistics', { headers: {} })
+  fetchWithAuth('http://160.191.46.107:8080/public/statistics', { headers: {} })
     .then(r => r.json())
     .then(json => {
       const d = json?.data;
@@ -1089,7 +1089,7 @@ async function uploadAvatarToCloud(id, saveToUser = true) {
   const formData = new FormData();
   formData.append('id', id);
   formData.append('file', file);
-  const response = await fetch('http://103.75.182.246:8080/public/upload-avatar', {
+  const response = await fetch('http://160.191.46.107:8080/public/upload-avatar', {
     method: 'POST',
     body: formData,
     credentials: 'include'
@@ -1102,7 +1102,7 @@ async function uploadAvatarToCloud(id, saveToUser = true) {
   const imageUrl = json?.data?.imageUrl || null;
   if (imageUrl && saveToUser) {
     // Gán avatar vào user (chỉ dùng khi cập nhật user đã tồn tại)
-    const saveRes = await fetchWithAuth(`http://103.75.182.246:8080/public/upload/avatar/${id}`, {
+    const saveRes = await fetchWithAuth(`http://160.191.46.107:8080/public/upload/avatar/${id}`, {
       method: 'POST',
       body: JSON.stringify(imageUrl)
     });
@@ -1674,7 +1674,7 @@ function attachAdminEvents() {
       // Tải mẫu Excel tài khoản
       document.getElementById('downloadAccountTemplateBtn')?.addEventListener('click', () => {
         const headers = ['ID', 'Họ và tên', 'Username', 'Mật khẩu', 'Vai trò (TEACHER/STUDENT/ADMIN)', 'Ngày sinh (yyyy-MM-dd)', 'Email', 'Giới tính (MALE/FEMALE)', 'Trạng thái (ACTIVE/LOCKED)'];
-        const sample = ['GV001', 'Nguyễn Văn A', 'nguyenvana', 'Password@123', 'TEACHER', '1990-01-15', 'gv001@sqkts.edu.vn', 'MALE', 'ACTIVE'];
+        const sample = ['GV001', 'Nguyễn Văn A', 'nguyenvana', 'Password@123', 'TEACHER', '1990-01-15', 'gv001@tdnu.edu.vn', 'MALE', 'ACTIVE'];
         const ws = XLSX.utils.aoa_to_sheet([headers, sample]);
         ws['!cols'] = headers.map(() => ({ wch: 28 }));
         const wb = XLSX.utils.book_new();

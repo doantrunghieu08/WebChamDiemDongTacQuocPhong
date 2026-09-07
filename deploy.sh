@@ -5,7 +5,7 @@
 #  Yêu cầu: ssh key đã được cấu hình truy cập VPS
 # ============================================
 
-VPS_IP="103.75.182.246"
+VPS_IP="160.191.46.107"
 VPS_USER="root"           # đổi nếu dùng user khác
 REMOTE_DIR="/var/www/hactech"
 NGINX_CONF="/etc/nginx/sites-available/hactech"

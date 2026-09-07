@@ -280,7 +280,7 @@ const ExamsService = {
      */
     /**
      * Cập nhật bài thi
-     * PUT http://103.75.182.246/api/teacher/update-exam/{examId}
+     * PUT http://160.191.46.107/api/teacher/update-exam/{examId}
      * @param {string|number} examId - ID bài thi cần cập nhật
      * @param {object} payload - { idExamType, name, description, sampleVideoUrl, standardData }
      * @returns {Promise<object>} Bài thi sau khi cập nhật
@@ -312,7 +312,7 @@ const ExamsService = {
      * @returns {Promise<string>} JSON string của standardData
      */
     async extractTemplate(videoUrl) {
-        const response = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-template', {
+        const response = await fetch('http://160.191.46.107/runpod-ai/api/ai/extract-template', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'

@@ -35,7 +35,7 @@
 // Cấu hình Base Host (Thay đổi IP/Domain tại đây khi chuyển VPS)
 // Có thể lấy từ biến window (nếu inject từ bên ngoài) hoặc dùng giá trị mặc định.
 // ============================================
-const API_HOST = window.API_HOST || 'http://103.75.182.246:8080';
+const API_HOST = window.API_HOST || 'http://160.191.46.107:8080';
 
 const API_CONFIG = {
     BASE_URL: `${API_HOST}/public/api`,

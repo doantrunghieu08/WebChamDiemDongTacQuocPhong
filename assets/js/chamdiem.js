@@ -18,7 +18,7 @@ async function loadGradingSession() {
     try {
       const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS)
         ? API_CONFIG.ENDPOINTS.TEACHER_CLASS_SUBMISSIONS(pending.classExamId)
-        : `http://103.75.182.246:8080/teacher/class/${encodeURIComponent(pending.classExamId)}/submissions`;
+        : `http://160.191.46.107:8080/teacher/class/${encodeURIComponent(pending.classExamId)}/submissions`;
 
       const res = await fetch(url, { credentials: 'include' });
       const json = await res.json().catch(() => null);
@@ -197,7 +197,7 @@ function loadStudentInfo() {
     // Update page title
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${examName.toUpperCase()}`;
-    document.title = `Chấm Điểm ${examName} – TSQKTS`;
+    document.title = `Chấm Điểm ${examName} – TDNU`;
 
     state.currentStudent = {
       name: gradingStudent.name,
@@ -214,7 +214,7 @@ function loadStudentInfo() {
     // Update page title
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${selectedStudent.subject.toUpperCase()}`;
-    document.title = `Chấm Điểm ${selectedStudent.subject} – TSQKTS`;
+    document.title = `Chấm Điểm ${selectedStudent.subject} – TDNU`;
 
     state.currentStudent = selectedStudent;
   } else if (selectedClass) {
@@ -223,7 +223,7 @@ function loadStudentInfo() {
 
     const pageTitle = document.querySelector('.page-title');
     if (pageTitle) pageTitle.textContent = `CHẤM ĐIỂM ${selectedClass.subject.toUpperCase()}`;
-    document.title = `Chấm Điểm ${selectedClass.subject} – TSQKTS`;
+    document.title = `Chấm Điểm ${selectedClass.subject} – TDNU`;
 
     state.currentStudent = { className: selectedClass.className, name: 'Học sinh', subject: selectedClass.subject };
   }
@@ -401,7 +401,7 @@ async function fetchAndSyncTeacherErrors() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_ERRORS)
       ? API_CONFIG.ENDPOINTS.TEACHER_ERRORS(teacherId)
-      : `http://103.75.182.246:8080/api/teacher/error/${encodeURIComponent(teacherId)}`;
+      : `http://160.191.46.107:8080/api/teacher/error/${encodeURIComponent(teacherId)}`;
 
     const response = await fetch(url, { credentials: 'include' });
     const json = await response.json().catch(() => null);
@@ -467,7 +467,7 @@ async function loadExistingGradingErrors() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL)
       ? API_CONFIG.ENDPOINTS.GRADING_ERROR_DETAIL(idSession, gradingMode)
-      : `http://103.75.182.246:8080/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${gradingMode}`;
+      : `http://160.191.46.107:8080/public/grading-error/${encodeURIComponent(idSession)}?gradingMode=${gradingMode}`;
 
     const response = await fetch(url, { method: 'GET', credentials: 'include' });
     if (!response.ok) return;
@@ -747,7 +747,7 @@ async function captureFrame() {
 
     const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME)
       ? API_CONFIG.ENDPOINTS.CAPTURE_ERROR_FRAME
-      : 'http://103.75.182.246:8080/public/capture-error-frame';
+      : 'http://160.191.46.107:8080/public/capture-error-frame';
 
     // Hiển thị thanh loading
     const preview = document.getElementById('frame-preview');
@@ -947,7 +947,7 @@ async function finishGrading() {
   if (idSession) {
     const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.GRADING_SESSION_ADD_ERROR)
       ? API_CONFIG.ENDPOINTS.GRADING_SESSION_ADD_ERROR(idSession)
-      : `http://103.75.182.246:8080/teacher/grading-session/${encodeURIComponent(idSession)}/add-error`;
+      : `http://160.191.46.107:8080/teacher/grading-session/${encodeURIComponent(idSession)}/add-error`;
 
     for (const e of state.assignedErrors) {
       try {
@@ -1367,7 +1367,7 @@ async function doUploadToCloudinary() {
 
   const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.UPLOAD_STUDENT_EXAM_VIDEO)
     ? API_CONFIG.ENDPOINTS.UPLOAD_STUDENT_EXAM_VIDEO
-    : 'http://103.75.182.246:8080/public/upload-student-exam';
+    : 'http://160.191.46.107:8080/public/upload-student-exam';
 
   const studentName = state.currentStudent?.name || 'unknown';
   const examTitle = state.currentStudent?.subject || 'exam';
@@ -1492,7 +1492,7 @@ async function doConfirmSubmission() {
 
   const apiUrl = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO)
     ? API_CONFIG.ENDPOINTS.TEACHER_UPLOAD_SUBMISSION_VIDEO
-    : 'http://103.75.182.246:8080/teacher/submission/upload-video';
+    : 'http://160.191.46.107:8080/teacher/submission/upload-video';
 
   let _uploadExtractProgressInterval = null;
 
@@ -1536,7 +1536,7 @@ async function doConfirmSubmission() {
       showToast('Đang trích xuất dữ liệu khung xương, vui lòng đợi...');
       _startUploadExtractProgress();
       try {
-        const aiRes = await fetch('http://103.75.182.246/runpod-ai/api/ai/extract-student', {
+        const aiRes = await fetch('http://160.191.46.107/runpod-ai/api/ai/extract-student', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -1688,7 +1688,7 @@ async function addNewErrorType() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR)
       ? API_CONFIG.ENDPOINTS.CREATE_TEACHER_ERROR
-      : 'http://103.75.182.246:8080/api/teacher/error';
+      : 'http://160.191.46.107:8080/api/teacher/error';
 
     const response = await fetch(url, {
       method: 'POST',
@@ -1741,7 +1741,7 @@ async function callAIGrading() {
   try {
     const url = (typeof API_CONFIG !== 'undefined' && API_CONFIG.ENDPOINTS.AI_GRADE)
       ? API_CONFIG.ENDPOINTS.AI_GRADE(idTeacher, videoUrl)
-      : `http://103.75.182.246:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`;
+      : `http://160.191.46.107:8080/teacher/grade?idTeacher=${encodeURIComponent(idTeacher)}&videoUrl=${encodeURIComponent(videoUrl)}`;
 
     const resp = await fetch(url, { method: 'POST', credentials: 'include' });
     let json = null;
@@ -1811,7 +1811,7 @@ function closeAIGradeModal(e) {
 }
 
 // ---- AI API ENDPOINTS ----
-const AI_BASE_URL = 'http://103.75.182.246/runpod-ai';
+const AI_BASE_URL = 'http://160.191.46.107/runpod-ai';
 
 // ---- COMPARE POSE ----
 
