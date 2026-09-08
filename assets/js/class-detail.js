@@ -674,10 +674,18 @@ function buildExamPanelHTML(s) {
     if (hasAnyScore) {
       scoreHTML = '<div class="cd-exam-scores">';
       if (hasPractice) {
-        scoreHTML += `<div class="cd-exam-score cd-score-practice"><span class="cd-score-label">📝 Luyện tập:</span> <span class="cd-score-value cd-val-practice">${parseFloat(practiceScore).toFixed(1)}/10</span></div>`;
+        scoreHTML += `
+          <div class="cd-score-badge cd-score-practice">
+            <span class="cd-score-label"><i class="fas fa-edit"></i> Luyện tập</span>
+            <span class="cd-score-pill">${parseFloat(practiceScore).toFixed(1)}/10</span>
+          </div>`;
       }
       if (hasOfficial) {
-        scoreHTML += `<div class="cd-exam-score cd-score-official"><span class="cd-score-label">🏅 Chính thức:</span> <span class="cd-score-value cd-val-official">${parseFloat(officialScore).toFixed(1)}/10</span></div>`;
+        scoreHTML += `
+          <div class="cd-score-badge cd-score-official">
+            <span class="cd-score-label"><i class="fas fa-award"></i> Chính thức</span>
+            <span class="cd-score-pill">${parseFloat(officialScore).toFixed(1)}/10</span>
+          </div>`;
       }
       scoreHTML += '</div>';
     }

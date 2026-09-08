@@ -719,6 +719,88 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
 .cd-submitted-time { font-size: 0.65rem; opacity: 0.85; margin-left: 4px; font-weight: 600; }
 
+/* ── Score Pill Badges ── */
+.cd-exam-scores {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.cd-score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cd-score-badge.cd-score-practice {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.cd-score-badge.cd-score-official {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.cd-score-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.cd-score-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cd-score-practice .cd-score-label i {
+  color: #15803d;
+  font-size: 0.7rem;
+}
+
+.cd-score-official .cd-score-label i {
+  color: #d97706;
+  font-size: 0.7rem;
+}
+
+.cd-score-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.cd-score-practice .cd-score-pill {
+  background: #16a34a;
+  color: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.cd-score-official .cd-score-pill {
+  background: #d97706;
+  color: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
 .cd-exam-videos { display: flex; gap: 6px; flex-wrap: wrap; }
 .cd-video-tag {
   display: inline-flex;
