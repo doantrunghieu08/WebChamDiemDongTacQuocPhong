@@ -1543,17 +1543,22 @@ async function doConfirmSubmission() {
           },
           body: JSON.stringify({ videoUrl: aiVideoUrl, sample_rate: 1 })
         });
-        const aiJson = await aiRes.json();
-        if (aiJson?.status === 'success' && aiJson?.studentData) {
-          studentDataStr = JSON.stringify(aiJson.studentData);
-          // Lưu vào state để dùng cho compare-pose
-          state.studentPoseData = aiJson.studentData;
-          // Đổi màu nút compare thành xanh lá (đã có dữ liệu)
-          const btnCP = document.getElementById('btnComparePose');
-          if (btnCP) btnCP.classList.add('has-data');
-          showToast('Trích xuất dữ liệu tư thế thành công! Có thể so sánh ngay.');
+        if (!aiRes.ok) {
+          console.warn(`[extract-student] HTTP ${aiRes.status} — bỏ qua, tiếp tục nộp bài`);
+          showToast(`Trích xuất khung xương tạm thời không khả dụng (HTTP ${aiRes.status}). Bài thi vẫn được nộp bình thường.`);
         } else {
-          showToast('Trích xuất dữ liệu không thành công.');
+          const aiJson = await aiRes.json();
+          if (aiJson?.status === 'success' && aiJson?.studentData) {
+            studentDataStr = JSON.stringify(aiJson.studentData);
+            // Lưu vào state để dùng cho compare-pose
+            state.studentPoseData = aiJson.studentData;
+            // Đổi màu nút compare thành xanh lá (đã có dữ liệu)
+            const btnCP = document.getElementById('btnComparePose');
+            if (btnCP) btnCP.classList.add('has-data');
+            showToast('Trích xuất dữ liệu tư thế thành công! Có thể so sánh ngay.');
+          } else {
+            showToast('Trích xuất dữ liệu không thành công.');
+          }
         }
       } catch (aiErr) {
         console.warn('Lỗi trích xuất khung xương:', aiErr);

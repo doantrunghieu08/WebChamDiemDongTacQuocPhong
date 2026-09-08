@@ -17,6 +17,7 @@ echo "==> Upload files frontend lên VPS..."
 rsync -avz --delete \
   --exclude='.git' \
   --exclude='.vscode' \
+  --exclude='.env*' \
   --exclude='nginx.conf' \
   --exclude='deploy.sh' \
   ./ ${VPS_USER}@${VPS_IP}:${REMOTE_DIR}/

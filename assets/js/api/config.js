@@ -7,10 +7,13 @@
         while (true) {
             try {
                 const response = await originalFetch(resource, init);
-                if (response.status === 429 && retries < maxRetries) {
+                const resourceUrl = String(resource?.url || resource);
+                const transientAiError = resourceUrl.includes('/runpod-ai/')
+                    && [502, 503, 504].includes(response.status);
+                if ((response.status === 429 || transientAiError) && retries < maxRetries) {
                     retries++;
                     const delay = retries * 750 + Math.random() * 250; // progressive delay with jitter
-                    console.warn(`[API] Gặp lỗi 429 (Too Many Requests). Đang thử lại lần ${retries}/${maxRetries} sau ${Math.round(delay)}ms...`, resource);
+                    console.warn(`[API] HTTP ${response.status}. Đang thử lại lần ${retries}/${maxRetries} sau ${Math.round(delay)}ms...`, resource);
                     await new Promise(resolve => setTimeout(resolve, delay));
                     continue;
                 }
