@@ -778,8 +778,8 @@ async function captureFrame() {
       // Hiển thị ảnh bằng chứng trong panel bên phải
       if (preview) {
         preview.innerHTML =
-          '<a href="' + json.data.imageUrl + '" target="_blank" rel="noopener">' +
-          '<img src="' + json.data.imageUrl + '" alt="Frame t=' + ts + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block;"/>' +
+          '<a href="' + json.data.imageUrl + '" target="_blank" rel="noopener" style="width:100%;height:100%;display:block;">' +
+          '<img src="' + json.data.imageUrl + '" alt="Frame t=' + ts + '" style="width:100%;height:100%;object-fit:contain;border-radius:6px;display:block;"/>' +
           '</a>' +
           '<div class="frame-badge-overlay" id="frame-badge-overlay" style="display:block">' +
           'Frame t=<span id="overlay-frame-time">' + ts + '</span>' +
