@@ -1448,19 +1448,38 @@ function _renderConfirmList() {
   const list = document.getElementById('upload-confirm-list');
   if (!list) return;
   list.innerHTML = '';
+
+  function _buildVideoCard(label, url, sizeBytes) {
+    const sizeMB = (sizeBytes / 1024 / 1024).toFixed(1);
+    return `
+      <div class="upload-preview-card">
+        <div class="upload-preview-video-wrap">
+          <video class="upload-preview-video" src="${url}" preload="metadata" muted playsinline></video>
+          <div class="upload-preview-overlay">
+            <button class="upload-preview-play-btn" onclick="(function(el){var v=el.closest('.upload-preview-video-wrap').querySelector('video');if(v.paused){v.play();el.innerHTML='<i class=\\'fas fa-pause\\'></i>';}else{v.pause();el.innerHTML='<i class=\\'fas fa-play\\'></i>';};})(this)">
+              <i class="fas fa-play"></i>
+            </button>
+          </div>
+          <div class="upload-preview-badge">${label}</div>
+        </div>
+        <div class="upload-preview-info">
+          <div class="upload-preview-meta">
+            <i class="fas fa-film" style="color:#4A5D23;font-size:0.75rem;"></i>
+            <span class="upload-preview-label">${label}</span>
+            <span class="upload-preview-size">${sizeMB} MB</span>
+          </div>
+          <a href="${url}" target="_blank" rel="noopener" class="upload-preview-link" title="Xem video gốc">
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+      </div>`;
+  }
+
   if (_uploadVideoState.uploadedUrl1) {
-    list.innerHTML += `<div class="upload-confirm-item">
-      <span class="upload-confirm-badge">Video 01</span>
-      <a href="${_uploadVideoState.uploadedUrl1}" target="_blank" rel="noopener" class="upload-confirm-url">${_uploadVideoState.uploadedUrl1}</a>
-      <span class="upload-confirm-size">${(_uploadVideoState.uploadedSize1 / 1024 / 1024).toFixed(1)} MB</span>
-    </div>`;
+    list.innerHTML += _buildVideoCard('Video 01', _uploadVideoState.uploadedUrl1, _uploadVideoState.uploadedSize1 || 0);
   }
   if (_uploadVideoState.uploadedUrl2) {
-    list.innerHTML += `<div class="upload-confirm-item">
-      <span class="upload-confirm-badge">Video 02</span>
-      <a href="${_uploadVideoState.uploadedUrl2}" target="_blank" rel="noopener" class="upload-confirm-url">${_uploadVideoState.uploadedUrl2}</a>
-      <span class="upload-confirm-size">${(_uploadVideoState.uploadedSize2 / 1024 / 1024).toFixed(1)} MB</span>
-    </div>`;
+    list.innerHTML += _buildVideoCard('Video 02', _uploadVideoState.uploadedUrl2, _uploadVideoState.uploadedSize2 || 0);
   }
 }
 

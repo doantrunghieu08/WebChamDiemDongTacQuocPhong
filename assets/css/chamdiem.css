@@ -1021,6 +1021,143 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   margin-bottom: 12px;
 }
 
+/* ── Upload Preview Video Card ── */
+.upload-confirm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upload-preview-card {
+  background: #ffffff;
+  border: 1px solid rgba(74, 93, 35, 0.12);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+.upload-preview-card:hover {
+  border-color: rgba(74, 93, 35, 0.25);
+  box-shadow: 0 4px 20px rgba(74, 93, 35, 0.10);
+}
+
+.upload-preview-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0a0e06;
+  overflow: hidden;
+}
+
+.upload-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.upload-preview-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.upload-preview-video-wrap:hover .upload-preview-overlay {
+  opacity: 1;
+}
+
+.upload-preview-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  color: #4A5D23;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: all 0.18s ease;
+}
+.upload-preview-play-btn:hover {
+  transform: scale(1.1);
+  background: #ffffff;
+}
+
+.upload-preview-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+}
+
+.upload-preview-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-top: 1px solid rgba(74, 93, 35, 0.08);
+}
+
+.upload-preview-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-preview-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1a1f0e;
+}
+
+.upload-preview-size {
+  font-size: 0.72rem;
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.upload-preview-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 0.5rem;
+  background: rgba(74, 93, 35, 0.08);
+  color: #4A5D23;
+  font-size: 0.7rem;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  border: 1px solid rgba(74, 93, 35, 0.12);
+}
+.upload-preview-link:hover {
+  background: #4A5D23;
+  color: #ffffff;
+  border-color: #4A5D23;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(74, 93, 35, 0.25);
+}
+
+
 /* ===================================================
    COMPARE POSE PANELS
    =================================================== */
